@@ -46,10 +46,10 @@ func (exa *VIPComboService) UpdateVIPCombo(e *business.VIPCombo) (err error) {
 //@author: [piexlmax](https://github.com/piexlmax)
 //@function: GetVIPCombo
 //@description: 获取套餐信息
-//@param: id uint
+//@param: id int
 //@return: customer model.VIPCombo, err error
 
-func (exa *VIPComboService) GetVIPCombo(id uint) (customer business.VIPCombo, err error) {
+func (exa *VIPComboService) GetVIPCombo(id int) (customer business.VIPCombo, err error) {
 	err = global.GVA_DB.Where("combo_id = ?", id).First(&customer).Error
 	return
 }
@@ -60,7 +60,7 @@ func (exa *VIPComboService) GetVIPCombo(id uint) (customer business.VIPCombo, er
 //@param: sysUserAuthorityID string, info request.PageInfo
 //@return: list interface{}, total int64, err error
 
-func (exa *VIPComboService) GetVIPComboInfoList(sysUserAuthorityID uint, info request.PageInfo) (list interface{}, total int64, err error) {
+func (exa *VIPComboService) GetVIPComboInfoList(sysUserAuthorityID int, info request.PageInfo) (list interface{}, total int64, err error) {
 	limit := info.PageSize
 	offset := info.PageSize * (info.Page - 1)
 	db := global.GVA_DB.Model(&business.VIPCombo{})
@@ -70,7 +70,7 @@ func (exa *VIPComboService) GetVIPComboInfoList(sysUserAuthorityID uint, info re
 	if err != nil {
 		return
 	}
-	var dataId []uint
+	var dataId []int
 	for _, v := range auth.DataAuthorityId {
 		dataId = append(dataId, v.AuthorityId)
 	}
@@ -84,7 +84,7 @@ func (exa *VIPComboService) GetVIPComboInfoList(sysUserAuthorityID uint, info re
 	return ComboList, total, err
 }
 
-func (exa *VIPComboService) GetAllVIPComboInfoList(sysUserAuthorityID uint) (list interface{}, err error) {
+func (exa *VIPComboService) GetAllVIPComboInfoList(sysUserAuthorityID int) (list interface{}, err error) {
 	db := global.GVA_DB.Model(&business.VIPCombo{})
 	var a system.SysAuthority
 	a.AuthorityId = sysUserAuthorityID
@@ -92,7 +92,7 @@ func (exa *VIPComboService) GetAllVIPComboInfoList(sysUserAuthorityID uint) (lis
 	if err != nil {
 		return
 	}
-	var dataId []uint
+	var dataId []int
 	for _, v := range auth.DataAuthorityId {
 		dataId = append(dataId, v.AuthorityId)
 	}

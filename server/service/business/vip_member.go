@@ -126,7 +126,7 @@ func (exa *VIPMemberService) UpdateVIPMemberSynchronous(member *business.VIPMemb
 }
 
 // 更新剩余次数remainTimes
-func (exa *VIPMemberService) UpdateVIPMemberRemainTimes(e *business.VIPMember, id uint, num uint) (err error) {
+func (exa *VIPMemberService) UpdateVIPMemberRemainTimes(e *business.VIPMember, id int, num int) (err error) {
 	err = global.GVA_DB.Where("id = ?", id).Update("remainTimes", gorm.Expr("remainTimes - ?", num)).Error
 	return err
 }
@@ -134,15 +134,15 @@ func (exa *VIPMemberService) UpdateVIPMemberRemainTimes(e *business.VIPMember, i
 //@author: [piexlmax](https://github.com/piexlmax)
 //@function: GetExaMember
 //@description: 获取客户信息
-//@param: id uint
+//@param: id int
 //@return: member model.ExaMember, err error
 
-func (exa *VIPMemberService) GetVIPMember(id uint) (member business.VIPMember, err error) {
+func (exa *VIPMemberService) GetVIPMember(id int) (member business.VIPMember, err error) {
 	err = global.GVA_DB.Where("card_id = ?", id).First(&member).Error
 	return
 }
 
-func (exa *VIPMemberService) GetVIPMemberWithTelephone(telephone uint) (member business.VIPMember, err error) {
+func (exa *VIPMemberService) GetVIPMemberWithTelephone(telephone int) (member business.VIPMember, err error) {
 	err = global.GVA_DB.Where("telephone = ?", telephone).First(&member).Error
 	return
 }
@@ -153,7 +153,7 @@ func (exa *VIPMemberService) GetVIPMemberWithTelephone(telephone uint) (member b
 //@param: sysUserAuthorityID string, info request.PageInfo
 //@return: list interface{}, total int64, err error
 
-func (exa *VIPMemberService) GetVIPMemberInfoList(sysUserAuthorityID uint, info request.PageInfo) (list interface{}, total int64, err error) {
+func (exa *VIPMemberService) GetVIPMemberInfoList(sysUserAuthorityID int, info request.PageInfo) (list interface{}, total int64, err error) {
 	limit := info.PageSize
 	offset := info.PageSize * (info.Page - 1)
 	db := global.GVA_DB.Model(&business.VIPMember{})
@@ -163,7 +163,7 @@ func (exa *VIPMemberService) GetVIPMemberInfoList(sysUserAuthorityID uint, info 
 	if err != nil {
 		return
 	}
-	var dataId []uint
+	var dataId []int
 	for _, v := range auth.DataAuthorityId {
 		dataId = append(dataId, v.AuthorityId)
 	}
@@ -178,7 +178,7 @@ func (exa *VIPMemberService) GetVIPMemberInfoList(sysUserAuthorityID uint, info 
 }
 
 // 根据卡号、联系方式搜索会员
-func (exa *VIPMemberService) SearchVIPMember(sysUserAuthorityID uint, searchInfo request.MemberSearchInfo) (list interface{}, total int64, err error) {
+func (exa *VIPMemberService) SearchVIPMember(sysUserAuthorityID int, searchInfo request.MemberSearchInfo) (list interface{}, total int64, err error) {
 	limit := searchInfo.PageSize
 	offset := searchInfo.PageSize * (searchInfo.Page - 1)
 
@@ -200,12 +200,17 @@ func (exa *VIPMemberService) SearchVIPMember(sysUserAuthorityID uint, searchInfo
 		cmd += fmt.Sprintf(" limit %d offset %d", limit, offset)
 	}
 	db := global.GVA_DB.Model(&business.VIPMember{})
-	err = db.Limit(limit).Offset(offset).Debug().Preload("Combo").Where(cmd).Find(&MemberList).Error
+	err = db.Where(cmd).Count(&total).Error
+	if err != nil {
+		return MemberList, total, err
+	} else {
+		err = db.Limit(limit).Offset(offset).Debug().Preload("Combo").Where(cmd).Find(&MemberList).Error
+	}
 	return MemberList, total, err
 }
 
 // 根据卡号、联系方式搜索会员
-func (exa *VIPMemberService) SearchVipCard(sysUserAuthorityID uint, cardInfo request.CardInfo) (list interface{}, err error) {
+func (exa *VIPMemberService) SearchVipCard(sysUserAuthorityID int, cardInfo request.CardInfo) (list interface{}, err error) {
 	var MemberList []business.VIPMember
 	db := global.GVA_DB.Model(&business.VIPMember{})
 	cmd := fmt.Sprintf("sys_user_authority_id = %d and telephone like '%%%d%%' or card_id like '%%%d%%'", sysUserAuthorityID, cardInfo.OnlyId, cardInfo.OnlyId)

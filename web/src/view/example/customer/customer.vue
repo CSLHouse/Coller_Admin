@@ -10,7 +10,7 @@
         :data="tableData"
         style="width: 100%"
         tooltip-effect="dark"
-        row-key="ID"
+        row-key="Id"
       >
         <el-table-column type="selection" width="55" />
         <el-table-column align="left" label="接入日期" width="180">
@@ -118,7 +118,7 @@ getTableData()
 const dialogFormVisible = ref(false)
 const type = ref('')
 const updateCustomer = async(row) => {
-  const res = await getExaCustomer({ ID: row.ID })
+  const res = await getExaCustomer({ Id: row.Id })
   type.value = 'update'
   if (res.code === 0) {
     form.value = res.data.customer
@@ -134,7 +134,7 @@ const closeDialog = () => {
 }
 const deleteCustomer = async(row) => {
   row.visible = false
-  const res = await deleteExaCustomer({ ID: row.ID })
+  const res = await deleteExaCustomer({Id: row.Id })
   if (res.code === 0) {
     ElMessage({
       type: 'success',

@@ -1,13 +1,13 @@
 aliyun-oss:
-    endpoint: yourEndpoint
-    access-key-id: yourAccessKeyId
-    access-key-secret: yourAccessKeySecret
-    bucket-name: yourBucketName
-    bucket-url: yourBucketUrl
-    base-path: yourBasePath
+    endpoint: https://oss-cn-beijing.aliyuncs.com
+    access-key-id: LTAI5tJcdwf4dTPNt1e5xQke
+    access-key-secret: nHEtlOvJ1wqWMXBiZheJh083YFZKmr
+    bucket-name: cooller
+    bucket-url: https://cooller.oss-cn-beijing.aliyuncs.com
+    base-path: resource
 autocode:
     transfer-restart: true
-    root: D:\Go\gin-vue-admin
+    root: D:\Web\Coller_Admin
     server: /server
     server-api: /api/v1/%s
     server-plug: /plugin/%s
@@ -83,7 +83,7 @@ hua-wei-obs:
     access-key: you-access-key
     secret-key: you-secret-key
 jwt:
-    signing-key: b6c658c6-3d39-44bc-8ddc-6b14876ed3ff
+    signing-key: 9bd5f907-d061-4c51-bd46-af25cd6206b1
     expires-time: 7d
     buffer-time: 1d
     issuer: qmPlus
@@ -176,8 +176,8 @@ system:
     env: public
     addr: 8888
     db-type: mysql
-    oss-type: local
-    use-multipoint: false
+    oss-type: aliyun-oss
+    use-multipoint: true
     use-redis: false
     iplimit-count: 15000
     iplimit-time: 3600
@@ -200,6 +200,10 @@ timer:
         - tableName: jwt_blacklists
           compareField: created_at
           interval: 168h
+wechat:
+    appid: wxfc872e07778f40eb
+    secret: 7427543442e791bcd3a27613a8d989df
+    session-url: https://api.weixin.qq.com/sns/jscode2session?appid=%s&secret=%s&js_code=%s&grant_type=authorization_code
 zap:
     level: info
     prefix: '[github.com/flipped-aurora/gin-vue-admin/server]'

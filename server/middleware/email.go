@@ -22,15 +22,15 @@ func ErrorToEmail() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var username string
 		claims, _ := utils2.GetClaims(c)
-		if claims.Username != "" {
-			username = claims.Username
+		if claims.UserName != "" {
+			username = claims.UserName
 		} else {
 			id, _ := strconv.Atoi(c.Request.Header.Get("x-user-id"))
 			user, err := userService.FindUserById(id)
 			if err != nil {
 				username = "Unknown"
 			}
-			username = user.Username
+			username = user.UserName
 		}
 		body, _ := io.ReadAll(c.Request.Body)
 		// 再重新写回请求体body中，ioutil.ReadAll会清空c.Request.Body中的数据

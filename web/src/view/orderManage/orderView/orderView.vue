@@ -46,9 +46,9 @@
           :data="tableData"
           style="width: 100%"
           tooltip-effect="dark"
-          row-key="ID"
+          row-key="Id"
         >
-          <el-table-column align="left" label="序号" prop="ID" width="60"></el-table-column>
+          <el-table-column align="left" label="序号" prop="Id" width="60"></el-table-column>
           <el-table-column align="left" label="订单编号" prop="orderId" width="180" />
           <el-table-column align="left" label="用户名称" prop="nameStr" width="180" />
           <el-table-column align="left" label="客户经理" prop="manager" width="120" />
@@ -170,7 +170,7 @@
     }
   
     comboOptions.value = comboList.map((item) => {
-      return {key: item.ID, value: item.comboName}
+      return {key: item.Id, value: item.comboName}
     })
     // 一定放在GetAllVIPCombos返回之后
     getOrderList()

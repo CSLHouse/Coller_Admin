@@ -7,14 +7,14 @@
       </div>
       <el-table
         :data="tableData"
-        row-key="ID"
+        row-key="Id"
       >
         <el-table-column align="left" label="头像" min-width="75">
           <template #default="scope">
             <CustomPic style="margin-top:8px" :pic-src="scope.row.headerImg" />
           </template>
         </el-table-column>
-        <el-table-column align="left" label="ID" min-width="50" prop="ID" />
+        <el-table-column align="left" label="Id" min-width="50" prop="Id" />
         <el-table-column align="left" label="用户名" min-width="150" prop="userName" />
         <el-table-column align="left" label="昵称" min-width="150" prop="nickName" />
         <el-table-column align="left" label="手机号" min-width="120" prop="phone" />
@@ -245,7 +245,7 @@ const resetPasswordFunc = (row) => {
     }
   ).then(async() => {
     const res = await resetPassword({
-      ID: row.ID,
+      Id: row.Id,
     })
     if (res.code === 0) {
       ElMessage({
@@ -280,7 +280,7 @@ const setOptions = (authData) => {
 }
 
 const deleteUserFunc = async(row) => {
-  const res = await deleteUser({ id: row.ID })
+  const res = await deleteUser({ id: row.Id })
   if (res.code === 0) {
     ElMessage.success('删除成功')
     row.visible = false
@@ -371,21 +371,21 @@ const tempAuth = {}
 const changeAuthority = async(row, flag, removeAuth) => {
   if (flag) {
     if (!removeAuth) {
-      tempAuth[row.ID] = [...row.authorityIds]
+      tempAuth[row.Id] = [...row.authorityIds]
     }
     return
   }
   await nextTick()
   const res = await setUserAuthorities({
-    ID: row.ID,
+    Id: row.Id,
     authorityIds: row.authorityIds
   })
   if (res.code === 0) {
     ElMessage({ type: 'success', message: '角色设置成功' })
   } else {
     if (!removeAuth) {
-      row.authorityIds = [...tempAuth[row.ID]]
-      delete tempAuth[row.ID]
+      row.authorityIds = [...tempAuth[row.Id]]
+      delete tempAuth[row.Id]
     } else {
       row.authorityIds = [removeAuth, ...row.authorityIds]
     }

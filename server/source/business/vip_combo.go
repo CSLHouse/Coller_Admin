@@ -66,7 +66,7 @@ func (i *initCombo) DataInserted(ctx context.Context) bool {
 	if !ok {
 		return false
 	}
-	if errors.Is(db.Where("ComboName = ?", "10次卡").First(&businessModel.VIPCombo{}).Error, gorm.ErrRecordNotFound) { // 判断是否存在数据
+	if errors.Is(db.Where("combo_name = ?", "10次卡").First(&businessModel.VIPCombo{}).Error, gorm.ErrRecordNotFound) { // 判断是否存在数据
 		return false
 	}
 	return true

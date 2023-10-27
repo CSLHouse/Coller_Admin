@@ -40,3 +40,11 @@ export const getSystemState = () => {
     donNotShowLoading: true
   })
 }
+
+// 向后端获取 OSS秘钥信息
+export const getAliOSSCreds = () => {
+  return service({
+    url: '/system/getAliOSSCred',
+    method: 'get'
+  })
+}

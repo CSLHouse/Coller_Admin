@@ -23,7 +23,7 @@ type UserService struct{}
 
 func (userService *UserService) Register(u system.SysUser) (userInter system.SysUser, err error) {
 	var user system.SysUser
-	if !errors.Is(global.GVA_DB.Where("username = ?", u.Username).First(&user).Error, gorm.ErrRecordNotFound) { // 判断用户名是否注册
+	if !errors.Is(global.GVA_DB.Where("user_name = ?", u.UserName).First(&user).Error, gorm.ErrRecordNotFound) { // 判断用户名是否注册
 		return userInter, errors.New("用户名已注册")
 	}
 	// 否则 附加uuid 密码hash加密 注册
@@ -46,7 +46,7 @@ func (userService *UserService) Login(u *system.SysUser) (userInter *system.SysU
 	}
 
 	var user system.SysUser
-	err = global.GVA_DB.Where("username = ?", u.Username).Preload("Authorities").Preload("Authority").First(&user).Error
+	err = global.GVA_DB.Where("user_name = ?", u.UserName).Preload("Authorities").Preload("Authority").First(&user).Error
 	if err == nil {
 		if ok := utils.BcryptCheck(u.Password, user.Password); !ok {
 			return nil, errors.New("密码错误")
@@ -101,7 +101,7 @@ func (userService *UserService) GetUserInfoList(info request.PageInfo) (list int
 //@param: uuid uuid.UUID, authorityId string
 //@return: err error
 
-func (userService *UserService) SetUserAuthority(id uint, authorityId uint) (err error) {
+func (userService *UserService) SetUserAuthority(id int, authorityId int) (err error) {
 	assignErr := global.GVA_DB.Where("sys_user_id = ? AND sys_authority_authority_id = ?", id, authorityId).First(&system.SysUserAuthority{}).Error
 	if errors.Is(assignErr, gorm.ErrRecordNotFound) {
 		return errors.New("该用户无此角色")
@@ -113,10 +113,10 @@ func (userService *UserService) SetUserAuthority(id uint, authorityId uint) (err
 //@author: [piexlmax](https://github.com/piexlmax)
 //@function: SetUserAuthorities
 //@description: 设置一个用户的权限
-//@param: id uint, authorityIds []string
+//@param: id int, authorityIds []string
 //@return: err error
 
-func (userService *UserService) SetUserAuthorities(id uint, authorityIds []uint) (err error) {
+func (userService *UserService) SetUserAuthorities(id int, authorityIds []int) (err error) {
 	return global.GVA_DB.Transaction(func(tx *gorm.DB) error {
 		TxErr := tx.Delete(&[]system.SysUserAuthority{}, "sys_user_id = ?", id).Error
 		if TxErr != nil {
@@ -165,12 +165,12 @@ func (userService *UserService) DeleteUser(id int) (err error) {
 
 func (userService *UserService) SetUserInfo(req system.SysUser) error {
 	return global.GVA_DB.Model(&system.SysUser{}).
-		Select("updated_at", "nick_name", "header_img", "phone", "email", "sideMode", "enable").
+		Select("updated_at", "nick_name", "avatar_url", "phone", "email", "sideMode", "enable").
 		Where("id=?", req.ID).
 		Updates(map[string]interface{}{
 			"updated_at": time.Now(),
 			"nick_name":  req.NickName,
-			"header_img": req.HeaderImg,
+			"avatar_url": req.AvatarUrl,
 			"phone":      req.Phone,
 			"email":      req.Email,
 			"side_mode":  req.SideMode,
@@ -236,10 +236,43 @@ func (userService *UserService) FindUserByUuid(uuid string) (user *system.SysUse
 //@author: [piexlmax](https://github.com/piexlmax)
 //@function: resetPassword
 //@description: 修改用户密码
-//@param: ID uint
+//@param: ID int
 //@return: err error
 
-func (userService *UserService) ResetPassword(ID uint) (err error) {
+func (userService *UserService) ResetPassword(ID int) (err error) {
 	err = global.GVA_DB.Model(&system.SysUser{}).Where("id = ?", ID).Update("password", utils.BcryptHash("123456")).Error
 	return err
 }
+
+func (userService *UserService) CreateWXAccount(e *system.SysUser) (err error) {
+	db := global.GVA_DB.Model(&system.SysUser{})
+	var wxUser system.SysUser
+	result := db.Where("open_id = ?", e.OpenId).First(&wxUser)
+	if result.Error != nil {
+		if result.Error == gorm.ErrRecordNotFound {
+			e.UUID = uuid.Must(uuid.NewV4())
+			err = global.GVA_DB.Debug().Create(&e).Error
+			return err
+		}
+		err = result.Error
+	} else {
+		err = db.Debug().Where("open_id = ?", e.OpenId).Updates(map[string]interface{}{"nick_name": e.NickName,
+			"gender": e.Gender, "avatar_url": e.AvatarUrl}).Error
+		return err
+	}
+
+	return err
+}
+
+func (userService *UserService) GetWXAccountByOpenID(openId string) (user system.SysUser, err error) {
+	err = global.GVA_DB.Where("open_id = ?", openId).First(&user).Error
+	return user, err
+}
+
+//func (userService *UserService) UpdateWXAccountInfo(e *system.SysUser) (err error) {
+//	db := global.GVA_DB.Model(&system.SysUser{})
+//
+//	err = db.Debug().Where("open_id = ?", e.OpenId).Updates(map[string]interface{}{"nick_name": e.NickName,
+//		"gender": e.Gender, "avatar_url": e.AvatarUrl}).Error
+//	return err
+//}

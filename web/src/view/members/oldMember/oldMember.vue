@@ -141,7 +141,7 @@
       comboList = vipComboStore.comboList
     }
     comboList.forEach(element => {
-      if (element.ID == memberForm.comboId) {
+      if (element.Id == memberForm.comboId) {
         comboOption.value = {key: element.comboId, value: element.comboName, price: element.comboPrice}
       }
     });

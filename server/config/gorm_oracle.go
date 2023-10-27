@@ -5,7 +5,7 @@ type Oracle struct {
 }
 
 func (m *Oracle) Dsn() string {
-	return "oracle://" + m.Username + ":" + m.Password + "@" + m.Path + ":" + m.Port + "/" + m.Dbname + "?" + m.Config
+	return "oracle://" + m.UserName + ":" + m.Password + "@" + m.Path + ":" + m.Port + "/" + m.Dbname + "?" + m.Config
 
 }
 

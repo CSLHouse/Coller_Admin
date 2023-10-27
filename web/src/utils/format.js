@@ -26,3 +26,7 @@ export const getDictFunc = async(type) => {
   const dicts = await getDict(type)
   return dicts
 }
+
+export const getImageUrlName = (url) => {
+  return url.split('/').at(-1)
+}

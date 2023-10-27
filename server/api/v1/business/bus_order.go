@@ -87,7 +87,7 @@ func (e *OrderApi) GetVIPOrderList(c *gin.Context) {
 	}, "获取成功", c)
 }
 
-// 获取流水数据
+// GetVIPStatementList 获取流水数据
 func (e *OrderApi) GetVIPStatementList(c *gin.Context) {
 	var statisticsInfo request.StatisticsSearchInfo
 	err := c.ShouldBindQuery(&statisticsInfo)
@@ -107,7 +107,7 @@ func (e *OrderApi) GetVIPStatementList(c *gin.Context) {
 	}, "获取成功", c)
 }
 
-// 获取统计数据
+// GetVIPStatisticsList 获取统计数据
 func (e *OrderApi) GetVIPStatisticsList(c *gin.Context) {
 	statistics, err := orderService.GetVIPStatisticsInfoList(utils.GetUserAuthorityId(c))
 	if err != nil {

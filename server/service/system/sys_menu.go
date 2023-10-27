@@ -20,7 +20,7 @@ type MenuService struct{}
 
 var MenuServiceApp = new(MenuService)
 
-func (menuService *MenuService) getMenuTreeMap(authorityId uint) (treeMap map[string][]system.SysMenu, err error) {
+func (menuService *MenuService) getMenuTreeMap(authorityId int) (treeMap map[string][]system.SysMenu, err error) {
 	var allMenus []system.SysMenu
 	var baseMenu []system.SysBaseMenu
 	var btns []system.SysAuthorityBtn
@@ -56,10 +56,10 @@ func (menuService *MenuService) getMenuTreeMap(authorityId uint) (treeMap map[st
 	if err != nil {
 		return
 	}
-	var btnMap = make(map[uint]map[string]uint)
+	var btnMap = make(map[int]map[string]int)
 	for _, v := range btns {
 		if btnMap[v.SysMenuID] == nil {
-			btnMap[v.SysMenuID] = make(map[string]uint)
+			btnMap[v.SysMenuID] = make(map[string]int)
 		}
 		btnMap[v.SysMenuID][v.SysBaseMenuBtn.Name] = authorityId
 	}
@@ -76,7 +76,7 @@ func (menuService *MenuService) getMenuTreeMap(authorityId uint) (treeMap map[st
 //@param: authorityId string
 //@return: menus []system.SysMenu, err error
 
-func (menuService *MenuService) GetMenuTree(authorityId uint) (menus []system.SysMenu, err error) {
+func (menuService *MenuService) GetMenuTree(authorityId int) (menus []system.SysMenu, err error) {
 	menuTree, err := menuService.getMenuTreeMap(authorityId)
 	menus = menuTree["0"]
 	for i := 0; i < len(menus); i++ {
@@ -176,7 +176,7 @@ func (menuService *MenuService) GetBaseMenuTree() (menus []system.SysBaseMenu, e
 //@param: menus []model.SysBaseMenu, authorityId string
 //@return: err error
 
-func (menuService *MenuService) AddMenuAuthority(menus []system.SysBaseMenu, authorityId uint) (err error) {
+func (menuService *MenuService) AddMenuAuthority(menus []system.SysBaseMenu, authorityId int) (err error) {
 	var auth system.SysAuthority
 	auth.AuthorityId = authorityId
 	auth.SysBaseMenus = menus
@@ -220,7 +220,8 @@ func (menuService *MenuService) GetMenuAuthority(info *request.GetAuthorityId) (
 }
 
 // UserAuthorityDefaultRouter 用户角色默认路由检查
-//  Author [SliverHorn](https://github.com/SliverHorn)
+//
+//	Author [SliverHorn](https://github.com/SliverHorn)
 func (menuService *MenuService) UserAuthorityDefaultRouter(user *system.SysUser) {
 	var menuIds []string
 	err := global.GVA_DB.Model(&system.SysAuthorityMenu{}).Where("sys_authority_authority_id = ?", user.AuthorityId).Pluck("sys_base_menu_id", &menuIds).Error

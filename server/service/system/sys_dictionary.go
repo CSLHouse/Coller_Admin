@@ -80,7 +80,7 @@ func (dictionaryService *DictionaryService) UpdateSysDictionary(sysDictionary *s
 //@param: Type string, Id uint
 //@return: err error, sysDictionary model.SysDictionary
 
-func (dictionaryService *DictionaryService) GetSysDictionary(Type string, Id uint, status *bool) (sysDictionary system.SysDictionary, err error) {
+func (dictionaryService *DictionaryService) GetSysDictionary(Type string, Id int, status *bool) (sysDictionary system.SysDictionary, err error) {
 	var flag = false
 	if status == nil {
 		flag = true

@@ -13,7 +13,7 @@ type GeneralDB struct {
 	Port         string `mapstructure:"port" json:"port" yaml:"port"`                               //:端口
 	Config       string `mapstructure:"config" json:"config" yaml:"config"`                         // 高级配置
 	Dbname       string `mapstructure:"db-name" json:"db-name" yaml:"db-name"`                      // 数据库名
-	Username     string `mapstructure:"username" json:"username" yaml:"username"`                   // 数据库用户名
+	UserName     string `mapstructure:"username" json:"username" yaml:"username"`                   // 数据库用户名
 	Password     string `mapstructure:"password" json:"password" yaml:"password"`                   // 数据库密码
 	Prefix       string `mapstructure:"prefix" json:"prefix" yaml:"prefix"`                         //全局表前缀，单独定义TableName则不生效
 	Singular     bool   `mapstructure:"singular" json:"singular" yaml:"singular"`                   //是否开启全局禁用复数，true表示开启

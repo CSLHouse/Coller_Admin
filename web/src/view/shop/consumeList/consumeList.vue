@@ -52,9 +52,9 @@
           :data="tableData"
           style="width: 100%"
           tooltip-effect="dark"
-          row-key="ID"
+          row-key="Id"
         >
-          <el-table-column align="left" label="入店序号" prop="ID" width="100"></el-table-column>
+          <el-table-column align="left" label="入店序号" prop="Id" width="100"></el-table-column>
           <el-table-column align="left" label="会员" prop="memberStr" width="180" />
           <el-table-column align="left" label="会员状态" prop="memberStateStr" width="180" />
           <el-table-column align="left" label="会员类型" prop="memberType" width="100" />
@@ -201,7 +201,7 @@
     }
   
     comboOptions.value = comboList.map((item) => {
-      return {key: item.ID, value: item.comboName}
+      return {key: item.Id, value: item.comboName}
     })
     // 一定放在GetAllVIPCombos返回之后
     getTableData()

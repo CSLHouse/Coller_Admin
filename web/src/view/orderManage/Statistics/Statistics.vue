@@ -56,7 +56,7 @@
           :data="tableData"
           style="width: 100%"
           tooltip-effect="dark"
-          row-key="ID"
+          row-key="Id"
         >
           <el-table-column align="left" label="日期" prop="date" width="100"></el-table-column>
           <el-table-column align="left" label="会员卡流水" prop="recharge" width="180" />

@@ -36,7 +36,6 @@ import {
   deleteExaVIPCombo,
   getExaVIPComboList
 } from '@/api/combo'
-import { ElMessage } from 'element-plus'
 import { ref, watch, toRefs } from 'vue'
 import config from '@/core/config'
 
@@ -50,7 +49,7 @@ const { dialogVisible, operateType } = toRefs(props)
 const emit = defineEmits(['cancel'])
 
 const comboForm = ref({
-  ID: 0,
+  Id: 0,
   storeName: '',
   comboName: '',
   comboType: 1,

@@ -4,7 +4,7 @@ import { ref, computed, watch } from 'vue'
 
 export const comboStore = defineStore('combo', () => {
   const comboInfo = ref({
-    ID: 0,
+    Id: 0,
     storeName: '',
     comboName: '',
     comboType: '',

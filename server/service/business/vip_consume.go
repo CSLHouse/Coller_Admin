@@ -81,15 +81,15 @@ func (exa *VIPConsumeService) UpdateVIPConsume(e *business.ConsumeRecord) (err e
 //@author: [piexlmax](https://github.com/piexlmax)
 //@function: GetExaConsume
 //@description: 获取客户信息
-//@param: id uint
+//@param: id int
 //@return: member model.ExaConsume, err error
 
-func (exa *VIPConsumeService) GetVIPConsume(id uint) (member business.ConsumeRecord, err error) {
+func (exa *VIPConsumeService) GetVIPConsume(id int) (member business.ConsumeRecord, err error) {
 	err = global.GVA_DB.Where("id = ?", id).First(&member).Error
 	return
 }
 
-func (exa *VIPConsumeService) GetVIPConsumeInfoList(sysUserAuthorityID uint, searchInfo request.ConsumeSearchInfo) (list interface{}, total int64, err error) {
+func (exa *VIPConsumeService) GetVIPConsumeInfoList(sysUserAuthorityID int, searchInfo request.ConsumeSearchInfo) (list interface{}, total int64, err error) {
 	limit := searchInfo.PageSize
 	offset := searchInfo.PageSize * (searchInfo.Page - 1)
 	var ConsumeList []business.ConsumeRecord
@@ -104,6 +104,11 @@ func (exa *VIPConsumeService) GetVIPConsumeInfoList(sysUserAuthorityID uint, sea
 		cmd += fmt.Sprintf(" limit %d offset %d", limit, offset)
 	}
 	db := global.GVA_DB.Model(&business.ConsumeRecord{})
-	err = db.Limit(limit).Offset(offset).Preload("Member").Preload("Member.Combo").Where(cmd).Find(&ConsumeList).Error
+	err = db.Where(cmd).Count(&total).Error
+	if err != nil {
+		return ConsumeList, total, err
+	} else {
+		err = db.Limit(limit).Offset(offset).Preload("Member").Preload("Member.Combo").Where(cmd).Find(&ConsumeList).Error
+	}
 	return ConsumeList, total, err
 }

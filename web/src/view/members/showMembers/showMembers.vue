@@ -53,11 +53,11 @@
         :data="tableData"
         style="width: 100%"
         tooltip-effect="dark"
-        row-key="ID"
+        row-key="Id"
         @cell-dblclick="updateMember"
       >
         <!-- <el-table-column type="selection" width="55" /> -->
-        <el-table-column align="left" label="序号" prop="ID" width="60"></el-table-column>
+        <el-table-column align="left" label="序号" prop="Id" width="60"></el-table-column>
         <el-table-column align="left" label="会员卡号" prop="cardId" width="120" />
         <el-table-column align="left" label="姓名" prop="memberName" width="120" />
         <el-table-column align="left" label="联系方式" prop="telephone" width="120" />
@@ -217,7 +217,7 @@ const onExport = () => {
 }
 
 const memberForm = ref({
-  ID: 0,
+  Id: 0,
   cardId: null,
   telephone: null,
   memberName: '',
@@ -283,7 +283,7 @@ const getComboData = async() => {
   }
 
   comboOptions.value = comboList.map((item) => {
-    return {key: item.ID, value: item.comboName}
+    return {key: item.Id, value: item.comboName}
   })
 }
 watch(() => comboOption.value, () => {
@@ -324,7 +324,7 @@ const updateMember = async(row) => {
 
 const deleteMember = async(row) => {
   row.visible = false
-  const res = await deleteVIPMember({ ID: row.ID })
+  const res = await deleteVIPMember({ Id: row.Id })
   if ("code" in res && res.code === 0) {
     ElMessage({
       type: 'success',

@@ -24,7 +24,8 @@ const (
 const (
 	InitOrderSystem    = 10
 	InitBusinessSystem = 100
-	InitOrderInternal  = 1000
+	InitOrderInternal  = 200
+	InitWechatInternal = 300
 	InitOrderExternal  = 100000
 )
 

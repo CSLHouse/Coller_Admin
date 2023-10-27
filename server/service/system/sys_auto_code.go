@@ -232,7 +232,7 @@ func makeDictTypes(autoCode *system.AutoCodeStruct) {
 // @param: model.AutoCodeStruct
 // @return: err error
 
-func (autoCodeService *AutoCodeService) CreateTemp(autoCode system.AutoCodeStruct, ids ...uint) (err error) {
+func (autoCodeService *AutoCodeService) CreateTemp(autoCode system.AutoCodeStruct, ids ...int) (err error) {
 	makeDictTypes(&autoCode)
 	for i := range autoCode.Fields {
 		if autoCode.Fields[i].FieldType == "time.Time" {
@@ -465,7 +465,7 @@ func (autoCodeService *AutoCodeService) addAutoMoveFile(data *tplData) {
 // @param: a *model.AutoCodeStruct
 // @return: err error
 
-func (autoCodeService *AutoCodeService) AutoCreateApi(a *system.AutoCodeStruct) (ids []uint, err error) {
+func (autoCodeService *AutoCodeService) AutoCreateApi(a *system.AutoCodeStruct) (ids []int, err error) {
 	apiList := []system.SysApi{
 		{
 			Path:        "/" + a.Abbreviation + "/" + "create" + a.StructName,

@@ -14,8 +14,19 @@ type CustomClaims struct {
 
 type BaseClaims struct {
 	UUID        uuid.UUID
-	ID          uint
-	Username    string
+	ID          int
+	UserName    string
 	NickName    string
-	AuthorityId uint
+	AuthorityId int
+}
+
+type WXBaseClaims struct {
+	OpenId   string
+	NickName string
+}
+
+type WXAccountClaims struct {
+	WXBaseClaims
+	BufferTime int64
+	jwt.RegisteredClaims
 }

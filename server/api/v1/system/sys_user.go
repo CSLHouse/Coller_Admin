@@ -1,6 +1,10 @@
 package system
 
 import (
+	"fmt"
+	"github.com/flipped-aurora/gin-vue-admin/server/middleware"
+	wechatReq "github.com/flipped-aurora/gin-vue-admin/server/model/wechat/request"
+	wechatRes "github.com/flipped-aurora/gin-vue-admin/server/model/wechat/response"
 	"strconv"
 	"time"
 
@@ -50,7 +54,7 @@ func (b *BaseApi) Login(c *gin.Context) {
 	var oc bool = openCaptcha == 0 || openCaptcha < interfaceToInt(v)
 
 	if !oc || store.Verify(l.CaptchaId, l.Captcha, true) {
-		u := &system.SysUser{Username: l.Username, Password: l.Password}
+		u := &system.SysUser{UserName: l.UserName, Password: l.Password}
 		user, err := userService.Login(u)
 		if err != nil {
 			global.GVA_LOG.Error("登陆失败! 用户名不存在或者密码错误!", zap.Error(err))
@@ -81,7 +85,7 @@ func (b *BaseApi) TokenNext(c *gin.Context, user system.SysUser) {
 		UUID:        user.UUID,
 		ID:          user.ID,
 		NickName:    user.NickName,
-		Username:    user.Username,
+		UserName:    user.UserName,
 		AuthorityId: user.AuthorityId,
 	})
 	token, err := j.CreateToken(claims)
@@ -99,8 +103,8 @@ func (b *BaseApi) TokenNext(c *gin.Context, user system.SysUser) {
 		return
 	}
 
-	if jwtStr, err := jwtService.GetRedisJWT(user.Username); err == redis.Nil {
-		if err := jwtService.SetRedisJWT(token, user.Username); err != nil {
+	if jwtStr, err := jwtService.GetRedisJWT(user.UUID.String()); err == redis.Nil {
+		if err := jwtService.SetRedisJWT(token, user.UUID.String()); err != nil {
 			global.GVA_LOG.Error("设置登录状态失败!", zap.Error(err))
 			response.FailWithMessage("设置登录状态失败", c)
 			return
@@ -120,7 +124,7 @@ func (b *BaseApi) TokenNext(c *gin.Context, user system.SysUser) {
 			response.FailWithMessage("jwt作废失败", c)
 			return
 		}
-		if err := jwtService.SetRedisJWT(token, user.Username); err != nil {
+		if err := jwtService.SetRedisJWT(token, user.UUID.String()); err != nil {
 			response.FailWithMessage("设置登录状态失败", c)
 			return
 		}
@@ -157,7 +161,7 @@ func (b *BaseApi) Register(c *gin.Context) {
 			AuthorityId: v,
 		})
 	}
-	user := &system.SysUser{Username: r.Username, NickName: r.NickName, Password: r.Password, HeaderImg: r.HeaderImg, AuthorityId: r.AuthorityId, Authorities: authorities, Enable: r.Enable, Phone: r.Phone, Email: r.Email}
+	user := &system.SysUser{UserName: r.UserName, NickName: r.NickName, Password: r.Password, AvatarUrl: r.AvatarUrl, AuthorityId: r.AuthorityId, Authorities: authorities, Enable: r.Enable, Phone: r.Phone, Email: r.Email}
 	userReturn, err := userService.Register(*user)
 	if err != nil {
 		global.GVA_LOG.Error("注册失败!", zap.Error(err))
@@ -320,7 +324,7 @@ func (b *BaseApi) DeleteUser(c *gin.Context) {
 		return
 	}
 	jwtId := utils.GetUserID(c)
-	if jwtId == uint(reqId.ID) {
+	if jwtId == reqId.ID {
 		response.FailWithMessage("删除失败, 自杀失败", c)
 		return
 	}
@@ -368,7 +372,7 @@ func (b *BaseApi) SetUserInfo(c *gin.Context) {
 			ID: user.ID,
 		},
 		NickName:  user.NickName,
-		HeaderImg: user.HeaderImg,
+		AvatarUrl: user.AvatarUrl,
 		Phone:     user.Phone,
 		Email:     user.Email,
 		SideMode:  user.SideMode,
@@ -404,7 +408,7 @@ func (b *BaseApi) SetSelfInfo(c *gin.Context) {
 			ID: user.ID,
 		},
 		NickName:  user.NickName,
-		HeaderImg: user.HeaderImg,
+		AvatarUrl: user.AvatarUrl,
 		Phone:     user.Phone,
 		Email:     user.Email,
 		SideMode:  user.SideMode,
@@ -459,4 +463,109 @@ func (b *BaseApi) ResetPassword(c *gin.Context) {
 		return
 	}
 	response.OkWithMessage("重置成功", c)
+}
+
+func (b *BaseApi) WXLogin(c *gin.Context) {
+	var login wechatReq.WXLogin
+	err := c.ShouldBindJSON(&login)
+	if err != nil {
+		response.FailWithMessage(err.Error(), c)
+		return
+	}
+	if len(login.Code) < 1 {
+		response.FailWithMessage(err.Error(), c)
+		return
+	}
+	//发送jscode，获得用户的open_id
+	wechatClient := middleware.NewWechatClient(nil)
+	wxMap, err := wechatClient.WXLogin(login.Code)
+	if err != nil {
+		global.GVA_LOG.Error("登录失败!", zap.Error(err))
+		response.FailWithMessage("登录失败", c)
+		return
+	}
+	var session wechatRes.WXLoginRes
+	session.OpenID = wxMap["openid"]
+	if len(session.OpenID) < 1 {
+		global.GVA_LOG.Error("登录失败!", zap.Error(err))
+		response.FailWithMessage("登录失败", c)
+		return
+	}
+
+	//var wxUser wechat.WXUser
+	//wxUser.OpenId = wxMap["openid"]
+	//wxUser.SessionKey = wxMap["session_key"]
+	////wxUser.Token = b.CreateToken(wxMap["openid"], userInfo.NickName)
+	//wxUser.Count = 1
+	//fmt.Println("---wxUser:", wxUser)
+	//err = userService.CreateWXAccount(wxUser)
+	//if err != nil {
+	//	response.FailWithMessage(err.Error(), c)
+	//	return
+	//}
+	response.OkWithDetailed(session, "获取成功", c)
+}
+
+// GetWXUserInfo 获取用户详情
+func (b *BaseApi) GetWXUserInfo(c *gin.Context) {
+	var user wechatReq.UserTag
+	err := c.ShouldBindQuery(&user)
+	if err != nil {
+		response.FailWithMessage(err.Error(), c)
+		return
+	}
+	wxUser, err := userService.GetWXAccountByOpenID(user.OpenID)
+	if err != nil {
+		global.GVA_LOG.Error("获取失败!", zap.Error(err))
+		response.FailWithMessage("获取失败", c)
+		return
+	}
+
+	response.OkWithData(wxUser, c)
+}
+
+func (b *BaseApi) CreateWXUserInfo(c *gin.Context) {
+	var userInfo wechatReq.WXUserInfo
+	err := c.ShouldBindJSON(&userInfo)
+	if err != nil {
+		response.FailWithMessage(err.Error(), c)
+		return
+	}
+	fmt.Println("---userInfo:", userInfo)
+
+	var wxUser system.SysUser
+	wxUser.OpenId = userInfo.OpenID
+	wxUser.NickName = userInfo.NickName
+	wxUser.Gender = userInfo.Gender
+	wxUser.AvatarUrl = userInfo.AvatarUrl
+	wxUser.AuthorityId = 9528
+
+	err = userService.CreateWXAccount(&wxUser)
+	if err != nil {
+		response.FailWithMessage(err.Error(), c)
+		return
+	}
+	fmt.Println("---wxUser:", wxUser)
+
+	response.OkWithDetailed(wxUser, "更新成功", c)
+}
+
+func (b *BaseApi) WXRefreshLogin(c *gin.Context) {
+	var login wechatReq.UserTag
+	err := c.ShouldBindJSON(&login)
+	if err != nil {
+		response.FailWithMessage(err.Error(), c)
+		return
+	}
+	if len(login.OpenID) < 1 {
+		response.FailWithMessage(err.Error(), c)
+		return
+	}
+	wxUser, err := userService.GetWXAccountByOpenID(login.OpenID)
+	if err != nil {
+		global.GVA_LOG.Error("获取失败!", zap.Error(err))
+		response.FailWithMessage("获取失败", c)
+		return
+	}
+	b.TokenNext(c, wxUser)
 }

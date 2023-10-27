@@ -26,7 +26,7 @@ func (exa *VIPOrderService) CreateVIPOrder(e *business.VIPOrder) (err error) {
 //@param: sysUserAuthorityID string, info request.PageInfo
 //@return: list interface{}, total int64, err error
 
-func (exa *VIPOrderService) GetVIPOrderInfoList(sysUserAuthorityID uint, searchInfo request.OrderSearchInfo) (list interface{}, total int64, err error) {
+func (exa *VIPOrderService) GetVIPOrderInfoList(sysUserAuthorityID int, searchInfo request.OrderSearchInfo) (list interface{}, total int64, err error) {
 	limit := searchInfo.PageSize
 	offset := searchInfo.PageSize * (searchInfo.Page - 1)
 
@@ -49,7 +49,13 @@ func (exa *VIPOrderService) GetVIPOrderInfoList(sysUserAuthorityID uint, searchI
 		cmd += fmt.Sprintf(" limit %d offset %d", limit, offset)
 	}
 	db := global.GVA_DB.Model(&business.VIPOrder{})
-	err = db.Limit(limit).Offset(offset).Preload("Member").Preload("Member.Combo").Where(cmd).Find(&orderList).Error
+	err = db.Where(cmd).Count(&total).Error
+	if err != nil {
+		return orderList, total, err
+	} else {
+		err = db.Limit(limit).Offset(offset).Preload("Member").Preload("Member.Combo").Where(cmd).Find(&orderList).Error
+	}
+
 	//err = global.GVA_DB.Where("sysUserAuthorityID = ? and telephone like ?", sysUserAuthorityID, telephone+"%").First(&member).Error
 	return orderList, total, err
 }
@@ -96,7 +102,7 @@ func (exa *VIPOrderService) CreateVIPStatement(e *business.VIPStatement) (err er
 //@param: sysUserAuthorityID string, info request.PageInfo
 //@return: list interface{}, total int64, err error
 
-func (exa *VIPOrderService) GetVIPStatementInfoList(sysUserAuthorityID uint, searchInfo request.StatisticsSearchInfo) (list interface{}, err error) {
+func (exa *VIPOrderService) GetVIPStatementInfoList(sysUserAuthorityID int, searchInfo request.StatisticsSearchInfo) (list interface{}, err error) {
 	var sql bytes.Buffer
 	sql.WriteString("Select date,recharge,card_number,new_member,consume_number from bus_statement where sys_user_authority_id = ")
 	sql.WriteString(strconv.Itoa(int(sysUserAuthorityID)))
@@ -167,7 +173,7 @@ func (exa *VIPOrderService) CreateVIPStatistics(e *business.VIPStatistics) (err 
 	return err
 }
 
-func (exa *VIPOrderService) GetVIPStatisticsInfoList(sysUserAuthorityID uint) (list interface{}, err error) {
+func (exa *VIPOrderService) GetVIPStatisticsInfoList(sysUserAuthorityID int) (list interface{}, err error) {
 	var statistics business.VIPStatistics
 	err = global.GVA_DB.Where("sys_user_authority_id = ? ", sysUserAuthorityID).First(&statistics).Error
 	return statistics, err

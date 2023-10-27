@@ -9,7 +9,7 @@
         :data="comboData"
         style="width: 100%"
         tooltip-effect="dark"
-        row-key="ID"
+        row-key="Id"
       >
         <el-table-column type="selection" width="55" />
         <el-table-column align="left" label="套餐编号" prop="comboId"></el-table-column>
@@ -107,7 +107,7 @@ const pageSize = ref(10)
 const comboData = ref([])
 
 const comboForm = ref({
-  ID: 0,
+  Id: 0,
   comboName: '',
   comboType: null,
   comboPrice: 0,
@@ -197,7 +197,7 @@ const updateCombo = async(row) => {
 const closeDialog = () => {
   dialogFormVisible.value = false
   comboForm.value = {
-    ID: 0,
+    Id: 0,
     comboName: '',
     comboType: null,
     comboPrice: 0,
@@ -212,7 +212,7 @@ const closeDialog = () => {
 }
 const deleteCombo = async(row) => {
   row.visible = false
-  const res = await deleteExaVIPCombo({ ID: row.ID })
+  const res = await deleteExaVIPCombo({ Id: row.Id })
   if ("code" in res && res.code === 0) {
     ElMessage({
       type: 'success',

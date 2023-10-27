@@ -89,7 +89,7 @@
 
   const memberForm = reactive({
     onlyId: null,
-    ID: 0,
+    Id: 0,
     cardId: null,
     telephone: null,
     memberName: '',
@@ -124,7 +124,7 @@
         tableData.value.forEach(memberElement => {
           memberElement.comboType = memberElement.combo.comboName
           // comboList.forEach(comboElement => {
-          //   if (memberElement.comboId == comboElement.ID) {
+          //   if (memberElement.comboId == comboElement.Id) {
           //     memberElement.comboType = comboElement.comboName
           //   }
           // });
@@ -140,7 +140,7 @@
   }
   
   const OnConfirm = async(row) => {
-    memberForm.ID = row.ID
+    memberForm.Id = row.Id
     memberForm.cardId = row.cardId
     memberForm.telephone = row.telephone
     memberForm.memberName = row.memberName
@@ -158,7 +158,7 @@
     //   comboList = vipComboStore.comboList
     // }
     // comboList.forEach(element => {
-    //   if (element.ID == memberForm.comboId) {
+    //   if (element.Id == memberForm.comboId) {
     //     memberForm.comboType = element.comboName
     //   }
     // });
@@ -172,7 +172,7 @@
   //   }
 
   //   comboList.forEach(element => {
-  //     comboOptions.value.push({key: element.ID, value: element.comboName, price: element.comboPrice})
+  //     comboOptions.value.push({key: element.Id, value: element.comboName, price: element.comboPrice})
   //   });
   // }
 
@@ -189,7 +189,7 @@
       return
     }
     const requestData = {
-      ID: memberForm.ID,
+      Id: memberForm.Id,
       cardId: memberForm.cardId,
       number: memberForm.number,
     }
