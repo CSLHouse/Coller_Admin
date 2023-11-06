@@ -24,6 +24,7 @@ http.validateStatus = (statusCode) => {
 
 http.interceptor.request((config, cancel) => { /* 请求之前拦截器 */
 	const token = uni.getStorageSync('Token');
+	console.log("------token:", store.state.token)
 	if(token){
 		config.header = {
 			'x-token':token,

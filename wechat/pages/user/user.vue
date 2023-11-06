@@ -19,12 +19,10 @@
 					<text class="yticon icon-iLinkapp-"></text>
 					黄金会员
 				</view>
-				<text class="e-m">mall移动端商城</text>
-				<text class="e-b">黄金及以上会员可享有会员价优惠商品。</text>
 			</view>
 		</view>
-		
-		<view 
+		<!-- 积分、成长值、优惠券 -->
+		<!--<view 
 			class="cover-container"
 			:style="[{
 				transform: coverTransform,
@@ -50,7 +48,6 @@
 					<text>优惠券</text>
 				</view>
 			</view>
-			<!-- 订单 -->
 			<view class="order-section">
 				<view class="order-item" @click="navTo('/pages/order/order?state=0')" hover-class="common-hover"  :hover-stay-time="50">
 					<text class="yticon icon-shouye"></text>
@@ -68,9 +65,10 @@
 					<text class="yticon icon-shouhoutuikuan"></text>
 					<text>退款/售后</text>
 				</view>
-			</view>
+			</view> -->
 			<!-- 浏览历史 -->
 			<view class="history-section icon">
+				<list-cell icon="icon-dizhi" iconColor="#5fcda2" title="会员管理" @eventClick="navTo('/pages/member/member')"></list-cell>
 				<list-cell icon="icon-dizhi" iconColor="#5fcda2" title="地址管理" @eventClick="navTo('/pages/address/address')"></list-cell>
 				<list-cell icon="icon-lishijilu" iconColor="#e07472" title="我的足迹" @eventClick="navTo('/pages/user/readHistory')"></list-cell>
 				<list-cell icon="icon-shoucang" iconColor="#5fcda2" title="我的关注" @eventClick="navTo('/pages/user/brandAttention')"></list-cell>
@@ -78,12 +76,48 @@
 				<list-cell icon="icon-pingjia" iconColor="#ee883b" title="我的评价"></list-cell>
 				<list-cell icon="icon-shezhi1" iconColor="#e07472" title="设置" border="" @eventClick="navTo('/pages/set/set')"></list-cell>
 			</view>
+		<!-- </view> -->
+		<view v-if='!hasLogin && !isCloseModel' @click="closePop">
+			<div class="modal-mask">
+			</div>
+			<div class="modal-dialog">
+			  <div class="modal-content">
+			    <image class="img" src="/static/pop.png"></image>
+			    <div class="content-text">
+			      <p class="key-bold-tip">注册会员</p>
+			      <p class="key-bold">注册成为会员享受更多优惠</p>
+			      <p class="little-tip">我们的生活圈：</p>
+			      <p class="little-content">
+			        注册成为会员，一店消费，多家优惠，欢迎体验
+			      </p>
+			    </div>
+			  </div>
+			  <div class="modal-footer">
+			    <button class='btn' open-type='getPhoneNumber' @getphonenumber="decryptPhoneNumber">
+			    	一键注册
+			    </button>
+			  </div>
+			</div>
 		</view>
-		<view v-if='!isCloseLoginModel'>
-			<login-pop @close='handleLoginModelClose' @success='handleLoginSuccess'></login-pop>
-		</view>
-		<view v-if='hasLogin && !isClosePhoneModel'>
-			<phone-pop @close='handlePhoneModelClose' @success='handlePhoneSuccess'></phone-pop>
+		<view v-if='hasLogin && !hadNickName && !isCloseNickNameModel'>
+			<div class="modal-mask" @click="closeNickNamePop">
+			</div>
+			<div class="modal-dialog">
+			  <div class="modal-content">
+			    <image class="img" src="/static/pop.png"></image>
+			    <div class="content-text">
+			      <p class="info-bold-tip">完善信息可体验更多功能</p>
+			      <p class="key-bold">99%用户选择使用微信昵称</p>
+				   <input type="nickname" class="weui-input" placeholder="请选择微信昵称" maxlength="15" v-model="nickName"
+				    @change="getNickname" />
+			    </div>
+			  </div>
+			  <div class="modal-footer">
+			    <button class='btn' @click="confirmNickName">
+			    	确认
+			    </button>
+			  </div>
+			</div>
 		</view>
     </view>  
 </template>
@@ -93,17 +127,16 @@
 	import {
 		fetchMemberCouponList
 	} from '@/api/coupon.js';
-    import {  
-        mapState 
-    } from 'vuex';
-	import phonePop from '@/components/phone-pop.vue';
-	import loginPop from '@/components/login-pop.vue';
+	import { getWXPhoneNumber, wxRefreshLogin, WXResetNickName } from '@/api/member.js';
+    import { mapState, mapMutations } from 'vuex';
+	// import phonePop from '@/components/phone-pop.vue';
+	// import loginPop from '@/components/login-pop.vue';
 	let startY = 0, moveY = 0, pageAtTop = true;
     export default {
 		components: {
 			listCell,
-			phonePop,
-			loginPop
+			// phonePop,
+			// loginPop
 		},
 		data(){
 			return {
@@ -111,14 +144,12 @@
 				coverTransition: '0s',
 				moving: false,
 				couponCount:null,
-				// hasLogin: uni.getStorageSync('HadLogin') || false,
-				// userInfo: uni.getStorageSync('UserInfo'),
-				isClosePhoneModel: false,
-				isCloseLoginModel: false,
+				isCloseModel: false,
+				isCloseNickNameModel: false,
+				nickName: '',
 			}
 		},
 		onLoad(){
-			
 		},
 		// onReady(){
 		// 	if (!this.hasLogin) {
@@ -126,6 +157,14 @@
 		// 	}
 		// },
 		onShow(){
+			uni.login({
+				provider: 'weixin',
+				success: function(loginRes) {
+					console.log("登录", loginRes.code)
+					
+				},
+			})
+			
 			if(this.hasLogin){
 				// 获取优惠券
 				// fetchMemberCouponList(0).then(response=>{
@@ -158,34 +197,108 @@
 		},
 		// #endif
         computed: {
-			...mapState(['hasLogin','userInfo'])
+			...mapState(['hasLogin','userInfo', 'hadNickName']),
 		},
         methods: {
-			goLogin() {
-				this.isCloseLoginModel = false
+			...mapMutations(['login', 'refreshLoginSession']),
+			getNickname(e) {
+				console.log("--[onNickName]-e:", e)
+				this.nickName = e.detail.value
 			},
-			handleLoginModelClose(e) {
-				this.isCloseLoginModel = e
+			checkNickName() {
+				if (!this.nickName) {
+					uni.showToast({
+						title: '请输入昵称',
+						icon: 'none'
+					})
+					return false
+				}
+				let str = this.nickName.trim();
+				if (str.length == 0) {
+					uni.showToast({
+						title: '请输入正确的昵称',
+						icon: 'none'
+					})
+					return false
+				}
+				this.nickName = str
+				// if ((/[^/a-zA-Z0-9\u4E00-\u9FA5]/g).test(str)) {
+				//  uni.showToast({
+				//      title: '请输入中英文和数字',
+				//      icon: 'none'
+				//  })
+				//  return false
+				// }
+				return true
 			},
-			handleLoginSuccess(e) {
-				if (e) {
-					this.isCloseLoginModel = true
+						
+			confirmNickName() {
+				console.log("--[confirmNickName]-this.userInfo:", this.$store.state.userInfo)
+				let _this = this
+				if (this.$store.state.userInfo) {
+					this.$store.state.userInfo.nickName = this.nickName
+					WXResetNickName(this.$store.state.userInfo).then(res=>{
+						if (res.code == 0) {
+							uni.showToast({ title: '设置成功', duration: 2000 })
+							console.log("------WXResetNickName----userInfo---", this.$store.state.userInfo)
+							_this.$store.state.hadNickName = true
+							uni.setStorage({//缓存用户登陆状态
+							    key: 'userInfo',  
+							    data: this.$store.state.userInfo  
+							})
+							this.isCloseNickNameModel = true
+						}
+						else {
+							uni.showToast({ title: '设置失败', duration: 2000 })
+						}
+					});
+				}
+				
+			},	
+			closePop() {
+				this.isCloseModel = true
+			},
+			closeNickNamePop() {
+				this.isCloseNickNameModel = true
+			},
+			decryptPhoneNumber: function(e) {
+				let _this = this
+				console.log("-------decryptPhoneNumber------", e)
+				console.log("-------_this.$store.state.openIdr------", _this.$store.state.openId)
+				if(e.detail.errMsg == "getPhoneNumber:ok"){
+					if (_this.$store.state.openId && _this.$store.state.openId.length > 0) {
+						getWXPhoneNumber({openId: _this.$store.state.openId, code: e.detail.code}).then(res=>{
+							console.log("------getWXPhoneNumber----res---", res)
+							if (res.code == 0) {
+								uni.showToast({ title: '注册成功', duration: 2000 })
+								console.log("-----phoneNumber:", res.data.phoneNumber)//成功后打印微信手机号
+								_this.getToken()
+							}
+							else {
+								uni.showToast({ title: '注册会员失败', duration: 2000 })
+							}
+						});
+					}
 				}
 			},
-			showPhonePopModel() {
-				const isLogined = this.$store.hasLogin
-				if (isLogined) {
-					this.isClosePhoneModel = false
-				} else {
-					uni.showToast({ title: '请先登录', duration: 2000 })
-				}	
+			getToken() {
+				let _this = this
+				wxRefreshLogin({openId: _this.$store.state.openId}).then(res => {
+					console.log("-[wxRefreshLogin]--", res)
+					if (res.code == 0) {
+						const userinfo = res.data
+						wx.setStorageSync("UserInfo", userinfo.customer,)
+						wx.setStorageSync("Token", userinfo.token)
+						wx.setStorageSync("TokenTime", (new Date()).getTime())
+						_this.$store.token = userinfo.token
+						this.login(userinfo.user);
+					}
+				}).catch(errors => {
+					console.log("------wxRefreshLogin---errors--------", errors)
+				});
 			},
-			handlePhoneModelClose(e) {
-				this.isClosePhoneModel = e
-			},
-			handlePhoneSuccess(e) {
-				console.log("------handleShowPhoneModel-----", e)
-				this.isClosePhoneModel = true
+			goLogin() {
+				this.isCloseLoginModel = false
 			},
 			/**
 			 * 统一跳转接口,拦截未登录路由
@@ -238,8 +351,9 @@
 				this.coverTransition = 'transform 0.3s cubic-bezier(.21,1.93,.53,.64)';
 				this.coverTransform = 'translateY(0px)';
 			},
-			handleConfirm () {
-				this.$refs.popup.close()
+			closePop() {
+				// 关闭弹窗
+				this.isClosePhoneModel = true
 			},
         }  
     }  
@@ -436,5 +550,108 @@
 			}
 		}
 	}
-	
+	.modal-mask {
+	  width: 100%;
+	  height: 100%;
+	  position: fixed;
+	  top: 0;
+	  left: 0;
+	  background: #000;
+	  opacity: 0.5;
+	  overflow: hidden;
+	  z-index: 9000;
+	  color: #fff;
+	}
+	.modal-dialog {
+	  box-sizing: border-box;
+	  width: 560rpx;
+	  overflow: hidden;
+	  position: fixed;
+	  top: 40%;
+	  left: 0;
+	  z-index: 9999;
+	  background: #fff;
+	  margin: -150rpx 95rpx;
+	  border-radius: 16rpx;
+	}
+	.modal-content {
+	  box-sizing: border-box;
+	  display: flex;
+	  padding: 0rpx 53rpx 50rpx 53rpx;
+	  font-size: 32rpx;
+	  align-items: center;
+	  justify-content: center;
+	  flex-direction: column;
+	}
+	.content-tip {
+	  text-align: center;
+	  font-size: 36rpx;
+	  color: #333333;
+	}
+	.content-text {
+	  /* height:230px; */
+	  padding:10px 0px 10px 0px;
+	  font-size:14px;
+	}
+	.modal-footer {
+	  box-sizing: border-box;
+	  display: flex;
+	  flex-direction: row;
+	  border-top: 1px solid #e5e5e5;
+	  font-size: 16px;
+	  font-weight:bold;
+	  /* height: 45px; */
+	  line-height: 45px;
+	  text-align: center;
+	  background:#feb600;
+	}
+	.btn {
+	  width: 100%;
+	  height: 100%;
+	  background:#feb600;
+	  color:#FFFFFF;
+	  font-weight:bold;
+	}
+	.img {
+	  width: 560rpx;
+	  height:140rpx;
+	}
+	.little-tip {
+	  padding-top:15px;
+	  padding-bottom:3px;
+	  font-size: 14px;
+	  font-weight:bold;
+	  color: #feb600;
+	}
+	.little-content {
+	  padding-top:5px;
+	  font-size: 13px;
+	  color:#606060;
+	}
+	.key-bold-tip {
+	  padding-top:5px;
+	  font-size: 15px;
+	  font-weight:bold;
+	  color: #feb600;
+	}
+	.key-bold {
+	  padding-top:5px;
+	  font-size: 14px;
+	  /* font-weight:bold; */
+	}
+	.info-bold-tip {
+		padding-top:5px;
+		font-size: 15px;
+		font-weight:bold;
+		color: #feb600;
+		text-align: center;
+	}
+	.weui-input {
+		margin-top: 40px;
+		// width: 200px;
+		height: 40px;
+		background: #f4f4f6;
+		line-height: 40px;
+		text-align: center;
+	}
 </style>

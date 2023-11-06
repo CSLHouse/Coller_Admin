@@ -13,7 +13,8 @@
 			<view class="titleNview-placing"></view>
 			<!-- 背景色区域 -->
 			<view class="titleNview-background" :style="{backgroundColor:titleNViewBackground}"></view>
-			<swiper class="carousel" circular @change="swiperChange">
+			<swiper class="carousel" circular indicator-dots autoplay :interval="5000"
+				:duration="500" @change="swiperChange">
 				<swiper-item v-for="(item, index) in advertiseList" :key="index" class="carousel-item" @click="navToAdvertisePage(item)">
 					<image :src="item.pic" />
 				</swiper-item>
@@ -161,29 +162,72 @@
 			</view>
 		</view>
 		<uni-load-more :status="loadingType"></uni-load-more>
-		<view v-if='!isCloseModel'>
-			<login-pop @close='handleClose' @success='handleShowLoginModel'></login-pop>
+		
+		<view v-if='!hasLogin && !isCloseModel' @click="closePop">
+			<div class="modal-mask">
+			</div>
+			<div class="modal-dialog">
+			  <div class="modal-content">
+			    <image class="img" src="/static/pop.png"></image>
+			    <div class="content-text">
+			      <p class="key-bold-tip">注册会员</p>
+			      <p class="key-bold">注册成为会员享受更多优惠</p>
+			      <p class="little-tip">我们的生活圈：</p>
+			      <p class="little-content">
+			        注册成为会员，一店消费，多家优惠，欢迎体验
+			      </p>
+			    </div>
+			  </div>
+			  <div class="modal-footer">
+			    <button class='btn' open-type='getPhoneNumber' @getphonenumber="decryptPhoneNumber">
+			    	一键注册
+			    </button>
+			  </div>
+			</div>
+		</view>
+		<view v-if=' hasLogin && !hadNickName && !isCloseNickNameModel' >
+			<div class="modal-mask" @click="closeNickNamePop">
+			</div>
+			<div class="modal-dialog">
+			  <div class="modal-content">
+			    <image class="img" src="/static/pop.png"></image>
+			    <div class="content-text">
+			      <p class="info-bold-tip">完善信息可体验更多功能</p>
+			      <p class="key-bold">99%用户选择使用微信昵称</p>
+				   <input type="nickname" class="weui-input" placeholder="请选择微信昵称" maxlength="15" v-model="nickName"
+				    @change="getNickname" />
+			    </div>
+			  </div>
+			  <div class="modal-footer">
+			    <button class='btn' @click="confirmNickName">
+			    	确认
+			    </button>
+			  </div>
+			</div>
 		</view>
 	</view>
 </template>
 
 <script>
 	import {
-	    mapState 
+	    mapState, mapMutations
 	} from 'vuex';
 	import {
 		fetchContent,
 		fetchRecommendProductList
 	} from '@/api/home.js';
+	import { getWXPhoneNumber, wxRefreshLogin, WXResetNickName } from '@/api/member.js';
 	import {
 		formatDate
 	} from '@/utils/date';
 	import uniLoadMore from '@/components/uni-load-more/uni-load-more.vue';
-	import loginPop from '@/components/login-pop.vue';
+	// import loginPop from '@/components/login-pop.vue';
+	// import phonePop from '@/components/phone-pop.vue';
 	export default {
 		components: {
 			uniLoadMore,
-			loginPop
+			// loginPop,
+			// phonePop,
 		},
 		data() {
 			return {
@@ -205,10 +249,20 @@
 				},
 				loadingType:'more',
 				isCloseModel: false,
+				isCloseNickNameModel: false,
+				nickName: '',
 			};
 		},
 		onLoad() {
 			this.loadData();
+		},
+		onShow() {
+			// uni.login({
+			// 	provider: 'weixin',
+			// 	success: function(loginRes) {
+			// 		console.log("登录", loginRes)
+			// 	},
+			// })
 		},
 		//下拉刷新
 		onPullDownRefresh(){
@@ -233,7 +287,7 @@
 			})
 		},
 		computed: {
-			...mapState(['hasLogin','userInfo']),
+			...mapState(['hasLogin','userInfo', 'hadNickName']),
 			cutDownTime() {
 				let endTime = new Date(this.homeFlashPromotion.endTime);
 				let endDateTime = new Date();
@@ -264,12 +318,106 @@
 			},
 		},
 		methods: {
-			handleClose(e) {
-				this.isCloseModel = e
+			...mapMutations(['login', 'refreshLoginSession']),
+			getNickname(e) {
+				console.log("--[onNickName]-e:", e)
+				this.nickName = e.detail.value
+			},
+			checkNickName() {
+				if (!this.nickName) {
+					uni.showToast({
+						title: '请输入昵称',
+						icon: 'none'
+					})
+					return false
+				}
+				let str = this.nickName.trim();
+				if (str.length == 0) {
+					uni.showToast({
+						title: '请输入正确的昵称',
+						icon: 'none'
+					})
+					return false
+				}
+				this.nickName = str
+				// if ((/[^/a-zA-Z0-9\u4E00-\u9FA5]/g).test(str)) {
+				//  uni.showToast({
+				//      title: '请输入中英文和数字',
+				//      icon: 'none'
+				//  })
+				//  return false
+				// }
+				return true
+			},
+						
+			confirmNickName() {
+				console.log("--[confirmNickName]-this.userInfo:", this.$store.state.userInfo)
+				let _this = this
+				if (this.$store.state.userInfo) {
+					_this.$store.state.userInfo.nickName = this.nickName
+					WXResetNickName(this.$store.state.userInfo).then(res=>{
+						if (res.code == 0) {
+							uni.showToast({ title: '设置成功', duration: 2000 })
+							console.log("------WXResetNickName----userInfo---", _this.$store.state.userInfo)
+							_this.$store.state.hadNickName = true
+							uni.setStorage({//缓存用户登陆状态
+							    key: 'UserInfo',
+							    data: _this.$store.state.userInfo  
+							})
+							_this.isCloseNickNameModel = true
+						}
+						else {
+							uni.showToast({ title: '设置失败', duration: 2000 })
+						}
+					});
+				}
+				
+			},	
+			closePop() {
+				this.isCloseModel = true
+			},
+			closeNickNamePop() {
+				this.isCloseNickNameModel = true
 			},
 			handleShowLoginModel(e) {
 				console.log("-------------e:", e)
 				this.isCloseModel = e
+			},
+			decryptPhoneNumber: function(e) {
+				let _this = this
+				console.log("-------decryptPhoneNumber------", e)
+				console.log("-------_this.$store.state.openIdr------", _this.$store.state.openId)
+				if(e.detail.errMsg == "getPhoneNumber:ok"){
+					if (_this.$store.state.openId && _this.$store.state.openId.length > 0) {
+						getWXPhoneNumber({openId: _this.$store.state.openId, code: e.detail.code}).then(res=>{
+							console.log("------getWXPhoneNumber----res---", res)
+							if (res.code == 0) {
+								uni.showToast({ title: '注册成功', duration: 2000 })
+								console.log("-----phoneNumber:", res.data.phoneNumber)//成功后打印微信手机号
+								_this.getToken()
+							}
+							else {
+								uni.showToast({ title: '注册会员失败', duration: 2000 })
+							}
+						});
+					}
+				}
+			},
+			getToken() {
+				let _this = this
+				wxRefreshLogin({openId: _this.$store.state.openId}).then(res => {
+					console.log("-[wxRefreshLogin]--", res)
+					if (res.code == 0) {
+						const userinfo = res.data
+						wx.setStorageSync("UserInfo", userinfo.customer,)
+						wx.setStorageSync("Token", userinfo.token)
+						wx.setStorageSync("TokenTime", (new Date()).getTime())
+						_this.$store.token = userinfo.token
+						this.login(userinfo.user);
+					}
+				}).catch(errors => {
+					console.log("------wxRefreshLogin---errors--------", errors)
+				});
 			},
 			/**
 			 * 加载数据
@@ -868,5 +1016,110 @@
 			flex-direction: column;
 			padding-left: 40upx;
 		}
+	}
+	
+	.modal-mask {
+	  width: 100%;
+	  height: 100%;
+	  position: fixed;
+	  top: 0;
+	  left: 0;
+	  background: #000;
+	  opacity: 0.5;
+	  overflow: hidden;
+	  z-index: 9000;
+	  color: #fff;
+	}
+	.modal-dialog {
+	  box-sizing: border-box;
+	  width: 560rpx;
+	  overflow: hidden;
+	  position: fixed;
+	  top: 40%;
+	  left: 0;
+	  z-index: 9999;
+	  background: #fff;
+	  margin: -150rpx 95rpx;
+	  border-radius: 16rpx;
+	}
+	.modal-content {
+	  box-sizing: border-box;
+	  display: flex;
+	  padding: 0rpx 53rpx 50rpx 53rpx;
+	  font-size: 32rpx;
+	  align-items: center;
+	  justify-content: center;
+	  flex-direction: column;
+	}
+	.content-tip {
+	  text-align: center;
+	  font-size: 36rpx;
+	  color: #333333;
+	}
+	.content-text {
+	  /* height:230px; */
+	  padding:10px 0px 10px 0px;
+	  font-size:14px;
+	}
+	.modal-footer {
+	  box-sizing: border-box;
+	  display: flex;
+	  flex-direction: row;
+	  border-top: 1px solid #e5e5e5;
+	  font-size: 16px;
+	  font-weight:bold;
+	  /* height: 45px; */
+	  line-height: 45px;
+	  text-align: center;
+	  background:#feb600;
+	}
+	.btn {
+	  width: 100%;
+	  height: 100%;
+	  background:#feb600;
+	  color:#FFFFFF;
+	  font-weight:bold;
+	}
+	.img {
+	  width: 560rpx;
+	  height:140rpx;
+	}
+	.little-tip {
+	  padding-top:15px;
+	  padding-bottom:3px;
+	  font-size: 14px;
+	  font-weight:bold;
+	  color: #feb600;
+	}
+	.little-content {
+	  padding-top:5px;
+	  font-size: 13px;
+	  color:#606060;
+	}
+	.key-bold-tip {
+	  padding-top:5px;
+	  font-size: 15px;
+	  font-weight:bold;
+	  color: #feb600;
+	}
+	.key-bold {
+	  padding-top:5px;
+	  font-size: 14px;
+	  /* font-weight:bold; */
+	}
+	.info-bold-tip {
+		padding-top:5px;
+		font-size: 15px;
+		font-weight:bold;
+		color: #feb600;
+		text-align: center;
+	}
+	.weui-input {
+		margin-top: 40px;
+		// width: 200px;
+		height: 40px;
+		background: #f4f4f6;
+		line-height: 40px;
+		text-align: center;
 	}
 </style>

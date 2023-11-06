@@ -39,8 +39,8 @@
 		methods: {
 			async loadData() {
 				let _this = this
-				if (_this.$store.openId) {
-					fetchAddressList({openId: _this.$store.openId}).then(response => {
+				if (_this.$store.state.openId) {
+					fetchAddressList({openId: _this.$store.state.openId}).then(response => {
 						this.addressList = response.data;
 					});
 				} else {

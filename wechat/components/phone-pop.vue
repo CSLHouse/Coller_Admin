@@ -16,7 +16,6 @@
 		          </p>
 		        </div>
 		      </div>
-			  <button @click="initWXLogin">Login</button>
 		      <div class="modal-footer">
 		         <!-- 小程序集成的API，通过button来授权登录 -->
 		        <button class='btn' open-type='getPhoneNumber' @getphonenumber="getWXPhone">
@@ -45,37 +44,41 @@
 		computed: {
 			...mapState(['hasPhone']),
 		},
+		
 		methods: {
+			decryptPhoneNumber: function(e) {
+				console.log("-------decryptPhoneNumber------", e.detail)
+			},
 			//绑定手机
-			getWXPhone(e) {
-				console.log("------getPhoneNumber---", e)
+			getWXPhone: function(e) {
+				console.log("------getPhoneNumber---", e.detail.code)
 				var _this = this;
 				if(e.detail.errMsg == "getPhoneNumber:ok") {
 					console.log("------getPhoneNumber:ok---")
-					uni.checkSession({
-					  success: function (res) {
-						  console.log("------getWXPhoneNumber----checkSession--success-")
-						 if	(res.errMsg == 'checkSession:ok') {
-							 _this.requestWxPhoneNumber({
-								encryptedData: e.detail.encryptedData,
-								iv: e.detail.iv,
-								// sessionKey: wx.getStorageSync("SessionKey"),
-								openId: wx.getStorageSync("OpenId"),
-							 })
-						 }
-					  },
-					  fail: function () {
-							console.log("------getWXPhoneNumber----checkSession--fail---")
-							_this.initWXLogin()
-							uni.showToast({ title: '注册失败', duration: 2000 })
-							// _this.requestWxPhoneNumber({
-							// encryptedData: e.detail.encryptedData,
-							// iv: e.detail.iv,
-							// sessionKey: wx.getStorageSync("SessionKey"),
-							// openId: wx.getStorageSync("OpenId"),
-						  // })
-					  }
-					})
+					// uni.checkSession({
+					//   success: function (res) {
+					// 	  console.log("------getWXPhoneNumber----checkSession--success-")
+					// 	 if	(res.errMsg == 'checkSession:ok') {
+					// 		 _this.requestWxPhoneNumber({
+					// 			encryptedData: e.detail.encryptedData,
+					// 			iv: e.detail.iv,
+					// 			// sessionKey: wx.getStorageSync("SessionKey"),
+					// 			openId: wx.getStorageSync("OpenId"),
+					// 		 })
+					// 	 }
+					//   },
+					//   fail: function () {
+					// 		console.log("------getWXPhoneNumber----checkSession--fail---")
+					// 		_this.initWXLogin()
+					// 		uni.showToast({ title: '注册失败', duration: 2000 })
+					// 		// _this.requestWxPhoneNumber({
+					// 		// encryptedData: e.detail.encryptedData,
+					// 		// iv: e.detail.iv,
+					// 		// sessionKey: wx.getStorageSync("SessionKey"),
+					// 		// openId: wx.getStorageSync("OpenId"),
+					// 	  // })
+					//   }
+					// })
 				} else {
 					uni.showToast({ title: '取消注册会员', duration: 2000 })
 				}
@@ -131,7 +134,7 @@
 			},
 		},
 		mounted() {
-			this.initWXLogin()
+			// this.initWXLogin()
 		}
 	}
 </script>

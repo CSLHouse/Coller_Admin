@@ -139,7 +139,7 @@
 			},
 			getToken() {
 				let _this = this
-				wxRefreshLogin({openId: _this.$store.openId}).then(res => {
+				wxRefreshLogin({openId: _this.$store.state.openId}).then(res => {
 					if (res.code == 0) {
 						const userinfo = res.data
 						wx.setStorageSync("UserInfo", userinfo.user)

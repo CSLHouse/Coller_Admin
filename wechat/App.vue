@@ -42,104 +42,53 @@
 			},
 			initWXLogin() {
 				const _this = this
-				const cacheUserInfo = wx.getStorageSync("UserInfo")
-				console.log("--cacheUserInfo--", cacheUserInfo)
-				if (cacheUserInfo) {
-					//更新登陆状态
-					uni.getStorage({
-						key: 'UserInfo',
-						success: (res) => {
-							this.login(res.data);
-						}
-					});
-					if (cacheUserInfo.phone.length == 11) {
-						this.makePhone(true)
-					}
-				}
 				const openId = wx.getStorageSync("OpenId")
+				if (openId) {
+					_this.$store.state.openId = openId
+					console.log("--openId-", _this.$store.state.openId)
+				} else {
+					_this.refreshLoginSession()
+				}
 				const token = wx.getStorageSync("Token")
 				const tokenTime = wx.getStorageSync("TokenTime")
+				const userInfo = wx.getStorageSync("UserInfo")
+				console.log("--[initWXLogin]-token:", token)
+				console.log("--[initWXLogin]-userInfo:", userInfo)
+				
 				// token有效时间 82800000 23h
-				if (cacheUserInfo && openId && token && (tokenTime + 82800000 > (new Date()).getTime())) {
+				// if (userInfo && token && (tokenTime + 82800000 > (new Date()).getTime())) {
+				if (userInfo && token ) {
+					_this.$store.state.token = token
+					if (userInfo.nickName) {
+						_this.$store.state.hadNickName = true
+					}
+					this.login(userInfo);
 					return
 				}
-
-				if (openId) {
-					_this.$store.openId = openId
+				if(userInfo) {
 					_this.getToken()
 					return
 				}
-				uni.login({
-				  provider: 'weixin', //使用微信登录
-				  success: function (loginRes) {
-					wxLogin({code: loginRes.code}).then(res => {
-						console.log("------login---res--------", res.data)
-						if (res.code == 0) {
-							uni.setStorageSync('OpenId', res.data.openid);
-							_this.$store.openId = res.data.openid
-							_this.getToken()
-						} else {
-							uni.showToast({
-								title: res.data,
-								icon: 'none'
-							})
-						}
-					}).catch(errors => {
-						console.log("------login---errors--------", errors)
-					});
-				  }
-				});
-
 			},
-			//调用 token 和 储存用户token等信息
-			// loginMain(code) {
-			// 	let _this = this
-			// 	wxLogin({code: code}).then(res => {
-			// 		console.log("------login---res--------", res.data)
-			// 		if (res.code == 0) {
-			// 			uni.setStorageSync('OpenId', res.data.openid);
-			// 			// uni.setStorageSync('SessionKey', res.data.session_key);
-			// 			wx.setStorageSync("WxCode", code)
-			// 			wx.setStorageSync("WxCodeTime", (new Date()).getTime())
-			// 			_this.getUserInfo()
-			// 		} else {
-			// 			uni.showToast({
-			// 				title: res.data,
-			// 				icon: 'none'
-			// 			})
-			// 		}
-			// 	}).catch(errors => {
-			// 		console.log("------login---errors--------", errors)
-			// 	});
-			// },
-			// getUserInfo() {
-			// 	let _this = this
-			// 	console.log("------updateUserInfo--openId:", uni.getStorageSync('OpenId'))
-			// 	GetWxUserInfo({openId: uni.getStorageSync('OpenId')}).then(res => {
-			// 		console.log("------GetWxUserInfo---res--------", res.data)
-			// 		if (res.code == 0) {
-			// 			wx.setStorageSync("UserInfo", res.data)
-			// 			// wx.setStorageSync("HadLogin", true)
-			// 			wx.setStorageSync("Token", res.data.token)
-			// 			wx.setStorageSync("TokenTime", (new Date()).getTime())
-			// 			const userinfo = res.data
-			// 			if (userinfo.phone.length == 11) {
-			// 				uni.setStorageSync('HadPhone', true)
-			// 			}
-			// 		}
-			// 	}).catch(errors => {
-			// 		console.log("------GetWxUserInfo---errors--------", errors)
-			// 	});
-			// },
 			getToken() {
 				let _this = this
-				wxRefreshLogin({openId: _this.$store.openId}).then(res => {
+				wxRefreshLogin({openId: _this.$store.state.openId}).then(res => {
 					if (res.code == 0) {
 						const userinfo = res.data
-						wx.setStorageSync("UserInfo", userinfo.user)
-						wx.setStorageSync("Token", userinfo.token)
-						wx.setStorageSync("TokenTime", (new Date()).getTime())
+						uni.setStorage({//缓存用户登陆状态
+						    key: 'UserInfo',  
+						    data: userinfo.user
+						})
+						uni.setStorage({//缓存用户登陆状态
+						    key: 'Token',  
+						    data: userinfo.token
+						})
+						uni.setStorage({//缓存用户登陆状态
+						    key: 'TokenTime',  
+						    data: (new Date()).getTime()
+						})
 						this.login(userinfo.user);
+						_this.$store.token = userinfo.token
 					}
 				}).catch(errors => {
 					console.log("------wxRefreshLogin---errors--------", errors)
