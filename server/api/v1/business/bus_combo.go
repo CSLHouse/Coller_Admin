@@ -35,8 +35,7 @@ func (e *ComboApi) CreateVIPCombo(c *gin.Context) {
 		response.FailWithMessage(err.Error(), c)
 		return
 	}
-
-	combo.AuthorityId = utils.GetUserAuthorityId(c)
+	combo.SysUserId = utils.GetUserID(c)
 	combo.State = 1
 	err = comboService.CreateVIPCombo(combo)
 	if err != nil {
@@ -56,20 +55,19 @@ func (e *ComboApi) CreateVIPCombo(c *gin.Context) {
 // @Param     data  body      example.ExaCustomer            true  "客户ID"
 // @Success   200   {object}  response.Response{msg=string}  "删除客户"
 // @Router    /customer/customer [delete]
-func (e *ComboApi) DeleteVIPCombo(c *gin.Context) {
-
-	var combo business.VIPCombo
-	err := c.ShouldBindJSON(&combo)
+func (e *ComboApi) DeleteVIPComboById(c *gin.Context) {
+	var reqId request.GetById
+	err := c.ShouldBindQuery(&reqId)
 	if err != nil {
 		response.FailWithMessage(err.Error(), c)
 		return
 	}
-	//err = utils.Verify(combo, utils.ComboVerify)
+	err = utils.Verify(reqId, utils.IdVerify)
 	if err != nil {
 		response.FailWithMessage(err.Error(), c)
 		return
 	}
-	err = comboService.DeleteVIPCombo(combo)
+	err = comboService.DeleteVIPComboById(reqId.ID)
 	if err != nil {
 		global.GVA_LOG.Error("删除失败!", zap.Error(err))
 		response.FailWithMessage("删除失败", c)
@@ -99,7 +97,6 @@ func (e *ComboApi) UpdateVIPCombo(c *gin.Context) {
 		response.FailWithMessage(err.Error(), c)
 		return
 	}
-	combo.AuthorityId = utils.GetUserAuthorityId(c)
 	err = comboService.UpdateVIPCombo(&combo)
 	if err != nil {
 		global.GVA_LOG.Error("更新失败!", zap.Error(err))
@@ -118,14 +115,20 @@ func (e *ComboApi) UpdateVIPCombo(c *gin.Context) {
 // @Param     data  query     example.ExaCustomer                                                true  "客户ID"
 // @Success   200   {object}  response.Response{data=exampleRes.ExaCustomerResponse,msg=string}  "获取单一客户信息,返回包括客户详情"
 // @Router    /customer/customer [get]
-func (e *ComboApi) GetVIPCombo(c *gin.Context) {
-	var combo business.VIPCombo
-	err := c.ShouldBindQuery(&combo)
+func (e *ComboApi) GetVIPComboById(c *gin.Context) {
+	var reqId request.GetById
+	err := c.ShouldBindQuery(&reqId)
 	if err != nil {
 		response.FailWithMessage(err.Error(), c)
 		return
 	}
-	data, err := comboService.GetVIPCombo(combo.ComboId)
+	err = utils.Verify(reqId, utils.IdVerify)
+	if err != nil {
+		response.FailWithMessage(err.Error(), c)
+		return
+	}
+
+	data, err := comboService.GetVIPComboById(reqId.ID)
 	if err != nil {
 		global.GVA_LOG.Error("获取失败!", zap.Error(err))
 		response.FailWithMessage("获取失败", c)
@@ -162,7 +165,7 @@ func (e *ComboApi) GetVIPComboList(c *gin.Context) {
 		response.FailWithMessage(err.Error(), c)
 		return
 	}
-	comboList, total, err := comboService.GetVIPComboInfoList(utils.GetUserAuthorityId(c), pageInfo)
+	comboList, total, err := comboService.GetVIPComboInfoList(utils.GetUserID(c), pageInfo)
 	if err != nil {
 		global.GVA_LOG.Error("获取失败!", zap.Error(err))
 		response.FailWithMessage("获取失败"+err.Error(), c)
@@ -177,7 +180,7 @@ func (e *ComboApi) GetVIPComboList(c *gin.Context) {
 }
 
 func (e *ComboApi) GetAllVIPCombos(c *gin.Context) {
-	comboList, err := comboService.GetAllVIPComboInfoList(utils.GetUserAuthorityId(c))
+	comboList, err := comboService.GetAllVIPComboInfoList(utils.GetUserID(c))
 	if err != nil {
 		global.GVA_LOG.Error("获取失败!", zap.Error(err))
 		response.FailWithMessage("获取失败"+err.Error(), c)

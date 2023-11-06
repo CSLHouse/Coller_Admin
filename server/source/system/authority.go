@@ -47,7 +47,6 @@ func (i *initAuthority) InitializeData(ctx context.Context) (context.Context, er
 		{AuthorityId: 888, AuthorityName: "超级管理员", ParentId: utils.Pointer[int](0), DefaultRouter: "dashboard"},
 		{AuthorityId: 8881, AuthorityName: "管理员", ParentId: utils.Pointer[int](888), DefaultRouter: "dashboard"},
 		{AuthorityId: 9528, AuthorityName: "普通用户", ParentId: utils.Pointer[int](0), DefaultRouter: "dashboard"},
-		{AuthorityId: 95281, AuthorityName: "普通用户", ParentId: utils.Pointer[int](0), DefaultRouter: "dashboard"},
 	}
 
 	if err := db.Create(&entities).Error; err != nil {

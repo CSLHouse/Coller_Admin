@@ -3,6 +3,7 @@ package system
 import (
 	"errors"
 	"fmt"
+	"github.com/flipped-aurora/gin-vue-admin/server/model/business"
 	"time"
 
 	"github.com/flipped-aurora/gin-vue-admin/server/global"
@@ -245,21 +246,21 @@ func (userService *UserService) ResetPassword(ID int) (err error) {
 }
 
 func (userService *UserService) CreateWXAccount(e *system.SysUser) (err error) {
-	db := global.GVA_DB.Model(&system.SysUser{})
-	var wxUser system.SysUser
-	result := db.Where("open_id = ?", e.OpenId).First(&wxUser)
-	if result.Error != nil {
-		if result.Error == gorm.ErrRecordNotFound {
-			e.UUID = uuid.Must(uuid.NewV4())
-			err = global.GVA_DB.Debug().Create(&e).Error
-			return err
-		}
-		err = result.Error
-	} else {
-		err = db.Debug().Where("open_id = ?", e.OpenId).Updates(map[string]interface{}{"nick_name": e.NickName,
-			"gender": e.Gender, "avatar_url": e.AvatarUrl}).Error
-		return err
-	}
+	//db := global.GVA_DB.Model(&system.SysUser{})
+	//var wxUser system.SysUser
+	//result := db.Where("telephone = ?", e.Phone).First(&wxUser)
+	//if result.Error != nil {
+	//	if result.Error == gorm.ErrRecordNotFound {
+	//		e.UUID = uuid.Must(uuid.NewV4())
+	//		err = global.GVA_DB.Debug().Create(&e).Error
+	//		return err
+	//	}
+	//	err = result.Error
+	//} else {
+	//	err = db.Debug().Where("open_id = ?", e.OpenId).Updates(map[string]interface{}{"nick_name": e.NickName,
+	//		"gender": e.Gender, "avatar_url": e.AvatarUrl}).Error
+	//	return err
+	//}
 
 	return err
 }
@@ -276,3 +277,8 @@ func (userService *UserService) GetWXAccountByOpenID(openId string) (user system
 //		"gender": e.Gender, "avatar_url": e.AvatarUrl}).Error
 //	return err
 //}
+
+func (userService *UserService) ResetWXNickName(e *business.Customer) (err error) {
+	err = global.GVA_DB.Model(&business.Customer{}).Where("id = ?", e.ID).Update("nick_name", e.NickName).Error
+	return err
+}

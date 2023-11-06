@@ -89,11 +89,11 @@ func (exa *VIPConsumeService) GetVIPConsume(id int) (member business.ConsumeReco
 	return
 }
 
-func (exa *VIPConsumeService) GetVIPConsumeInfoList(sysUserAuthorityID int, searchInfo request.ConsumeSearchInfo) (list interface{}, total int64, err error) {
+func (exa *VIPConsumeService) GetVIPConsumeInfoList(userId int, searchInfo request.ConsumeSearchInfo) (list interface{}, total int64, err error) {
 	limit := searchInfo.PageSize
 	offset := searchInfo.PageSize * (searchInfo.Page - 1)
 	var ConsumeList []business.ConsumeRecord
-	cmd := fmt.Sprintf("sys_user_authority_id = %d", sysUserAuthorityID)
+	cmd := fmt.Sprintf("sys_user_id = %d", userId)
 	if searchInfo.Telephone >= 1000 {
 		cmd += fmt.Sprintf(" and telephone like '%%%d%%'", searchInfo.Telephone)
 	}
@@ -108,7 +108,7 @@ func (exa *VIPConsumeService) GetVIPConsumeInfoList(sysUserAuthorityID int, sear
 	if err != nil {
 		return ConsumeList, total, err
 	} else {
-		err = db.Limit(limit).Offset(offset).Preload("Member").Preload("Member.Combo").Where(cmd).Find(&ConsumeList).Error
+		err = db.Limit(limit).Offset(offset).Preload("Card").Preload("Card.Combo").Where(cmd).Find(&ConsumeList).Error
 	}
 	return ConsumeList, total, err
 }

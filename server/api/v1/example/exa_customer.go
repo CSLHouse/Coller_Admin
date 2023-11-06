@@ -34,7 +34,7 @@ func (e *CustomerApi) CreateExaCustomer(c *gin.Context) {
 		response.FailWithMessage(err.Error(), c)
 		return
 	}
-	customer.SysUserID = utils.GetUserID(c)
+	customer.SysUserId = utils.GetUserID(c)
 	customer.SysUserAuthorityID = utils.GetUserAuthorityId(c)
 	err = customerService.CreateExaCustomer(customer)
 	if err != nil {

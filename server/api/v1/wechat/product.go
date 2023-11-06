@@ -631,18 +631,19 @@ func (e *HomeApi) UpdateProductBrand(c *gin.Context) {
 }
 
 func (e *HomeApi) DeleteHomeProductBrand(c *gin.Context) {
-	var brand wechat.HomeBrand
-	err := c.ShouldBindJSON(&brand)
+	var reqId request.GetById
+	err := c.ShouldBindQuery(&reqId)
 	if err != nil {
 		response.FailWithMessage(err.Error(), c)
 		return
 	}
-	//err = utils.Verify(combo, utils.ComboVerify)
+	err = utils.Verify(reqId, utils.IdVerify)
 	if err != nil {
 		response.FailWithMessage(err.Error(), c)
 		return
 	}
-	err = wechatService.DeleteHomeProductBrand(brand)
+
+	err = wechatService.DeleteHomeProductBrand(reqId.ID)
 	if err != nil {
 		global.GVA_LOG.Error("删除失败!", zap.Error(err))
 		response.FailWithMessage("删除失败", c)

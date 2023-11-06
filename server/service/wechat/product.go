@@ -348,8 +348,9 @@ func (exa *HomeService) UpdateHomeBrand(e *wechat.HomeBrand) (err error) {
 	return err
 }
 
-func (exa *HomeService) DeleteHomeProductBrand(e wechat.HomeBrand) (err error) {
-	err = global.GVA_DB.Delete(&e).Error
+func (exa *HomeService) DeleteHomeProductBrand(id int) (err error) {
+	var brand wechat.HomeBrand
+	err = global.GVA_DB.Where("id = ?", id).Delete(&brand).Error
 	return err
 }
 

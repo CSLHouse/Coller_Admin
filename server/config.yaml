@@ -7,7 +7,7 @@ aliyun-oss:
     base-path: resource
 autocode:
     transfer-restart: true
-    root: D:\Web\Coller_Admin
+    root: D:\Web\Coller
     server: /server
     server-api: /api/v1/%s
     server-plug: /plugin/%s
@@ -35,7 +35,7 @@ captcha:
     img-width: 240
     img-height: 80
     open-captcha: 0
-    open-captcha-timeout: 3600
+    open-captcha-timeout: 7200
 cors:
     mode: strict-whitelist
     whitelist:
@@ -83,7 +83,7 @@ hua-wei-obs:
     access-key: you-access-key
     secret-key: you-secret-key
 jwt:
-    signing-key: 9bd5f907-d061-4c51-bd46-af25cd6206b1
+    signing-key: 99274e05-d019-4f87-9085-60106137d576
     expires-time: 7d
     buffer-time: 1d
     issuer: qmPlus
@@ -204,6 +204,8 @@ wechat:
     appid: wxfc872e07778f40eb
     secret: 7427543442e791bcd3a27613a8d989df
     session-url: https://api.weixin.qq.com/sns/jscode2session?appid=%s&secret=%s&js_code=%s&grant_type=authorization_code
+    access-token-url: https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid=%s&secret=%s
+    telephone-url: https://api.weixin.qq.com/wxa/business/getuserphonenumber?access_token=%s
 zap:
     level: info
     prefix: '[github.com/flipped-aurora/gin-vue-admin/server]'

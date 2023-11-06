@@ -45,7 +45,7 @@ type SetUserAuthorities struct {
 
 type ChangeUserInfo struct {
 	ID           int                   `gorm:"primarykey"`                                                                           // 主键ID
-	NickName     string                `json:"nickName" gorm:"default:系统用户;comment:用户昵称"`                                            // 用户昵称
+	NickName     string                `json:"nickName" gorm:"comment:用户昵称"`                                                         // 用户昵称
 	Phone        string                `json:"phone"  gorm:"comment:用户手机号"`                                                          // 用户手机号
 	AuthorityIds []int                 `json:"authorityIds" gorm:"-"`                                                                // 角色ID
 	Email        string                `json:"email"  gorm:"comment:用户邮箱"`                                                           // 用户邮箱

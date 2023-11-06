@@ -22,7 +22,7 @@ func (e *ConsumeApi) GetConsumeList(c *gin.Context) {
 		response.FailWithMessage(err.Error(), c)
 		return
 	}
-	consumeList, total, err := consumeService.GetVIPConsumeInfoList(utils.GetUserAuthorityId(c), searchInfo)
+	consumeList, total, err := consumeService.GetVIPConsumeInfoList(utils.GetUserID(c), searchInfo)
 	if err != nil {
 		global.GVA_LOG.Error("获取失败!", zap.Error(err))
 		response.FailWithMessage("获取失败", c)
@@ -33,11 +33,11 @@ func (e *ConsumeApi) GetConsumeList(c *gin.Context) {
 	for _, value := range recordList {
 		consumeRes := businessRes.VipConsumeResModel{}
 		consumeRes.ID = value.ID
-		consumeRes.MemberName = value.Member.MemberName
+		consumeRes.MemberName = value.Card.UserName
 		consumeRes.Telephone = value.Telephone
-		consumeRes.MemberType = value.Member.Combo.ComboName
-		consumeRes.MemberState = value.Member.State
-		consumeRes.Deadline = value.Member.Deadline
+		consumeRes.MemberType = value.Card.Combo.ComboName
+		consumeRes.MemberState = value.Card.State
+		consumeRes.Deadline = value.Card.Deadline
 		consumeRes.RemainTimes = value.RemainTimes
 		consumeRes.ConsumeTimes = value.ConsumeTimes
 		consumeRes.PunchDate = value.PunchDate
@@ -65,12 +65,12 @@ func (e *ConsumeApi) ConsumeVIPCard(c *gin.Context) {
 		response.FailWithMessage(err.Error(), c)
 		return
 	}
-	oldData, err := memberService.GetVIPMember(consume.CardID)
+	oldData, err := memberService.GetVIPCardById(consume.ID)
 	if err != nil {
 		response.FailWithMessage(err.Error(), c)
 		return
 	}
-	if oldData.CardID != consume.CardID {
+	if oldData.CardId != consume.CardID {
 		global.GVA_LOG.Error("卡号错误!", zap.Error(err))
 		response.FailWithMessage("划卡失败", c)
 		return
@@ -92,7 +92,7 @@ func (e *ConsumeApi) ConsumeVIPCard(c *gin.Context) {
 		return
 	}
 	oldData.RemainTimes -= consume.Number
-	err = memberService.UpdateVIPMember(&oldData)
+	err = memberService.UpdateVIPCard(&oldData)
 	if err != nil {
 		global.GVA_LOG.Error("更新失败!", zap.Error(err))
 		response.FailWithMessage("更新失败", c)
@@ -105,7 +105,7 @@ func (e *ConsumeApi) ConsumeVIPCard(c *gin.Context) {
 	consumeRecord.ConsumeTimes = consume.Number
 	consumeRecord.PunchDate = date_conversion.BuildTheTimeStr()
 	consumeRecord.State = 1 // 默认已确认
-	consumeRecord.SysUserAuthorityID = utils.GetUserAuthorityId(c)
+	consumeRecord.SysUserId = utils.GetUserID(c)
 	//err = consumeService.CreateVIPConsume(consumeRecord)
 	//if err != nil {
 	//	global.GVA_LOG.Error("创建失败!", zap.Error(err))
@@ -116,7 +116,7 @@ func (e *ConsumeApi) ConsumeVIPCard(c *gin.Context) {
 	statement.Date = date_conversion.BuildTheDayStr()
 	statement.CardNumber = 1
 	statement.ConsumeNumber = consumeRecord.ConsumeTimes
-	statement.SysUserAuthorityID = utils.GetUserAuthorityId(c)
+	consumeRecord.SysUserId = utils.GetUserID(c)
 	//err = orderService.CreateVIPStatement(&statement)
 	//if err != nil {
 	//	global.GVA_LOG.Error("创建订单失败!", zap.Error(err))
@@ -126,7 +126,7 @@ func (e *ConsumeApi) ConsumeVIPCard(c *gin.Context) {
 
 	var statistics business.VIPStatistics
 	statistics.TotalConsumer = 1
-	statistics.SysUserAuthorityID = consumeRecord.SysUserAuthorityID
+	consumeRecord.SysUserId = utils.GetUserID(c)
 	//err = orderService.CreateVIPStatistics(&statistics)
 	//if err != nil {
 	//	global.GVA_LOG.Error("统计失败!", zap.Error(err))

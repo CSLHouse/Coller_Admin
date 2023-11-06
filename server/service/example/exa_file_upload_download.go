@@ -2,6 +2,7 @@ package example
 
 import (
 	"errors"
+	"fmt"
 	"mime/multipart"
 	"strings"
 
@@ -65,20 +66,20 @@ func (e *FileUploadAndDownloadService) EditFileName(file example.ExaFileUploadAn
 //@param: info request.PageInfo
 //@return: list interface{}, total int64, err error
 
-func (e *FileUploadAndDownloadService) GetFileRecordInfoList(info request.PageInfo) (list interface{}, total int64, err error) {
+func (e *FileUploadAndDownloadService) GetFileRecordInfoList(info request.PageInfo, userId int) (list interface{}, total int64, err error) {
 	limit := info.PageSize
 	offset := info.PageSize * (info.Page - 1)
 	keyword := info.Keyword
 	db := global.GVA_DB.Model(&example.ExaFileUploadAndDownload{})
 	var fileLists []example.ExaFileUploadAndDownload
 	if len(keyword) > 0 {
-		db = db.Where("name LIKE ?", "%"+keyword+"%")
+		db = db.Where("name LIKE ? and sys_user_id = ?", "%"+keyword+"%", userId)
 	}
 	err = db.Count(&total).Error
 	if err != nil {
 		return
 	}
-	err = db.Limit(limit).Offset(offset).Order("updated_at desc").Find(&fileLists).Error
+	err = db.Limit(limit).Offset(offset).Where("sys_user_id = ?", userId).Order("updated_at desc").Find(&fileLists).Error
 	return fileLists, total, err
 }
 
@@ -88,7 +89,7 @@ func (e *FileUploadAndDownloadService) GetFileRecordInfoList(info request.PageIn
 //@param: header *multipart.FileHeader, noSave string
 //@return: file model.ExaFileUploadAndDownload, err error
 
-func (e *FileUploadAndDownloadService) UploadFile(header *multipart.FileHeader, noSave string) (file example.ExaFileUploadAndDownload, err error) {
+func (e *FileUploadAndDownloadService) UploadFile(header *multipart.FileHeader, noSave string, userId int) (file example.ExaFileUploadAndDownload, err error) {
 	oss := upload.NewOss()
 	filePath, key, uploadErr := oss.UploadFile(header)
 	if uploadErr != nil {
@@ -96,13 +97,24 @@ func (e *FileUploadAndDownloadService) UploadFile(header *multipart.FileHeader, 
 	}
 	s := strings.Split(header.Filename, ".")
 	f := example.ExaFileUploadAndDownload{
-		Url:  filePath,
-		Name: header.Filename,
-		Tag:  s[len(s)-1],
-		Key:  key,
+		Url:       filePath,
+		Name:      header.Filename,
+		Tag:       s[len(s)-1],
+		Key:       key,
+		SysUserId: userId,
 	}
 	if noSave == "0" {
 		return f, e.Upload(f)
 	}
 	return f, nil
+}
+
+func (e *FileUploadAndDownloadService) CheckFile(fileName string, userId int) bool {
+	var file example.ExaFileUploadAndDownload
+	err := global.GVA_DB.Where("name = ? and sys_user_id = ?", fileName, userId).First(&file).Error
+	fmt.Println(err)
+	if err == nil {
+		return true
+	}
+	return false
 }

@@ -74,7 +74,7 @@ func Routers() *gin.Engine {
 		exampleRouter.InitCustomerRouter(PrivateGroup)              // 客户路由
 		exampleRouter.InitFileUploadAndDownloadRouter(PrivateGroup) // 文件上传下载功能路由
 		businessRouter.InitComboRouter(PrivateGroup)                // 业务--套餐路由
-		businessRouter.InitMemberRouter(PrivateGroup)               // VIP会员路由
+		businessRouter.InitMemberRouter(PrivateGroup, PublicGroup)  // VIP会员路由
 		businessRouter.InitConsumeRouter(PrivateGroup)              // 会员消费路由
 		businessRouter.InitOrderRouter(PrivateGroup)                // 订单路由
 		wechatRouter.InitWechatRouter(PrivateGroup, PublicGroup)    // 小程序首页路由

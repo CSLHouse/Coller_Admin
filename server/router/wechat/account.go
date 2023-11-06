@@ -14,8 +14,6 @@ func (s *AccountRouter) InitAccountRouter(Router *gin.RouterGroup) (R gin.IRoute
 		//wxBaseRouter.POST("wxLogin", wxBaseApi.WXLogin)
 		//wxBaseRouter.GET("userInfo", wxBaseApi.GetUserInfo)
 		//wxBaseRouter.POST("userInfo", wxBaseApi.UpdateUserInfo)
-		wxBaseRouter.POST("phoneNumber", wxBaseApi.ParsePhoneNumber)
-		wxBaseRouter.GET("checkPhone", wxBaseApi.CheckPhoneNumber)
 		wxBaseRouter.POST("address", wxBaseApi.CreateMemberReceiveAddress)
 		wxBaseRouter.GET("addressList", wxBaseApi.GetMemberReceiveAddressList)
 		wxBaseRouter.PUT("address", wxBaseApi.UpdateMemberReceiveAddress)

@@ -52,6 +52,7 @@ func (i *initMenuAuthority) InitializeData(ctx context.Context) (next context.Co
 	// 8881
 	menu8881 := menus[10:21]
 	menu8881 = append(menu8881, menus[0])
+	menu8881 = append(menu8881, menus[35])
 	if err = db.Model(&authorities[1]).Association("SysBaseMenus").Replace(menu8881); err != nil {
 		return next, err
 	}
@@ -61,8 +62,9 @@ func (i *initMenuAuthority) InitializeData(ctx context.Context) (next context.Co
 	//}
 
 	// 9528
-	menu9528 := menus[10:13]
+	menu9528 := menus[10:21]
 	menu9528 = append(menu9528, menus[0])
+	menu9528 = append(menu9528, menus[35])
 	if err = db.Model(&authorities[2]).Association("SysBaseMenus").Replace(menu9528); err != nil {
 		return next, err
 	}

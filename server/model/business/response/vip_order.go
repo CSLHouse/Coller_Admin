@@ -3,7 +3,7 @@ package response
 type VipOrderResModel struct {
 	ID         int    `json:"Id" gorm:"primarykey"`
 	OrderID    int64  `json:"orderId" form:"orderId" gorm:"comment:订单编号"`       // 客户名
-	Telephone  int    `json:"telephone" form:"telephone" gorm:"comment:会员手机号"`  // 客户手机号
+	Telephone  string `json:"telephone" form:"telephone" gorm:"comment:会员手机号"`  // 客户手机号
 	MemberName string `json:"memberName" form:"memberName" gorm:"comment:会员名"`  // 客户名
 	ComboId    int    `json:"comboId" form:"comboId" gorm:"comment:套餐ID"`       // 管理ID
 	ComboType  string `json:"comboType" form:"comboType" gorm:"comment:套餐类型"`   // 管理ID

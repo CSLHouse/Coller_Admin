@@ -1,6 +1,8 @@
 package response
 
-import "github.com/flipped-aurora/gin-vue-admin/server/model/business"
+import (
+	"github.com/flipped-aurora/gin-vue-admin/server/model/business"
+)
 
 //	type VIPMemberResponseModel struct {
 //		CardID             string                   `json:"cardID" form:"cardID" gorm:"comment:会员卡号"`                           // 客户名
@@ -13,6 +15,13 @@ import "github.com/flipped-aurora/gin-vue-admin/server/model/business"
 //		SysUserAuthorityID uint                     `json:"sysUserAuthorityID" form:"sysUserAuthorityID" gorm:"comment:管理角色ID"` // 管理角色ID
 //		VIPMembers         []VIPMemberResponseModel `json:"vipmembers" gorm:"foreignKey:sys_user_authority_id;"`
 //	}
+
+type WXLoginResponse struct {
+	Customer  business.Customer `json:"customer"`
+	Token     string            `json:"token"`
+	ExpiresAt int64             `json:"expiresAt"`
+}
+
 type VIPMemberResponse struct {
-	Member business.VIPMember `json:"member"`
+	Member business.Customer `json:"member"`
 }

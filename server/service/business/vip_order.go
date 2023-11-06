@@ -26,12 +26,12 @@ func (exa *VIPOrderService) CreateVIPOrder(e *business.VIPOrder) (err error) {
 //@param: sysUserAuthorityID string, info request.PageInfo
 //@return: list interface{}, total int64, err error
 
-func (exa *VIPOrderService) GetVIPOrderInfoList(sysUserAuthorityID int, searchInfo request.OrderSearchInfo) (list interface{}, total int64, err error) {
+func (exa *VIPOrderService) GetVIPOrderInfoList(userId int, searchInfo request.OrderSearchInfo) (list interface{}, total int64, err error) {
 	limit := searchInfo.PageSize
 	offset := searchInfo.PageSize * (searchInfo.Page - 1)
 
 	var orderList []business.VIPOrder
-	cmd := fmt.Sprintf("sys_user_authority_id = %d", sysUserAuthorityID)
+	cmd := fmt.Sprintf("sys_user_id = %d", userId)
 	if searchInfo.Telephone >= 1000 {
 		cmd += fmt.Sprintf(" and telephone like '%%%d%%'", searchInfo.Telephone)
 	}
@@ -53,7 +53,7 @@ func (exa *VIPOrderService) GetVIPOrderInfoList(sysUserAuthorityID int, searchIn
 	if err != nil {
 		return orderList, total, err
 	} else {
-		err = db.Limit(limit).Offset(offset).Preload("Member").Preload("Member.Combo").Where(cmd).Find(&orderList).Error
+		err = db.Limit(limit).Offset(offset).Preload("Card").Preload("Card.Combo").Where(cmd).Find(&orderList).Error
 	}
 
 	//err = global.GVA_DB.Where("sysUserAuthorityID = ? and telephone like ?", sysUserAuthorityID, telephone+"%").First(&member).Error
@@ -62,7 +62,7 @@ func (exa *VIPOrderService) GetVIPOrderInfoList(sysUserAuthorityID int, searchIn
 
 func (exa *VIPOrderService) CreateVIPStatement(e *business.VIPStatement) (err error) {
 	var sql bytes.Buffer
-	sql.WriteString("insert into bus_statement(date, recharge, card_number,new_member,consume_number,sys_user_authority_id) values (")
+	sql.WriteString("insert into bus_statement(date, recharge, card_number,new_member,consume_number,sys_user_id) values (")
 	sql.WriteString("\"")
 	sql.WriteString(strings.TrimSpace(e.Date))
 	sql.WriteString("\",")
@@ -74,7 +74,7 @@ func (exa *VIPOrderService) CreateVIPStatement(e *business.VIPStatement) (err er
 	sql.WriteString(",")
 	sql.WriteString(strconv.Itoa(int(e.ConsumeNumber)))
 	sql.WriteString(",")
-	sql.WriteString(strconv.Itoa(int(e.SysUserAuthorityID)))
+	sql.WriteString(strconv.Itoa(int(e.SysUserId)))
 	sql.WriteString(") ON DUPLICATE KEY UPDATE ")
 	sql.WriteString("recharge=recharge+")
 	sql.WriteString(strconv.Itoa(int(e.Recharge)))
@@ -102,10 +102,10 @@ func (exa *VIPOrderService) CreateVIPStatement(e *business.VIPStatement) (err er
 //@param: sysUserAuthorityID string, info request.PageInfo
 //@return: list interface{}, total int64, err error
 
-func (exa *VIPOrderService) GetVIPStatementInfoList(sysUserAuthorityID int, searchInfo request.StatisticsSearchInfo) (list interface{}, err error) {
+func (exa *VIPOrderService) GetVIPStatementInfoList(userId int, searchInfo request.StatisticsSearchInfo) (list interface{}, err error) {
 	var sql bytes.Buffer
-	sql.WriteString("Select date,recharge,card_number,new_member,consume_number from bus_statement where sys_user_authority_id = ")
-	sql.WriteString(strconv.Itoa(int(sysUserAuthorityID)))
+	sql.WriteString("Select date,recharge,card_number,new_member,consume_number from bus_statement where sys_user_id = ")
+	sql.WriteString(strconv.Itoa(userId))
 	if len(searchInfo.StartDate) >= 10 {
 		sql.WriteString(" and date > ")
 		sql.WriteString(strings.TrimSpace(searchInfo.StartDate))
@@ -129,13 +129,12 @@ func (exa *VIPOrderService) GetVIPStatementInfoList(sysUserAuthorityID int, sear
 	}
 	rows.Close()
 
-	//err = global.GVA_DB.Where("sysUserAuthorityID = ? and telephone like ?", sysUserAuthorityID, telephone+"%").First(&member).Error
 	return orderList, err
 }
 
 func (exa *VIPOrderService) BuildVIPStatistics(e *business.VIPStatistics) (cmd string) {
 	var sql bytes.Buffer
-	sql.WriteString("insert into bus_statistics(total_stream, total_order, total_member,total_consumer,sys_user_authority_id) values (")
+	sql.WriteString("insert into bus_statistics(total_stream, total_order, total_member,total_consumer,sys_user_id) values (")
 	sql.WriteString("\"")
 	sql.WriteString(strconv.FormatFloat(e.TotalStream, 'f', 2, 64))
 	sql.WriteString("\",")
@@ -145,7 +144,7 @@ func (exa *VIPOrderService) BuildVIPStatistics(e *business.VIPStatistics) (cmd s
 	sql.WriteString(",")
 	sql.WriteString(strconv.Itoa(int(e.TotalConsumer)))
 	sql.WriteString(",")
-	sql.WriteString(strconv.Itoa(int(e.SysUserAuthorityID)))
+	sql.WriteString(strconv.Itoa(int(e.SysUserId)))
 	sql.WriteString(") ON DUPLICATE KEY UPDATE ")
 	sql.WriteString("total_stream=total_stream+")
 	sql.WriteString(strconv.Itoa(int(e.TotalStream)))
@@ -173,8 +172,8 @@ func (exa *VIPOrderService) CreateVIPStatistics(e *business.VIPStatistics) (err 
 	return err
 }
 
-func (exa *VIPOrderService) GetVIPStatisticsInfoList(sysUserAuthorityID int) (list interface{}, err error) {
+func (exa *VIPOrderService) GetVIPStatisticsInfoList(userId int) (list interface{}, err error) {
 	var statistics business.VIPStatistics
-	err = global.GVA_DB.Where("sys_user_authority_id = ? ", sysUserAuthorityID).First(&statistics).Error
+	err = global.GVA_DB.Where("sys_user_id = ? ", userId).First(&statistics).Error
 	return statistics, err
 }

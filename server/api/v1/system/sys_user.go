@@ -3,6 +3,8 @@ package system
 import (
 	"fmt"
 	"github.com/flipped-aurora/gin-vue-admin/server/middleware"
+	"github.com/flipped-aurora/gin-vue-admin/server/model/business"
+	businessRes "github.com/flipped-aurora/gin-vue-admin/server/model/business/response"
 	wechatReq "github.com/flipped-aurora/gin-vue-admin/server/model/wechat/request"
 	wechatRes "github.com/flipped-aurora/gin-vue-admin/server/model/wechat/response"
 	"strconv"
@@ -534,9 +536,9 @@ func (b *BaseApi) CreateWXUserInfo(c *gin.Context) {
 	fmt.Println("---userInfo:", userInfo)
 
 	var wxUser system.SysUser
-	wxUser.OpenId = userInfo.OpenID
+	//wxUser.OpenId = userInfo.OpenID
 	wxUser.NickName = userInfo.NickName
-	wxUser.Gender = userInfo.Gender
+	//wxUser.Gender = userInfo.Gender
 	wxUser.AvatarUrl = userInfo.AvatarUrl
 	wxUser.AuthorityId = 9528
 
@@ -550,6 +552,64 @@ func (b *BaseApi) CreateWXUserInfo(c *gin.Context) {
 	response.OkWithDetailed(wxUser, "更新成功", c)
 }
 
+// TokenNext 登录以后签发jwt
+func (b *BaseApi) WXTokenNext(c *gin.Context, customer business.Customer) {
+	j := &utils.JWT{SigningKey: []byte(global.GVA_CONFIG.JWT.SigningKey)} // 唯一签名
+	claims := j.CreateClaims(systemReq.BaseClaims{
+		UUID:        customer.UUID,
+		ID:          customer.ID,
+		NickName:    customer.NickName,
+		UserName:    customer.UserName,
+		AuthorityId: customer.AuthorityId,
+	})
+	token, err := j.CreateToken(claims)
+	if err != nil {
+		global.GVA_LOG.Error("获取token失败!", zap.Error(err))
+		response.FailWithMessage("获取token失败", c)
+		return
+	}
+	if !global.GVA_CONFIG.System.UseMultipoint {
+		response.OkWithDetailed(businessRes.WXLoginResponse{
+			Customer:  customer,
+			Token:     token,
+			ExpiresAt: claims.RegisteredClaims.ExpiresAt.Unix() * 1000,
+		}, "登录成功", c)
+		return
+	}
+
+	if jwtStr, err := jwtService.GetRedisJWT(customer.UUID.String()); err == redis.Nil {
+		if err := jwtService.SetRedisJWT(token, customer.UUID.String()); err != nil {
+			global.GVA_LOG.Error("设置登录状态失败!", zap.Error(err))
+			response.FailWithMessage("设置登录状态失败", c)
+			return
+		}
+		response.OkWithDetailed(businessRes.WXLoginResponse{
+			Customer:  customer,
+			Token:     token,
+			ExpiresAt: claims.RegisteredClaims.ExpiresAt.Unix() * 1000,
+		}, "登录成功", c)
+	} else if err != nil {
+		global.GVA_LOG.Error("设置登录状态失败!", zap.Error(err))
+		response.FailWithMessage("设置登录状态失败", c)
+	} else {
+		var blackJWT system.JwtBlacklist
+		blackJWT.Jwt = jwtStr
+		if err := jwtService.JsonInBlacklist(blackJWT); err != nil {
+			response.FailWithMessage("jwt作废失败", c)
+			return
+		}
+		if err := jwtService.SetRedisJWT(token, customer.UUID.String()); err != nil {
+			response.FailWithMessage("设置登录状态失败", c)
+			return
+		}
+		response.OkWithDetailed(businessRes.WXLoginResponse{
+			Customer:  customer,
+			Token:     token,
+			ExpiresAt: claims.RegisteredClaims.ExpiresAt.Unix() * 1000,
+		}, "登录成功", c)
+	}
+}
+
 func (b *BaseApi) WXRefreshLogin(c *gin.Context) {
 	var login wechatReq.UserTag
 	err := c.ShouldBindJSON(&login)
@@ -561,11 +621,118 @@ func (b *BaseApi) WXRefreshLogin(c *gin.Context) {
 		response.FailWithMessage(err.Error(), c)
 		return
 	}
-	wxUser, err := userService.GetWXAccountByOpenID(login.OpenID)
+	wxUser, err := memberService.GetVIPMemberByOpenIdWithoutCardList(login.OpenID)
 	if err != nil {
 		global.GVA_LOG.Error("获取失败!", zap.Error(err))
 		response.FailWithMessage("获取失败", c)
 		return
 	}
-	b.TokenNext(c, wxUser)
+	b.WXTokenNext(c, wxUser)
+}
+
+// TODO: 优化请求
+func (b *BaseApi) ParsePhoneNumber(c *gin.Context) {
+	var loginInfo wechatReq.WXPhoneNumber
+	err := c.ShouldBindJSON(&loginInfo)
+	if err != nil {
+		response.FailWithMessage(err.Error(), c)
+		return
+	}
+	err = utils.Verify(loginInfo, utils.WxRegisterVerify)
+	if err != nil {
+		response.FailWithMessage(err.Error(), c)
+		return
+	}
+	fmt.Println("---code:", loginInfo.Code)
+	fmt.Println("---OpenID:", loginInfo.OpenID)
+	accessToken, ok := global.BlackCache.Get("access_token")
+	fmt.Println("---accessToken:", accessToken)
+	if !ok || accessToken == nil {
+		wechatClient := middleware.NewWechatClient(nil)
+		wxMap, err := wechatClient.GetWXAccessToken()
+		if err != nil {
+			global.GVA_LOG.Error("登录失败!", zap.Error(err))
+			response.FailWithMessage("登录失败", c)
+			return
+		}
+		accessToken = wxMap["access_token"]
+		openCaptchaTimeOut := global.GVA_CONFIG.Captcha.OpenCaptchaTimeOut // 缓存超时时间
+		fmt.Println("------openCaptchaTimeOut:", openCaptchaTimeOut)
+		global.BlackCache.Set("access_token", accessToken, time.Second*time.Duration(openCaptchaTimeOut))
+	}
+
+	//httpClient := http.Client{}
+	wechatClient := middleware.NewWechatClient(nil)
+	wxMap, err := wechatClient.GetWXTelephone(accessToken.(string), loginInfo.Code)
+	fmt.Println("----wxMap:", wxMap)
+
+	if err != nil {
+		global.GVA_LOG.Error("登录失败!", zap.Error(err))
+		response.FailWithMessage("登录失败", c)
+		return
+	}
+
+	var phoneNumber = wxMap.PhoneInfo.PurePhoneNumber
+	if len(phoneNumber) < 1 {
+		global.GVA_LOG.Error("登录失败!", zap.Error(err))
+		response.FailWithMessage("登录失败", c)
+		return
+	}
+	var wxUser business.Customer
+	wxUser.Telephone = phoneNumber
+	wxUser.OpenId = loginInfo.OpenID
+	wxUser.AuthorityId = 9528
+
+	err = memberService.CreateCustomerFormWechat(&wxUser)
+	if err != nil {
+		response.FailWithMessage(err.Error(), c)
+		return
+	}
+	fmt.Println("---wxUser:", wxUser)
+
+	response.OkWithData(wechatRes.WXPhoneNum{
+		PhoneNumber: phoneNumber,
+	}, c)
+}
+
+// CheckPhoneNumber 查询是否有手机号 true 有 false 无
+func (b *BaseApi) CheckPhoneNumber(c *gin.Context) {
+	var loginInfo wechatReq.UserTag
+	err := c.ShouldBindQuery(&loginInfo)
+	if err != nil {
+		response.FailWithMessage(err.Error(), c)
+		return
+	}
+	if len(loginInfo.OpenID) < 1 {
+		fmt.Println("----login:", loginInfo)
+		response.FailWithMessage(err.Error(), c)
+		return
+	}
+
+	userInfo, err := accountService.CheckWXAccountPhone(loginInfo.OpenID)
+	if err != nil {
+		response.FailWithMessage(err.Error(), c)
+		return
+	}
+	if len(userInfo.PhoneNumber) < 11 {
+		response.OkWithData(false, c)
+		return
+	}
+	response.OkWithData(true, c)
+}
+
+func (b *BaseApi) ResetWXNickName(c *gin.Context) {
+	var user business.Customer
+	err := c.ShouldBindJSON(&user)
+	if err != nil {
+		response.FailWithMessage(err.Error(), c)
+		return
+	}
+	err = userService.ResetWXNickName(&user)
+	if err != nil {
+		global.GVA_LOG.Error("设置昵称失败!", zap.Error(err))
+		response.FailWithMessage("设置昵称失败"+err.Error(), c)
+		return
+	}
+	response.OkWithMessage("设置昵称成功", c)
 }

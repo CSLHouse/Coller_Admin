@@ -61,7 +61,6 @@ func (i *initMenu) InitializeData(ctx context.Context) (next context.Context, er
 		//{MenuLevel: 0, Hidden: false, ParentId: "2", Path: "dictionary", Name: "dictionary", Component: "view/superAdmin/dictionary/sysDictionary.vue", Sort: 5, Meta: Meta{Title: "字典管理", Icon: "notebook"}},
 		//{MenuLevel: 0, Hidden: true, ParentId: "2", Path: "dictionaryDetail/:id", Name: "dictionaryDetail", Component: "view/superAdmin/dictionary/sysDictionaryDetail.vue", Sort: 1, Meta: Meta{Title: "字典详情-${id}", Icon: "list", ActiveName: "dictionary"}},
 		{MenuLevel: 0, Hidden: false, ParentId: "2", Path: "operation", Name: "operation", Component: "view/superAdmin/operation/sysOperationRecord.vue", Sort: 6, Meta: Meta{Title: "操作历史", Icon: "pie-chart"}},
-		//{MenuLevel: 0, Hidden: true, ParentId: "0", Path: "person", Name: "person", Component: "view/person/person.vue", Sort: 4, Meta: Meta{Title: "个人信息", Icon: "message"}},
 		//{MenuLevel: 0, Hidden: false, ParentId: "0", Path: "example", Name: "example", Component: "view/example/index.vue", Sort: 7, Meta: Meta{Title: "示例文件", Icon: "management"}},
 		//{MenuLevel: 0, Hidden: false, ParentId: "12", Path: "upload", Name: "upload", Component: "view/example/upload/upload.vue", Sort: 5, Meta: Meta{Title: "媒体库（上传下载）", Icon: "upload"}},
 		//{MenuLevel: 0, Hidden: false, ParentId: "12", Path: "breakpoint", Name: "breakpoint", Component: "view/example/breakpoint/breakpoint.vue", Sort: 6, Meta: Meta{Title: "断点续传", Icon: "upload-filled"}},
@@ -101,13 +100,15 @@ func (i *initMenu) InitializeData(ctx context.Context) (next context.Context, er
 		{MenuLevel: 0, Hidden: false, ParentId: "22", Path: "productType", Name: "ProductType", Component: "view/product/productType/ProductType.vue", Sort: 4, Meta: Meta{Title: "商品类型", Icon: "MagicStick"}},
 		{MenuLevel: 0, Hidden: false, ParentId: "22", Path: "brand", Name: "Brand", Component: "view/product/brand/Brand.vue", Sort: 5, Meta: Meta{Title: "品牌管理", Icon: "Medal"}},
 		{MenuLevel: 0, Hidden: false, ParentId: "22", Path: "attribute", Name: "Attribute", Component: "view/product/attribute/Attribute.vue", Sort: 6, Meta: Meta{Title: "商品属性参数", Icon: "Medal"}},
+		{MenuLevel: 0, Hidden: true, ParentId: "22", Path: "updateProduct", Name: "updateProduct", Component: "view/product/updateProduct/updateProduct.vue", Sort: 7, Meta: Meta{Title: "修改商品", Icon: "Sell"}},
 
 		{MenuLevel: 0, Hidden: false, ParentId: "0", Path: "marketing", Name: "Marketing", Component: "view/marketing/index.vue", Sort: 7, Meta: Meta{Title: "营销", Icon: "Goods"}},
-		{MenuLevel: 0, Hidden: false, ParentId: "29", Path: "flashPromotion", Name: "FlashPromotion", Component: "view/marketing/flashPromotion/FlashPromotion.vue", Sort: 1, Meta: Meta{Title: "秒杀活动列表", Icon: "Box"}},
-		{MenuLevel: 0, Hidden: false, ParentId: "29", Path: "brandRecommend", Name: "BrandRecommend", Component: "view/marketing/brandRecommend/BrandRecommend.vue", Sort: 2, Meta: Meta{Title: "品牌推荐", Icon: "Sell"}},
-		{MenuLevel: 0, Hidden: false, ParentId: "29", Path: "hotProduct", Name: "HotProduct", Component: "view/marketing/hotProduct/HotProduct.vue", Sort: 3, Meta: Meta{Title: "人气推荐", Icon: "Paperclip"}},
-		{MenuLevel: 0, Hidden: false, ParentId: "29", Path: "advertise", Name: "Advertise", Component: "view/marketing/advertise/Advertise.vue", Sort: 4, Meta: Meta{Title: "广告列表", Icon: "MagicStick"}},
-		{MenuLevel: 0, Hidden: false, ParentId: "29", Path: "newRecommend", Name: "NewRecommend", Component: "view/marketing/newRecommend/NewRecommend.vue", Sort: 5, Meta: Meta{Title: "新品推荐", Icon: "Medal"}},
+		{MenuLevel: 0, Hidden: false, ParentId: "30", Path: "flashPromotion", Name: "FlashPromotion", Component: "view/marketing/flashPromotion/FlashPromotion.vue", Sort: 1, Meta: Meta{Title: "秒杀活动列表", Icon: "Box"}},
+		{MenuLevel: 0, Hidden: false, ParentId: "30", Path: "brandRecommend", Name: "BrandRecommend", Component: "view/marketing/brandRecommend/BrandRecommend.vue", Sort: 2, Meta: Meta{Title: "品牌推荐", Icon: "Sell"}},
+		{MenuLevel: 0, Hidden: false, ParentId: "30", Path: "hotProduct", Name: "HotProduct", Component: "view/marketing/hotProduct/HotProduct.vue", Sort: 3, Meta: Meta{Title: "人气推荐", Icon: "Paperclip"}},
+		{MenuLevel: 0, Hidden: false, ParentId: "30", Path: "advertise", Name: "Advertise", Component: "view/marketing/advertise/Advertise.vue", Sort: 4, Meta: Meta{Title: "广告列表", Icon: "MagicStick"}},
+		{MenuLevel: 0, Hidden: false, ParentId: "30", Path: "newRecommend", Name: "NewRecommend", Component: "view/marketing/newRecommend/NewRecommend.vue", Sort: 5, Meta: Meta{Title: "新品推荐", Icon: "Medal"}},
+		{MenuLevel: 0, Hidden: true, ParentId: "0", Path: "person", Name: "person", Component: "view/person/person.vue", Sort: 4, Meta: Meta{Title: "个人信息", Icon: "message"}},
 	}
 	if err = db.Create(&entities).Error; err != nil {
 		return ctx, errors.Wrap(err, SysBaseMenu{}.TableName()+"表数据初始化失败!")

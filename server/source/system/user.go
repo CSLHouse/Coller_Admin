@@ -57,7 +57,6 @@ func (i *initUser) InitializeData(ctx context.Context) (next context.Context, er
 			AuthorityId: 888,
 			Phone:       "17611111111",
 			Email:       "333333333@qq.com",
-			StoreName:   "总部",
 		},
 		{
 			UUID:        uuid.Must(uuid.NewV4()),
@@ -68,7 +67,6 @@ func (i *initUser) InitializeData(ctx context.Context) (next context.Context, er
 			AuthorityId: 9528,
 			Phone:       "17611111111",
 			Email:       "333333333@qq.com",
-			StoreName:   "酷儿乐分店",
 			Position:    1,
 		},
 	}
