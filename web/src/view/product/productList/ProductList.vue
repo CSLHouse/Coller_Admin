@@ -115,11 +115,12 @@
           <el-table-column align="left" label="审核状态" prop="verifyStatus" width="80" />
           <el-table-column align="left" label="操作" min-width="160">
             <template #default="scope">
+              <el-button type="primary" link icon="edit" @click="handleUpdateProduct(scope.row)">变更</el-button>
               <el-popover v-model="scope.row.visible" placement="top" width="160">
                 <p>确定要删除吗？</p>
                 <div style="text-align: right; margin-top: 8px;">
                   <el-button type="primary" link @click="scope.row.visible = false">取消</el-button>
-                  <el-button type="primary" @click="deleteMember(scope.row)">确定</el-button>
+                  <el-button type="primary" @click="handleDeleteProduct(scope.row)">确定</el-button>
                 </div>
                 <template #reference>
                   <el-button type="danger" link icon="delete" @click="scope.row.visible = true">删除</el-button>
@@ -199,15 +200,10 @@
   } from '@/api/product'
   import { ref, reactive, onBeforeMount, watch } from 'vue'
   import { ElMessage, ElTable } from 'element-plus'
-  import { comboStore } from '@/pinia/modules/combo'
-  import config from '@/core/config'
-  import { trim } from '@/utils/stringFun'
-  import { number } from 'echarts'
-  import { useRouter } from "vue-router";
-  import {
-    Edit, Search 
-  } from '@element-plus/icons-vue'
+  import { Edit, Search } from '@element-plus/icons-vue'
   import { ProductStore } from '@/pinia/modules/product'
+  import { useRouter } from "vue-router";
+  const router = useRouter()
 
   const productStore = ProductStore()
   const searchData = reactive({
@@ -433,6 +429,13 @@
   }
   const handleClearSkuCode = () => {
     selectedSkuCode.value = ""
+  }
+  
+  const handleUpdateProduct = (row) => {
+    router.push({ path: 'updateProduct', query: {id: row.id}})
+  }
+  const handleDeleteProduct = (row) => {
+
   }
   </script>
   

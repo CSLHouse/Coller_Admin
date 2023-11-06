@@ -28,7 +28,7 @@
         @row-click="OnConfirm">
           <el-table-column prop="cardId" label="会员卡号" width="120" height="40" />
           <el-table-column prop="telephone" label="手机号" width="120" height="40" />
-          <el-table-column prop="memberName" label="姓名" width="80" />
+          <el-table-column prop="userName" label="姓名" width="80" />
           <el-table-column prop="comboType" label="套餐类型" width="80"/>
           <el-table-column prop="remainTimes" label="当前剩余" width="80"/>
           <el-table-column prop="deadline" label="截止日期" width="100"/>
@@ -37,9 +37,9 @@
       </div>
       
     </el-form-item>
-    <el-form-item label="会员姓名" prop="memberName">
+    <el-form-item label="会员姓名" prop="userName">
       <el-col :span="8">
-        <el-input v-model="memberForm.memberName" type="text" autocomplete="off" disabled/>
+        <el-input v-model="memberForm.userName" type="text" autocomplete="off" disabled/>
       </el-col>
     </el-form-item>
     <el-form-item label="VIP卡" prop="comboType">
@@ -89,10 +89,10 @@
 
   const memberForm = reactive({
     onlyId: null,
-    Id: 0,
+    id: 0,
     cardId: null,
     telephone: null,
-    memberName: '',
+    userName: '',
     comboType: '',
     remainTimes: null,
     startDate: '',
@@ -140,10 +140,10 @@
   }
   
   const OnConfirm = async(row) => {
-    memberForm.Id = row.Id
+    memberForm.id = row.id
     memberForm.cardId = row.cardId
     memberForm.telephone = row.telephone
-    memberForm.memberName = row.memberName
+    memberForm.userName = row.userName
     memberForm.comboId = row.comboId
     memberForm.comboType = row.comboType
     memberForm.remainTimes = row.remainTimes
@@ -181,7 +181,7 @@
   // })
 
   const submitForm = async(formEl: FormInstance | undefined) => {
-    if (memberForm.memberName.length < 1) {
+    if (memberForm.userName.length < 1) {
       ElMessage({
         type: 'error',
         message: '信息填写错误'
@@ -189,11 +189,11 @@
       return
     }
     const requestData = {
-      Id: memberForm.Id,
+      id: memberForm.id,
       cardId: memberForm.cardId,
       number: memberForm.number,
     }
-
+    console.log("----requestData-", requestData)
     let res = await consumeVIPCard(requestData)
     if ('code' in res && res.code === 0) {
       ElMessage({
@@ -202,7 +202,7 @@
       })
       tableVisible.value = false
       memberForm.onlyId = null
-      memberForm.memberName = ''
+      memberForm.userName = ''
       memberForm.comboId = 0
       memberForm.remainTimes = null
       memberForm.deadline = ''
@@ -219,7 +219,7 @@
     formEl.resetFields()
     tableVisible.value = false
     memberForm.onlyId = null
-    memberForm.memberName = ''
+    memberForm.userName = ''
     memberForm.comboId = 0
     memberForm.remainTimes = null
     memberForm.deadline = ''

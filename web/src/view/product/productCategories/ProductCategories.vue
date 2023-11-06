@@ -224,7 +224,7 @@
     navStatus: 0,
     showStatus: 0,
     sort: 0,
-    icon: 0,
+    icon: "",
     keywords: '',
     description: '',
   })
@@ -247,7 +247,7 @@
         navStatus: 0,
         showStatus: 0,
         sort: 0,
-        icon: 0,
+        icon: '',
         keywords: '',
         description: '',
     }

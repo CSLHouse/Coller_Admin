@@ -6,7 +6,7 @@ export const ProductStore = defineStore('product', () => {
 
   const ProductAttributeCategoryList = ref()
   const RandData = ref()
-  const ProductCategoryOptions = []
+  const ProductCategoryOptions = ref([])
 
   const setProductAttributeCategoryList = (val) => {
     ProductAttributeCategoryList.value = val
@@ -16,6 +16,7 @@ export const ProductStore = defineStore('product', () => {
   const GetProductAttributeCategoryList = async() => {
     const res = await getProductAttributeCategoryList()
     if (res.code === 0) {
+      ProductAttributeCategoryList.value = []
       setProductAttributeCategoryList(res.data.list)
     }
     return res
@@ -37,6 +38,8 @@ export const ProductStore = defineStore('product', () => {
   
   const parseProductAttributeCategory = () => {
     let productAttributeMap = {}
+    ProductCategoryOptions.value = []
+    console.log("--[parseProductAttributeCategory]ProductAttributeCategoryList:", ProductAttributeCategoryList.value)
     ProductAttributeCategoryList.value.forEach((item) => {
         let splitted = item.name.split("-")
         if ( !productAttributeMap[splitted[0]]) {
@@ -52,22 +55,28 @@ export const ProductStore = defineStore('product', () => {
         }
     })
     console.log("---productAttributeMap-", productAttributeMap)
+    let count = 0
     for (let key in productAttributeMap) {
         let productAttribute = {}
         productAttribute["label"] = key
-        productAttribute["value"] = productAttributeMap[key].id
+        
         
         if (Array.isArray(productAttributeMap[key])) {
-            productAttribute["children"] = []
-            productAttributeMap[key].forEach((item) => {
-                let productAttributeItem = {}
-                productAttributeItem["label"] = item.data
-                productAttributeItem["value"] = item.id
-                productAttribute["children"].push(productAttributeItem)
-            })
+          productAttribute["value"] = count
+          productAttribute["children"] = []
+          productAttributeMap[key].forEach((item) => {
+            let productAttributeItem = {}
+            productAttributeItem["label"] = item.data
+            productAttributeItem["value"] = item.id
+            productAttribute["children"].push(productAttributeItem)
+          })
+            count += 1
+        } else {
+          productAttribute["value"] = productAttributeMap[key].id
         }
-        ProductCategoryOptions.push(productAttribute)
+        ProductCategoryOptions.value.push(productAttribute)
     }
+    console.log("--[parseProductAttributeCategory]ProductCategoryOptions:", ProductCategoryOptions.value)
   }
   const BuildProductAttributeData = async(isRefresh) => {
     if (!ProductAttributeCategoryList.value || isRefresh) {

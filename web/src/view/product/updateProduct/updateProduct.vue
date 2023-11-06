@@ -13,17 +13,17 @@
             style="max-width: 860px;margin-left: 20px;"
             >
             <div v-if="active==0">
-                <el-form-item label="商品分类" prop="productCategoryName">
+                <el-form-item label="商品分类" >
                     <el-cascader v-model="productType" :options="productCategoryOptions" 
                         placeholder="请选择" clearable @change="handleProductTypeChange"/>
                 </el-form-item>
-                <el-form-item label="商品名称" prop="name">
+                <el-form-item label="商品名称">
                     <el-input v-model="productForm.name" type="tel" autocomplete="off" />
                 </el-form-item>
-                <el-form-item label="副标题" prop="subTitle">
+                <el-form-item label="副标题" >
                     <el-input v-model="productForm.subTitle" type="text" autocomplete="off" />
                 </el-form-item>
-                <el-form-item label="商品品牌" prop="comboId">
+                <el-form-item label="商品品牌">
                     <el-select v-model="productBrandOption" class="m-2" placeholder="请选择品牌" size="large">
                         <el-option
                             v-for="item in productBrandOptions"
@@ -33,59 +33,59 @@
                         />
                     </el-select>
                 </el-form-item>
-                <el-form-item label="商品介绍" prop="gift">
+                <el-form-item label="商品介绍">
                     <el-input v-model="productForm.description" type="textarea" autocomplete="off" />
                 </el-form-item>
-                <el-form-item label="商品货号" prop="collection">
+                <el-form-item label="商品货号" >
                     <el-input v-model="productForm.productSN" type="text" autocomplete="off" />
                 </el-form-item>
-                <el-form-item label="商品售价" prop="date">
+                <el-form-item label="商品售价" >
                     <el-input-number v-model="productForm.price" :precision="2"></el-input-number>
                 </el-form-item>
-                <el-form-item label="市场价" prop="cardId">
+                <el-form-item label="市场价" >
                     <el-input-number v-model="productForm.originalPrice" :precision="2"></el-input-number>
                 </el-form-item>
-                <el-form-item label="商品库存" prop="telephone">
+                <el-form-item label="商品库存" >
                     <el-input v-model.number="productForm.stock" type="number" autocomplete="off" style="width: 100px"/>
                 </el-form-item>
-                <el-form-item label="计量单位" prop="name">
+                <el-form-item label="计量单位" >
                     <el-input v-model="productForm.unit" type="text" autocomplete="off" />
                 </el-form-item>
-                <el-form-item label="商品重量" prop="name">
+                <el-form-item label="商品重量" >
                     <el-col :span="8">
                         <el-input-number v-model="productForm.weight" :precision="2"></el-input-number>
                     </el-col>
                     <a style=" margin-left: 10px;">克</a>
                 </el-form-item>
-                <el-form-item label="排序" prop="name">
+                <el-form-item label="排序" >
                     <el-input v-model="productForm.sort" autocomplete="off" />
                 </el-form-item>
             </div>
             <div v-if="active==1">
-                <el-form-item label="赠送积分" prop="date" >
+                <el-form-item label="赠送积分" >
                     <el-input v-model.number="productForm.giftPoint" type="number" autocomplete="off" style="width: 100px"/>
                 </el-form-item>
-                <el-form-item label="赠送成长值" prop="cardId">
+                <el-form-item label="赠送成长值">
                     <el-input v-model.number="productForm.giftGrowth" type="number" autocomplete="off" style="width: 100px"/>
                 </el-form-item>
-                <el-form-item label="积分购买限制" prop="telephone">
+                <el-form-item label="积分购买限制">
                     <el-input v-model.number="productForm.usePointLimit" type="number" autocomplete="off" style="width: 100px"/>
                 </el-form-item>
-                <el-form-item label="预告商品" prop="telephone">
+                <el-form-item label="预告商品" >
                     <el-switch
                         v-model="productForm.previewStatus"
                         :active-value="1"
                         :inactive-value="0">
                     </el-switch>
                 </el-form-item>
-                <el-form-item label="商品上架" prop="telephone">
+                <el-form-item label="商品上架" >
                     <el-switch
                         v-model="productForm.publishStatus"
                         :active-value="1"
                         :inactive-value="0">
                     </el-switch>
                 </el-form-item>
-                <el-form-item label="商品推荐" prop="telephone">
+                <el-form-item label="商品推荐">
                     <el-switch
                         v-model="productForm.newStatus"
                         :active-value="1"
@@ -99,26 +99,26 @@
                         inactive-text="推荐:">
                     </el-switch>
                 </el-form-item>
-                <el-form-item label="服务保证" prop="telephone">
+                <el-form-item label="服务保证" >
                     <el-checkbox-group v-model="checkList" @change="HandleServiceIdsRadioChanged">
                         <el-checkbox label="无忧退货" />
                         <el-checkbox label="快速退款" />
                         <el-checkbox label="免费包邮" />
                     </el-checkbox-group>
                 </el-form-item>
-                <el-form-item label="详细页标题" prop="name">
+                <el-form-item label="详细页标题">
                     <el-input v-model="productForm.detailTitle" type="text" autocomplete="off" />
                 </el-form-item>
-                <el-form-item label="详细页描述" prop="name">
+                <el-form-item label="详细页描述">
                     <el-input v-model="productForm.detailDesc" type="text" autocomplete="off" />
                 </el-form-item>
-                <el-form-item label="商品关键字" prop="name">
+                <el-form-item label="商品关键字" >
                     <el-input v-model="productForm.keywords" type="text" autocomplete="off" />
                 </el-form-item>
                 <el-form-item label="商品备注" prop="gift">
                     <el-input v-model="productForm.note" type="textarea" autocomplete="off" />
                 </el-form-item>
-                <el-form-item label="选择优惠方式" prop="name">
+                <el-form-item label="选择优惠方式">
                     <el-radio-group v-model="promotionTypeState" @change="HandlePromotionTypeRadioChanged">
                         <el-radio-button label="0" size="large">无优惠</el-radio-button>
                         <el-radio-button label="1" size="large">特惠促销</el-radio-button>
@@ -239,7 +239,7 @@
                 </el-form-item>
             </div>
             <div v-if="active==2">
-                <el-form-item label="属性类型" prop="comboId">
+                <el-form-item label="属性类型">
                     <el-select v-model="productAttributeOption" class="m-2" placeholder="请选择品牌" size="large" @change="handleSelectProductAttribute">
                         <el-option
                         v-for="item in productAttributeOptions"
@@ -269,7 +269,7 @@
                             <el-table-column v-for="(item, index) in skuColumsData" :key="index" :prop="item.prop" :label="item.label" :width="item.width" >
                                 <template #default="scope">
                                     <div v-if="item.operation">
-                                        <el-button link type="primary" size="small" @click.prevent="handleDeleteRow(scop.$index)">删除</el-button>
+                                        <el-button link type="primary" size="small" @click.prevent="handleDeleteRow(scope.$index)">删除</el-button>
                                     </div>
                                     <div v-if="item.canEdit">
                                         <el-input-number v-model="scope.row[item.prop]" :precision="2" size="small"></el-input-number>
@@ -306,18 +306,18 @@
                         </el-form>
                     </el-card>
                 </el-form-item>
-                <el-form-item label="商品相册" prop="name">
+                <el-form-item label="商品相册">
                     <el-input v-model="productForm.unit" type="text" autocomplete="off" />
                 </el-form-item>
-                <el-form-item label="商品详情" prop="name">
+                <el-form-item label="商品详情">
                     <el-input v-model="productForm.detailHTML" type="textarea" autocomplete="off" />
                 </el-form-item>
             </div>
             <div v-if="active==3">
-                <el-form-item label="关联专题" prop="name">
+                <el-form-item label="关联专题" >
                     <el-input v-model="productForm.unit" type="text" autocomplete="off" />
                 </el-form-item>
-                <el-form-item label="关联优选" prop="name">
+                <el-form-item label="关联优选">
                     <el-input v-model="productForm.unit" type="text" autocomplete="off" />
                 </el-form-item>
             </div>
@@ -340,12 +340,13 @@
   </template>
   
   <script lang="ts" setup>
-  import { createProduct, getProductAttributeList } from '@/api/product'
+  import { createProduct, getProductAttributeList, getProductDetail } from '@/api/product'
   import { reactive, ref, onBeforeMount, watch } from 'vue'
   import { FormInstance, FormRules, ElMessage } from 'element-plus'
-  import { Plus } from '@element-plus/icons-vue'
   import { ProductStore } from '@/pinia/modules/product'  
-import { number } from 'echarts'
+  import { useRoute } from 'vue-router'
+
+  const route = useRoute()
   const titleList = ["填写商品信息", "填写商品促销", "填写商品属性", "选择商品关联"]
   const active = ref(0)
   const back = () => {
@@ -396,7 +397,7 @@ import { number } from 'echarts'
 //     console.log("----productCategoryOptions---", productCategoryOptions.value)
 //   }
   const getProductAttributeData = async() => {
-    await productStore.BuildProductAttributeData()
+    await productStore.BuildProductAttributeData(true)
     productCategoryOptions.value = productStore.ProductCategoryOptions
     console.log("--productCategoryOptions-", productCategoryOptions.value )
 
@@ -407,11 +408,11 @@ import { number } from 'echarts'
     })
     // parseProductAttributeCategory(productAttributeCategoryList)
   }
+
   const productType = ref()
   const handleProductTypeChange = (value) => {
-    console.log("----productCategoryOptions:", productCategoryOptions.value)
     console.log("-productType--", productType.value)
-    productForm.value.productAttributeCategoryId = value.at(-1)
+    productForm.value.productAttributeCategoryId = productType.value.at(-1)
   }
   watch(() => productAttributeOption.value, () => {
     console.log("---productAttributeOption--", productAttributeOption.value)
@@ -438,7 +439,6 @@ import { number } from 'echarts'
     productForm.value.brandName = productBrandOption.value.value
   })
   
-
   const productForm = ref({
     albumPics: "",
     brandId: 0,
@@ -535,9 +535,54 @@ import { number } from 'echarts'
     })
   }
 
-  onBeforeMount(() => {
-    getProductAttributeData()
-    getProductBrandData()
+  const getProductById = async(query) => {
+    if (query.id && query.id > 0) {
+        const res = await getProductDetail(query)
+        console.log("--onBeforeMount--", res.data)
+        if ("code" in res && res.code === 0) {
+          productForm.value =  res.data.product
+          console.log("--onBeforeMount--", productForm.value)
+        }
+    }
+  }
+  onBeforeMount(async() => {
+    await getProductById(route.query)
+    await getProductAttributeData()
+    await getProductBrandData()
+    productType.value = []
+    for (let index = 0; index < productCategoryOptions.value.length; index++) {
+        const element = productCategoryOptions.value[index];
+        if ("children" in element) {
+            for (let index = 0; index < element.children.length; index++) {
+                const item = element.children[index];
+                if (item.label == productForm.value.productCategoryName) {
+                    productType.value.push(element.value)
+                    productType.value.push(item.value)
+                }
+                break
+            }
+        } else {
+            if ("label" in element && element.label == productForm.value.productCategoryName) {
+                productType.value.push(element.value)
+                break
+            }
+        }
+    }
+    
+    for (let index = 0; index < productBrandOptions.value.length; index++) {
+        const element = productBrandOptions.value[index];
+        if (element.key == productForm.value.brandId) {
+            productBrandOption.value = element
+            break
+        }
+    }
+    for (let index = 0; index < productAttributeOptions.value.length; index++) {
+        const element = productAttributeOptions.value[index];
+        if (element.key === productForm.value.productAttributeCategoryId) {
+            productAttributeOption.value = element
+            break
+        }
+    }
   })
 
   watch(() => productForm.value.productCategoryName, () => {
@@ -552,7 +597,7 @@ import { number } from 'echarts'
     if (!formEl) return false
     // 选择的商品规格
     standardTable.value.forEach((item) => {
-        if (item.selectList.length > 0) {
+        if (item.length > 0) {
             let attributeMap = {}
             attributeMap['productAttributeId'] = item.id
             let attriValue = ""
@@ -620,16 +665,16 @@ import { number } from 'echarts'
   }
   
   const resetData = () =>{
-    productForm.value.productCategoryName = null
-    productForm.value.subTitle = null
+    productForm.value.productCategoryName = ''
+    productForm.value.subTitle = ''
     productForm.value.brandName = ''
-    productForm.value.description = null
-    productForm.value.productSN = null
+    productForm.value.description = ''
+    productForm.value.productSN = ''
     productForm.value.price = 0
     productForm.value.originalPrice = 0
     productForm.value.stock = 0
-    productForm.value.unit = null
-    productForm.value.sort = null
+    productForm.value.unit = ''
+    productForm.value.sort = 0
 
     productBrandOption.value = {key: 0, value: ""}
   }
@@ -651,7 +696,7 @@ import { number } from 'echarts'
     });
     productForm.value.serviceIds = serviceIdsStr
   }
-  const promotionTypeState = ref("0")
+  const promotionTypeState = ref(0)
   const HandlePromotionTypeRadioChanged = () => {
     productForm.value.promotionType = Number(promotionTypeState.value)
   }
@@ -718,7 +763,6 @@ import { number } from 'echarts'
         )
     }
   }
-  const attributeValue = {}
 
   const addStandard = async(item) => {
     if (item.newSelect == '') {

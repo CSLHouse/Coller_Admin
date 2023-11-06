@@ -12,7 +12,7 @@
         row-key="Id"
       >
         <el-table-column type="selection" width="55" />
-        <el-table-column align="left" label="套餐编号" prop="comboId"></el-table-column>
+        <el-table-column align="left" label="套餐编号" prop="id"></el-table-column>
         <el-table-column align="left" label="套餐名称" prop="comboName" width="120" />
         <el-table-column align="left" label="套餐类型" prop="comboType" width="120" />
         <el-table-column align="left" label="套餐价格" prop="comboPrice" width="120" />
@@ -212,7 +212,8 @@ const closeDialog = () => {
 }
 const deleteCombo = async(row) => {
   row.visible = false
-  const res = await deleteExaVIPCombo({ Id: row.Id })
+  console.log("---row:", row)
+  const res = await deleteExaVIPCombo({ id: row.id })
   if ("code" in res && res.code === 0) {
     ElMessage({
       type: 'success',

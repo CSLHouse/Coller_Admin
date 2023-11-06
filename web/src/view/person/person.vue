@@ -33,7 +33,7 @@
                   </el-icon>
                   {{ userStore.userInfo.nickName }}
                 </li>
-                <el-tooltip
+                <!-- <el-tooltip
                   class="item"
                   effect="light"
                   content="北京反转极光科技有限公司-技术部-前端事业群"
@@ -64,7 +64,7 @@
                     </el-icon>
                     GoLang/JavaScript/Vue/Gorm
                   </li>
-                </el-tooltip>
+                </el-tooltip> -->
               </ul>
             </div>
           </div>
@@ -75,7 +75,7 @@
           <el-tabs v-model="activeName" @tab-click="handleClick">
             <el-tab-pane label="账号绑定" name="second">
               <ul>
-                <li>
+                <!-- <li>
                   <p class="title">密保手机</p>
                   <p class="desc">
                     已绑定手机:{{ userStore.userInfo.phone }}
@@ -95,7 +95,7 @@
                     未设置密保问题
                     <a href="javascript:void(0)">去设置</a>
                   </p>
-                </li>
+                </li> -->
                 <li>
                   <p class="title">修改密码</p>
                   <p class="desc">

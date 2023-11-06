@@ -18,7 +18,7 @@
   >
     <el-form-item label="手机/会员卡" prop="cardId" >
       <el-col :span="8">
-        <el-input v-model.number="memberForm.onlyId" type="number" autocomplete="off"
+        <el-input v-model="memberForm.onlyId" type="text" autocomplete="off"
         clearable @input="onTriggerSearch" @clear="onSearch"/>
       </el-col>
     </el-form-item>
@@ -29,7 +29,7 @@
         @row-click="OnConfirm">
           <el-table-column prop="cardId" label="会员卡号" width="120" height="40" />
           <el-table-column prop="telephone" label="手机号" width="120" height="40" />
-          <el-table-column prop="memberName" label="姓名" width="80" />
+          <el-table-column prop="userName" label="姓名" width="80" />
           <el-table-column prop="comboType" label="套餐类型" width="80"/>
           <el-table-column prop="remainTimes" label="当前剩余" width="80"/>
           <el-table-column prop="deadline" label="截止日期" width="100"/>
@@ -39,7 +39,7 @@
     </el-form-item>
     <el-form-item label="会员姓名" prop="telephone">
       <el-col :span="8">
-        <el-input v-model="memberForm.memberName" type="tel" autocomplete="off" disabled/>
+        <el-input v-model="memberForm.userName" type="tel" autocomplete="off" disabled/>
       </el-col>
     </el-form-item>
     <el-form-item label="VIP卡" prop="comboId">
@@ -97,8 +97,9 @@
 
   const memberForm = reactive({
     onlyId: null,
+    id: null,
     cardId: null,
-    memberName: "",
+    userName: "",
     times: null,
     comboId: null,
     collection: null,
@@ -130,8 +131,9 @@
   }
   
   const OnConfirm = async(row) => {
+    memberForm.id = row.id
     memberForm.cardId = row.cardId
-    memberForm.memberName = row.memberName
+    memberForm.userName = row.userName
     memberForm.comboId = row.comboId
     memberForm.times = 0
     memberForm.collection = 0
@@ -142,7 +144,7 @@
     }
     comboList.forEach(element => {
       if (element.Id == memberForm.comboId) {
-        comboOption.value = {key: element.comboId, value: element.comboName, price: element.comboPrice}
+        comboOption.value = {key: element.id, value: element.comboName, price: element.comboPrice}
       }
     });
   }
@@ -154,7 +156,7 @@
       comboList = vipComboStore.comboList
     }
     comboList.forEach(element => {
-      comboOptions.value.push({key: element.comboId, value: element.comboName, price: element.comboPrice})
+      comboOptions.value.push({key: element.id, value: element.comboName, price: element.comboPrice})
     });
   }
 
@@ -175,6 +177,7 @@
       return
     }
     const memberTable = {
+      id: memberForm.id,
       cardId: memberForm.cardId,
       times: memberForm.times,
       comboId: memberForm.comboId,
@@ -184,7 +187,7 @@
     if ('code' in res && res.code === 0) {
       formEl.resetFields()
       tableVisible.value = false
-      memberForm.memberName = ""
+      memberForm.userName = ""
       memberForm.onlyId = null
       memberForm.comboId = 0
       memberForm.times = null
@@ -202,7 +205,7 @@
     if (!formEl) return
     formEl.resetFields()
     tableVisible.value = false
-    memberForm.memberName = ""
+    memberForm.userName = ""
     memberForm.onlyId = null
     memberForm.comboId = 0
     memberForm.times = null

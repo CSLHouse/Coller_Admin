@@ -8,6 +8,14 @@ export const getProductList = (params) => {
     })
 }
 
+export const getProductDetail = (params) => {
+    return service({
+        url: '/product/productDetail',
+        method: 'get',
+        params
+    })
+}
+
 export const updateProducts = (data) => {
     return service({
         url: '/product/update',
@@ -45,6 +53,14 @@ export const updateProductBrand = (data) => {
         url: '/product/brand',
         method: 'put',
         data
+    })
+}
+
+export const deleteProductBrand = (params) => {
+    return service({
+        url: '/product/brand',
+        method: 'delete',
+        params: params,
     })
 }
 

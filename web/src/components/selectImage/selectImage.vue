@@ -10,7 +10,7 @@
       <el-icon>
         <edit />
       </el-icon>
-      重新上传</span>
+      选择图片</span>
   </div>
   <div v-else class="multiple-img">
     <div
@@ -51,6 +51,7 @@
         :file-size="512"
         :max-w-h="1080"
         class="upload-btn-media-library"
+        @on-error="handleUploadError"
         @on-success="getImageList"
       />
       <el-form ref="searchForm" :inline="true" :model="search">
@@ -203,6 +204,18 @@ const getImageList = async() => {
   }
 }
 
+const handleUploadError = async(res) => {
+  console.log("-[handleUploadError]--error upload", res)
+}
+</script>
+<script>
+
+export default {
+  name: 'SelectImage',
+  methods: {
+
+  }
+}
 </script>
 
 <style scoped lang="scss">
