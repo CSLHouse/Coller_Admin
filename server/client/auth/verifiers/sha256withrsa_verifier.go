@@ -10,14 +10,14 @@ import (
 	"crypto/sha256"
 	"encoding/base64"
 	"fmt"
-	"github.com/flipped-aurora/gin-vue-admin/server/core/pay"
+	"github.com/flipped-aurora/gin-vue-admin/server/client"
 	"strings"
 )
 
 // SHA256WithRSAVerifier SHA256WithRSA 数字签名验证器
 type SHA256WithRSAVerifier struct {
 	// Certificates 微信支付平台证书Map，key: 平台证书序列号， value: 微信支付平台证书
-	certGetter pay.CertificateGetter
+	certGetter client.CertificateGetter
 }
 
 // Verify 对数字签名信息进行验证
@@ -62,6 +62,6 @@ func checkParameter(ctx context.Context, serialNumber, message, signature string
 }
 
 // NewSHA256WithRSAVerifier 使用 core.CertificateGetter 初始化 SHA256WithRSAVerifier
-func NewSHA256WithRSAVerifier(getter pay.CertificateGetter) *SHA256WithRSAVerifier {
+func NewSHA256WithRSAVerifier(getter client.CertificateGetter) *SHA256WithRSAVerifier {
 	return &SHA256WithRSAVerifier{certGetter: getter}
 }

@@ -48,6 +48,7 @@ type Order struct {
 	CommentTime           string       `json:"commentTime" gorm:"null;default null;comment:评价时间"`
 	ModifyTime            string       `json:"modifyTime" gorm:"null;default null;comment:修改时间"`
 	OrderItemList         []*OrderItem `json:"orderItemList" gorm:"foreignKey:OrderId"`
+	PrepayId              string       `json:"prepayId" gorm:"null;default null;comment:预支付交易会话标识"`
 }
 
 func (Order) TableName() string {

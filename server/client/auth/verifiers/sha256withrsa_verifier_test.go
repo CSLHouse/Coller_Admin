@@ -5,8 +5,8 @@ package verifiers
 import (
 	"context"
 	"crypto/x509"
-	"github.com/flipped-aurora/gin-vue-admin/server/core/auth"
-	"github.com/flipped-aurora/gin-vue-admin/server/core/pay"
+	"github.com/flipped-aurora/gin-vue-admin/server/client"
+	"github.com/flipped-aurora/gin-vue-admin/server/client/auth"
 	"testing"
 
 	"github.com/flipped-aurora/gin-vue-admin/server/utils"
@@ -187,7 +187,7 @@ func TestWechatPayVerifier_Verify(t *testing.T) {
 			if tt.fields.Certificates == nil {
 				verifier = NewSHA256WithRSAVerifier(nil)
 			} else {
-				verifier = NewSHA256WithRSAVerifier(pay.NewCertificateMap(tt.fields.Certificates))
+				verifier = NewSHA256WithRSAVerifier(client.NewCertificateMap(tt.fields.Certificates))
 			}
 			if err := verifier.Verify(tt.args.ctx, tt.args.serialNumber, tt.args.message,
 				tt.args.signature); (err != nil) != tt.wantErr {

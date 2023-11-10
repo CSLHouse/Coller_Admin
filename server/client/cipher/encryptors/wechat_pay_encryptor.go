@@ -5,19 +5,18 @@ package encryptors
 import (
 	"context"
 	"fmt"
-	"github.com/flipped-aurora/gin-vue-admin/server/core/pay"
-
+	"github.com/flipped-aurora/gin-vue-admin/server/client"
 	"github.com/flipped-aurora/gin-vue-admin/server/utils"
 )
 
 // WechatPayEncryptor 微信支付字符串加密器
 type WechatPayEncryptor struct {
 	// 微信支付平台证书提供器
-	certGetter pay.CertificateGetter
+	certGetter client.CertificateGetter
 }
 
 // NewWechatPayEncryptor 新建一个 WechatPayEncryptor
-func NewWechatPayEncryptor(certProvider pay.CertificateGetter) *WechatPayEncryptor {
+func NewWechatPayEncryptor(certProvider client.CertificateGetter) *WechatPayEncryptor {
 	return &WechatPayEncryptor{certGetter: certProvider}
 }
 

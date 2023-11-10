@@ -6,10 +6,9 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"github.com/flipped-aurora/gin-vue-admin/server/client/auth"
 	"io"
 	"net/http"
-
-	"github.com/flipped-aurora/gin-vue-admin/server/core/auth"
 )
 
 // WechatPayNotifyValidator 微信支付 API v3 通知请求报文验证器

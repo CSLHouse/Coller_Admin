@@ -5,13 +5,13 @@ package ciphers
 import (
 	"context"
 	"github.com/agiledragon/gomonkey"
-	"github.com/flipped-aurora/gin-vue-admin/server/core/pay"
+	"github.com/flipped-aurora/gin-vue-admin/server/client"
+	"github.com/flipped-aurora/gin-vue-admin/server/client/cipher/decryptors"
+	encryptors2 "github.com/flipped-aurora/gin-vue-admin/server/client/cipher/encryptors"
+	"github.com/flipped-aurora/gin-vue-admin/server/utils"
 	"reflect"
 	"testing"
 
-	"github.com/flipped-aurora/gin-vue-admin/server/core"
-	"github.com/flipped-aurora/gin-vue-admin/server/core/cipher/decryptors"
-	"github.com/flipped-aurora/gin-vue-admin/server/core/cipher/encryptors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -46,30 +46,30 @@ func TestContextKey_String(t *testing.T) {
 }
 
 func TestWechatPayCipher_Encrypt_Decrypt(t *testing.T) {
-	cityCD := core.String("成都")
-	cityLA := core.String("LA")
+	cityCD := utils.String("成都")
+	cityLA := utils.String("LA")
 
 	s := Student{
 		Name: "小可",
 		Age:  8,
 		Addresses: []Address{
 			{
-				Country:  core.String("中国"),
-				Province: core.String("四川"),
+				Country:  utils.String("中国"),
+				Province: utils.String("四川"),
 				City:     &cityCD,
-				Street:   core.String("春熙路"),
+				Street:   utils.String("春熙路"),
 			},
 			{
-				Country:  core.String("USA"),
-				Province: core.String("California"),
+				Country:  utils.String("USA"),
+				Province: utils.String("California"),
 				City:     &cityLA,
-				Street:   core.String("Nowhere"),
+				Street:   utils.String("Nowhere"),
 			},
 		},
 		Parents: &[]Parent{
 			{
 				Name:        "爸",
-				PhoneNumber: core.String("13000000000"),
+				PhoneNumber: utils.String("13000000000"),
 			},
 			{
 				Name:        "妈",
@@ -84,7 +84,7 @@ func TestWechatPayCipher_Encrypt_Decrypt(t *testing.T) {
 	}
 
 	c := WechatPayCipher{
-		encryptor: &encryptors.MockEncryptor{
+		encryptor: &encryptors2.MockEncryptor{
 			Serial: "Mock Serial",
 		},
 		decryptor: &decryptors.MockDecryptor{},
@@ -133,30 +133,30 @@ func TestWechatPayCipher_Encrypt_Decrypt(t *testing.T) {
 }
 
 func TestWechatPayCipher_Encrypt_DecryptWithValue(t *testing.T) {
-	cityCD := core.String("成都")
-	cityLA := core.String("LA")
+	cityCD := utils.String("成都")
+	cityLA := utils.String("LA")
 
 	s := Student{
 		Name: "小可",
 		Age:  8,
 		Addresses: []Address{
 			{
-				Country:  core.String("中国"),
-				Province: core.String("四川"),
+				Country:  utils.String("中国"),
+				Province: utils.String("四川"),
 				City:     &cityCD,
-				Street:   core.String("春熙路"),
+				Street:   utils.String("春熙路"),
 			},
 			{
-				Country:  core.String("USA"),
-				Province: core.String("California"),
+				Country:  utils.String("USA"),
+				Province: utils.String("California"),
 				City:     &cityLA,
-				Street:   core.String("Nowhere"),
+				Street:   utils.String("Nowhere"),
 			},
 		},
 		Parents: &[]Parent{
 			{
 				Name:        "爸",
-				PhoneNumber: core.String("13000000000"),
+				PhoneNumber: utils.String("13000000000"),
 			},
 			{
 				Name:        "妈",
@@ -166,7 +166,7 @@ func TestWechatPayCipher_Encrypt_DecryptWithValue(t *testing.T) {
 	}
 
 	c := NewWechatPayCipher(
-		&encryptors.MockEncryptor{
+		&encryptors2.MockEncryptor{
 			Serial: "Mock Serial",
 		},
 		&decryptors.MockDecryptor{},
@@ -210,7 +210,7 @@ func TestWechatPayCipher_Encrypt_DecryptWithValue(t *testing.T) {
 
 func TestWechatPayCipher_CipherNil(t *testing.T) {
 	c := WechatPayCipher{
-		encryptor: &encryptors.MockEncryptor{
+		encryptor: &encryptors2.MockEncryptor{
 			Serial: "Mock Serial",
 		},
 		decryptor: &decryptors.MockDecryptor{},
@@ -227,17 +227,17 @@ func TestWechatPayCipher_CipherNil(t *testing.T) {
 
 func TestWechatPayCipher_CipherNonStruct(t *testing.T) {
 	c := WechatPayCipher{
-		encryptor: &encryptors.MockEncryptor{
+		encryptor: &encryptors2.MockEncryptor{
 			Serial: "Mock Serial",
 		},
 		decryptor: &decryptors.MockDecryptor{},
 	}
 
-	_, err := c.Encrypt(context.Background(), core.String("123"))
+	_, err := c.Encrypt(context.Background(), utils.String("123"))
 	require.Error(t, err)
 	assert.Equal(t, "encrypt struct failed: only struct can be ciphered", err.Error())
 
-	err = c.Decrypt(context.Background(), core.Int64(123))
+	err = c.Decrypt(context.Background(), utils.Int64(123))
 	require.Error(t, err)
 	assert.Equal(t, "decrypt struct failed: only struct can be ciphered", err.Error())
 }
@@ -249,7 +249,7 @@ func TestWechatPayCipher_CipherValue(t *testing.T) {
 	}
 
 	c := WechatPayCipher{
-		encryptor: &encryptors.MockEncryptor{
+		encryptor: &encryptors2.MockEncryptor{
 			Serial: "Mock Serial",
 		},
 		decryptor: &decryptors.MockDecryptor{},
@@ -268,7 +268,7 @@ func TestWechatPayCipher_EncryptWithoutCertificate(t *testing.T) {
 	s := Student{Name: "小可"}
 
 	// 这是一个 SelectCertificate 会失败的 Encryptor
-	invalidEncryptor := encryptors.NewWechatPayEncryptor(pay.NewCertificateMap(nil))
+	invalidEncryptor := encryptors2.NewWechatPayEncryptor(client.NewCertificateMap(nil))
 
 	c := WechatPayCipher{
 		encryptor: invalidEncryptor,
@@ -290,7 +290,7 @@ func TestWechatPayCipher_EncryptWithoutSerial(t *testing.T) {
 	}
 
 	c := WechatPayCipher{
-		encryptor: &encryptors.MockEncryptor{
+		encryptor: &encryptors2.MockEncryptor{
 			Serial: "Mock Serial",
 		},
 		decryptor: &decryptors.MockDecryptor{},
@@ -307,7 +307,7 @@ func TestWechatPayCipher_DecryptWrongData(t *testing.T) {
 	}
 
 	c := WechatPayCipher{
-		encryptor: &encryptors.MockEncryptor{
+		encryptor: &encryptors2.MockEncryptor{
 			Serial: "Mock Serial",
 		},
 		decryptor: &decryptors.MockDecryptor{},
@@ -320,14 +320,14 @@ func TestWechatPayCipher_DecryptWrongData(t *testing.T) {
 		Name: "Encrypted小可",
 		Addresses: []Address{
 			{
-				Country:  core.String("中国"),
-				Province: core.String("四川"),
-				Street:   core.String("UnEncrypted春熙路"),
+				Country:  utils.String("中国"),
+				Province: utils.String("四川"),
+				Street:   utils.String("UnEncrypted春熙路"),
 			},
 			{
-				Country:  core.String("USA"),
-				Province: core.String("California"),
-				Street:   core.String("EncryptedNowhere"),
+				Country:  utils.String("USA"),
+				Province: utils.String("California"),
+				Street:   utils.String("EncryptedNowhere"),
 			},
 		},
 	}
@@ -343,7 +343,7 @@ func TestWechatPayCipher_cipherWithWrongType(t *testing.T) {
 	}
 
 	c := WechatPayCipher{
-		encryptor: &encryptors.MockEncryptor{
+		encryptor: &encryptors2.MockEncryptor{
 			Serial: "Mock Serial",
 		},
 		decryptor: &decryptors.MockDecryptor{},

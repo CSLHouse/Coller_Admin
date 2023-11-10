@@ -17,6 +17,7 @@ func (s *OrderRouter) InitOrderRouter(Router *gin.RouterGroup) (R gin.IRoutes) {
 		wxOrderRouter.GET("detail", wxOrderApi.GetOrderDetail)
 		wxOrderRouter.GET("list", wxOrderApi.GetOrderList)
 		wxOrderRouter.POST("paySuccess", wxOrderApi.PaySuccess)
+		wxOrderRouter.POST("cancelOrder", wxOrderApi.CancelOrder)
 	}
 	return wxOrderRouter
 }

@@ -120,7 +120,7 @@ type HomeProduct struct {
 	Sort                       int     `json:"sort" form:"sort" gorm:"comment:排序"`
 	Sale                       int     `json:"sale" form:"sale" gorm:"comment:销量"`
 	Price                      float32 `json:"price" form:"price" gorm:"comment:价格"`
-	PromotionPrice             int     `json:"promotionPrice" form:"promotionPrice" gorm:"comment:促销价格"`
+	PromotionPrice             float32 `json:"promotionPrice" form:"promotionPrice" gorm:"comment:促销价格"`
 	GiftGrowth                 int     `json:"giftGrowth" form:"giftGrowth" gorm:"comment:赠送的成长值"`
 	GiftPoint                  int     `json:"giftPoint" form:"giftPoint" gorm:"comment:赠送的积分"`
 	UsePointLimit              int     `json:"usePointLimit" form:"usePointLimit" gorm:"comment:限制使用的积分数"`

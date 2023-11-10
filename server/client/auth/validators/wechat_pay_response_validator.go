@@ -7,10 +7,9 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"github.com/flipped-aurora/gin-vue-admin/server/client/auth"
 	"io/ioutil"
 	"net/http"
-
-	"github.com/flipped-aurora/gin-vue-admin/server/core/auth"
 )
 
 // WechatPayResponseValidator 微信支付 API v3 默认应答报文验证器

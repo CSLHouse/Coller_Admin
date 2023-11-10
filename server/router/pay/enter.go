@@ -1,8 +1,5 @@
-package business
+package pay
 
 type RouterGroup struct {
-	ComboRouter
-	MemberRouter
-	ConsumeRouter
-	OrderRouter
+	PayRouter
 }

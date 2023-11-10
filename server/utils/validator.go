@@ -109,13 +109,12 @@ func Gt(mark string) string {
 	return "gt=" + mark
 }
 
-//
-//@author: [piexlmax](https://github.com/piexlmax)
-//@function: Verify
-//@description: 校验方法
-//@param: st interface{}, roleMap Rules(入参实例，规则map)
-//@return: err error
-
+// @author: [piexlmax](https://github.com/piexlmax)
+// @function: Verify
+// @description: 校验方法
+// @param: st interface{}, roleMap Rules(入参实例，规则map)
+// @return: err error
+// TODO: 获得的值为0时 得到错误的结果
 func Verify(st interface{}, roleMap Rules) (err error) {
 	compareMap := map[string]bool{
 		"lt": true,

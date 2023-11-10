@@ -5,14 +5,13 @@ package validators
 import (
 	"context"
 	"fmt"
+	"github.com/flipped-aurora/gin-vue-admin/server/client/auth"
+	"github.com/flipped-aurora/gin-vue-admin/server/client/consts"
 	"math"
 	"net/http"
 	"strconv"
 	"strings"
 	"time"
-
-	"github.com/flipped-aurora/gin-vue-admin/server/core/auth"
-	"github.com/flipped-aurora/gin-vue-admin/server/core/consts"
 )
 
 type wechatPayValidator struct {

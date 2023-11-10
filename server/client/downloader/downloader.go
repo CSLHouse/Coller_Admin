@@ -7,14 +7,13 @@ import (
 	"crypto/rsa"
 	"crypto/x509"
 	"fmt"
-	"github.com/flipped-aurora/gin-vue-admin/server/core"
-	"github.com/flipped-aurora/gin-vue-admin/server/core/pay"
+	"github.com/flipped-aurora/gin-vue-admin/server/client"
+	"github.com/flipped-aurora/gin-vue-admin/server/client/auth/signers"
+	validators2 "github.com/flipped-aurora/gin-vue-admin/server/client/auth/validators"
+	"github.com/flipped-aurora/gin-vue-admin/server/client/auth/verifiers"
+	"github.com/flipped-aurora/gin-vue-admin/server/client/consts"
 	"sync"
 
-	"github.com/flipped-aurora/gin-vue-admin/server/core/auth/signers"
-	"github.com/flipped-aurora/gin-vue-admin/server/core/auth/validators"
-	"github.com/flipped-aurora/gin-vue-admin/server/core/auth/verifiers"
-	"github.com/flipped-aurora/gin-vue-admin/server/core/consts"
 	"github.com/flipped-aurora/gin-vue-admin/server/utils"
 )
 
@@ -40,10 +39,10 @@ func isSameCertificateMap(l, r map[string]*x509.Certificate) bool {
 
 // CertificateDownloader 平台证书下载器，下载完成后可直接获取 x509.Certificate 对象或导出证书内容
 type CertificateDownloader struct {
-	certContents map[string]string  // 证书文本内容，用于导出
-	certificates pay.CertificateMap // 证书实例
-	client       *core.Client       // 微信支付 API v3 Go SDK HTTPClient
-	mchAPIv3Key  string             // 商户APIv3密钥
+	certContents map[string]string     // 证书文本内容，用于导出
+	certificates client.CertificateMap // 证书实例
+	client       *client.Client        // 微信支付 API v3 Go SDK HTTPClient
+	mchAPIv3Key  string                // 商户APIv3密钥
 	lock         sync.RWMutex
 }
 
@@ -118,9 +117,9 @@ func (d *CertificateDownloader) updateCertificates(
 
 	d.certContents = certContents
 	d.certificates.Reset(certificates)
-	d.client = core.NewClientWithValidator(
+	d.client = client.NewClientWithValidator(
 		d.client,
-		validators.NewWechatPayResponseValidator(verifiers.NewSHA256WithRSAVerifier(d)),
+		validators2.NewWechatPayResponseValidator(verifiers.NewSHA256WithRSAVerifier(d)),
 	)
 }
 
@@ -131,7 +130,7 @@ func (d *CertificateDownloader) performDownloading(ctx context.Context) (*downlo
 	}
 
 	resp := new(downloadCertificatesResponse)
-	if err = core.UnMarshalResponse(result.Response, resp); err != nil {
+	if err = client.UnMarshalResponse(result.Response, resp); err != nil {
 		return nil, err
 	}
 	return resp, nil
@@ -176,16 +175,16 @@ func (d *CertificateDownloader) DownloadCertificates(ctx context.Context) error 
 func NewCertificateDownloader(
 	ctx context.Context, mchID string, privateKey *rsa.PrivateKey, certificateSerialNo string, mchAPIv3Key string,
 ) (*CertificateDownloader, error) {
-	settings := pay.DialSettings{
+	settings := client.DialSettings{
 		Signer: &signers.SHA256WithRSASigner{
 			MchID:               mchID,
 			PrivateKey:          privateKey,
 			CertificateSerialNo: certificateSerialNo,
 		},
-		Validator: &validators.NullValidator{},
+		Validator: &validators2.NullValidator{},
 	}
 
-	client, err := core.NewClientWithDialSettings(ctx, &settings)
+	client, err := client.NewClientWithDialSettings(ctx, &settings)
 	if err != nil {
 		return nil, fmt.Errorf("create downloader failed, create client err:%v", err)
 	}
@@ -196,7 +195,7 @@ func NewCertificateDownloader(
 // NewCertificateDownloaderWithClient 使用 core.Client 初始化商户的平台证书下载器 CertificateDownloader
 // 初始化完成后会立即发起一次下载，确保下载器被正确初始化。
 func NewCertificateDownloaderWithClient(
-	ctx context.Context, client *core.Client, mchAPIv3Key string,
+	ctx context.Context, client *client.Client, mchAPIv3Key string,
 ) (*CertificateDownloader, error) {
 	downloader := CertificateDownloader{
 		client:      client,

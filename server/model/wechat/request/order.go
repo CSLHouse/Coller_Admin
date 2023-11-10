@@ -1,6 +1,9 @@
 package request
 
 type OrderCreateRequest struct {
+	AppId                  string `json:"appId" gorm:"null;default null"`
+	OpenId                 string `json:"openId" gorm:"not null;" binding:"required"`
+	IP                     string `json:"ip" gorm:"not null;" binding:"required"`
 	CartIds                []int  `json:"cartIds" gorm:"not null;"`
 	CouponId               int    `json:"couponId" gorm:"null;default null"`
 	MemberReceiveAddressId int    `json:"memberReceiveAddressId" gorm:"not null;"`

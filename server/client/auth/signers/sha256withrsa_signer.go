@@ -7,7 +7,7 @@ import (
 	"context"
 	"crypto/rsa"
 	"fmt"
-	"github.com/flipped-aurora/gin-vue-admin/server/core/auth"
+	"github.com/flipped-aurora/gin-vue-admin/server/client/auth"
 	"github.com/flipped-aurora/gin-vue-admin/server/utils"
 	"strings"
 )

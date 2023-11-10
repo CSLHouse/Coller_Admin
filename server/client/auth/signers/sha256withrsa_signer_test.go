@@ -6,12 +6,12 @@ import (
 	"context"
 	"crypto/rsa"
 	"fmt"
+	"github.com/flipped-aurora/gin-vue-admin/server/client/auth"
 	"strings"
 	"testing"
 
 	"github.com/agiledragon/gomonkey"
 
-	"github.com/flipped-aurora/gin-vue-admin/server/core/auth"
 	"github.com/flipped-aurora/gin-vue-admin/server/utils"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"

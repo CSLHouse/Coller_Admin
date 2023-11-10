@@ -5,7 +5,7 @@ package ciphers
 import (
 	"context"
 	"fmt"
-	"github.com/flipped-aurora/gin-vue-admin/server/core/cipher"
+	cipher2 "github.com/flipped-aurora/gin-vue-admin/server/client/cipher"
 	"reflect"
 )
 
@@ -45,8 +45,8 @@ func init() {
 //
 // 详见：https://wechatpay-api.gitbook.io/wechatpay-api-v3/qian-ming-zhi-nan-1/min-gan-xin-xi-jia-mi
 type WechatPayCipher struct {
-	encryptor cipher.Encryptor
-	decryptor cipher.Decryptor
+	encryptor cipher2.Encryptor
+	decryptor cipher2.Decryptor
 }
 
 // Encrypt 对结构中的敏感字段进行加密
@@ -220,6 +220,6 @@ func (c *WechatPayCipher) cipherStringField(
 }
 
 // NewWechatPayCipher 使用 cipher.Encryptor + cipher.Decryptor 构建一个 WechatPayCipher
-func NewWechatPayCipher(encryptor cipher.Encryptor, decryptor cipher.Decryptor) *WechatPayCipher {
+func NewWechatPayCipher(encryptor cipher2.Encryptor, decryptor cipher2.Decryptor) *WechatPayCipher {
 	return &WechatPayCipher{encryptor: encryptor, decryptor: decryptor}
 }

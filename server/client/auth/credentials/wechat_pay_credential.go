@@ -6,8 +6,8 @@ package credentials
 import (
 	"context"
 	"fmt"
-	"github.com/flipped-aurora/gin-vue-admin/server/core/auth"
-	"github.com/flipped-aurora/gin-vue-admin/server/core/consts"
+	"github.com/flipped-aurora/gin-vue-admin/server/client/auth"
+	"github.com/flipped-aurora/gin-vue-admin/server/client/consts"
 	"github.com/flipped-aurora/gin-vue-admin/server/utils"
 	"time"
 )
@@ -31,6 +31,7 @@ func (c *WechatPayCredentials) GenerateAuthorizationHeader(
 	}
 	timestamp := time.Now().Unix()
 	message := fmt.Sprintf(consts.SignatureMessageFormat, method, canonicalURL, timestamp, nonce, signBody)
+	fmt.Println("签名信息：", message)
 	signatureResult, err := c.Signer.Sign(ctx, message)
 	if err != nil {
 		return "", err

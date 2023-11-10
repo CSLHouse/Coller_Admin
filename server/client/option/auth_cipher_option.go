@@ -6,21 +6,23 @@ import (
 	"context"
 	"crypto/rsa"
 	"crypto/x509"
-	"github.com/flipped-aurora/gin-vue-admin/server/core"
-	"github.com/flipped-aurora/gin-vue-admin/server/core/auth/signers"
-	"github.com/flipped-aurora/gin-vue-admin/server/core/auth/validators"
-	"github.com/flipped-aurora/gin-vue-admin/server/core/auth/verifiers"
-	"github.com/flipped-aurora/gin-vue-admin/server/core/cipher/ciphers"
-	"github.com/flipped-aurora/gin-vue-admin/server/core/cipher/decryptors"
-	"github.com/flipped-aurora/gin-vue-admin/server/core/cipher/encryptors"
-	"github.com/flipped-aurora/gin-vue-admin/server/core/downloader"
-	"github.com/flipped-aurora/gin-vue-admin/server/core/pay"
+	"github.com/flipped-aurora/gin-vue-admin/server/client"
+	"github.com/flipped-aurora/gin-vue-admin/server/client/auth/signers"
+	"github.com/flipped-aurora/gin-vue-admin/server/client/auth/validators"
+	"github.com/flipped-aurora/gin-vue-admin/server/client/auth/verifiers"
+	"github.com/flipped-aurora/gin-vue-admin/server/client/cipher/ciphers"
+	"github.com/flipped-aurora/gin-vue-admin/server/client/cipher/decryptors"
+	"github.com/flipped-aurora/gin-vue-admin/server/client/cipher/encryptors"
+	"github.com/flipped-aurora/gin-vue-admin/server/client/consts"
+	downloader2 "github.com/flipped-aurora/gin-vue-admin/server/client/downloader"
+	"github.com/flipped-aurora/gin-vue-admin/server/utils"
+	"log"
 )
 
-type withAuthCipherOption struct{ settings pay.DialSettings }
+type withAuthCipherOption struct{ settings client.DialSettings }
 
 // Apply 设置 core.DialSettings 的 Signer、Validator 以及 Cipher
-func (w withAuthCipherOption) Apply(o *pay.DialSettings) error {
+func (w withAuthCipherOption) Apply(o *client.DialSettings) error {
 	o.Signer = w.settings.Signer
 	o.Validator = w.settings.Validator
 	o.Cipher = w.settings.Cipher
@@ -30,10 +32,10 @@ func (w withAuthCipherOption) Apply(o *pay.DialSettings) error {
 // WithWechatPayAuthCipher 一键初始化 Client，使其具备「签名/验签/敏感字段加解密」能力
 func WithWechatPayAuthCipher(
 	mchID string, certificateSerialNo string, privateKey *rsa.PrivateKey, certificateList []*x509.Certificate,
-) core.ClientOption {
-	certGetter := pay.NewCertificateMapWithList(certificateList)
+) client.ClientOption {
+	certGetter := client.NewCertificateMapWithList(certificateList)
 	return withAuthCipherOption{
-		settings: pay.DialSettings{
+		settings: client.DialSettings{
 			Signer: &signers.SHA256WithRSASigner{
 				MchID:               mchID,
 				PrivateKey:          privateKey,
@@ -50,21 +52,25 @@ func WithWechatPayAuthCipher(
 
 // WithWechatPayAutoAuthCipher 一键初始化 Client，使其具备「签名/验签/敏感字段加解密」能力。
 // 同时提供证书定时更新功能（因此需要提供 mchAPIv3Key 用于证书解密），不再需要本地提供平台证书
-func WithWechatPayAutoAuthCipher(
-	mchID string, certificateSerialNo string, privateKey *rsa.PrivateKey, mchAPIv3Key string,
-) core.ClientOption {
-	mgr := downloader.MgrInstance()
-
-	if !mgr.HasDownloader(context.Background(), mchID) {
-		err := mgr.RegisterDownloaderWithPrivateKey(
-			context.Background(), privateKey, certificateSerialNo, mchID, mchAPIv3Key,
+func WithWechatPayAutoAuthCipher() client.ClientOption {
+	mgr := downloader2.MgrInstance()
+	if !mgr.HasDownloader(context.Background(), consts.MachID) {
+		privateKey, err := utils.LoadPrivateKeyWithPath("./cert/apiclient_key.pem")
+		if err != nil {
+			log.Print("load merchant private key error")
+		}
+		err = mgr.RegisterDownloaderWithPrivateKey(
+			context.Background(), privateKey, consts.MchCertificateSerialNumber, consts.MachID, consts.MchAPIv3Key,
 		)
 		if err != nil {
-			return core.ErrorOption{Error: err}
+			return client.ErrorOption{Error: err}
 		}
 	}
-
-	return WithWechatPayAutoAuthCipherUsingDownloaderMgr(mchID, certificateSerialNo, privateKey, mgr)
+	privateKey, err := utils.LoadPrivateKeyWithPath("./cert/apiclient_key.pem")
+	if err != nil {
+		log.Print("load merchant private key error")
+	}
+	return WithWechatPayAutoAuthCipherUsingDownloaderMgr(consts.MachID, consts.MchCertificateSerialNumber, privateKey, mgr)
 }
 
 // WithWechatPayAutoAuthCipherUsingDownloaderMgr 一键初始化 Client，使其具备「签名/验签/敏感字段加解密」能力。
@@ -73,11 +79,11 @@ func WithWechatPayAutoAuthCipher(
 // 【注意】本函数的能力与 WithWechatPayAutoAuthCipher 完全一致，除非有自行管理 CertificateDownloaderMgr 的需求，
 // 否则推荐直接使用 WithWechatPayAutoAuthCipher
 func WithWechatPayAutoAuthCipherUsingDownloaderMgr(
-	mchID string, certificateSerialNo string, privateKey *rsa.PrivateKey, mgr *downloader.CertificateDownloaderMgr,
-) core.ClientOption {
+	mchID string, certificateSerialNo string, privateKey *rsa.PrivateKey, mgr *downloader2.CertificateDownloaderMgr,
+) client.ClientOption {
 	certVisitor := mgr.GetCertificateVisitor(mchID)
 	return withAuthCipherOption{
-		settings: pay.DialSettings{
+		settings: client.DialSettings{
 			Signer: &signers.SHA256WithRSASigner{
 				MchID:               mchID,
 				CertificateSerialNo: certificateSerialNo,

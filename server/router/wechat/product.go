@@ -44,6 +44,7 @@ func (e *WechatRouter) InitWechatRouter(Router *gin.RouterGroup, RouterPub *gin.
 		wechatRouterWithoutRecord.DELETE("cart", homeApi.DeleteProductCartById)
 		wechatRouterWithoutRecord.DELETE("cart/clear", homeApi.ClearProductCart)
 		wechatRouterWithoutRecord.GET("cart/list", homeApi.GetProductCartList)
+		wechatRouterWithoutRecord.DELETE("carts", homeApi.DeleteProductCartByIds)
 	}
 	{
 		homePublicRouterWithoutRecord.GET("content", homeApi.GetAllHomeAdvertise)

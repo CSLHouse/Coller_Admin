@@ -5,7 +5,7 @@ package encryptors
 import (
 	"context"
 	"crypto/x509"
-	"github.com/flipped-aurora/gin-vue-admin/server/core/pay"
+	"github.com/flipped-aurora/gin-vue-admin/server/client"
 	"strings"
 	"testing"
 
@@ -100,7 +100,7 @@ func initWechatPayEncryptor() (*WechatPayEncryptor, error) {
 		l = append(l, cert)
 	}
 
-	return NewWechatPayEncryptor(pay.NewCertificateMapWithList(l)), nil
+	return NewWechatPayEncryptor(client.NewCertificateMapWithList(l)), nil
 }
 
 func TestWechatPayEncryptor_SelectCertificate(t *testing.T) {

@@ -6,6 +6,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"github.com/flipped-aurora/gin-vue-admin/server/client/consts"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -15,7 +16,6 @@ import (
 
 	"github.com/agiledragon/gomonkey"
 
-	"github.com/flipped-aurora/gin-vue-admin/server/core/consts"
 	"github.com/stretchr/testify/assert"
 )
 

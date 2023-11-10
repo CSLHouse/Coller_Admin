@@ -1,7 +1,6 @@
-package wechat
+package pay
 
 type ServiceGroup struct {
-	HomeService
-	AccountService
-	OrderService
+	PayMentService
+	JsapiApiService
 }

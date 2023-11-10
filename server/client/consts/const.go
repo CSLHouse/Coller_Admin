@@ -15,6 +15,7 @@ const (
 const (
 	Version         = "0.2.18"                     // SDK 版本
 	UserAgentFormat = "WechatPay-Go/%s (%s) GO/%s" // UserAgent中的信息
+	//UserAgentTest   = "https://zh.wikipedia.org/wiki/User_agent"
 )
 
 // HTTP 请求报文 Header 相关常量
@@ -36,6 +37,7 @@ const (
 
 // 请求报文签名相关常量
 const (
+	//SignatureMessageFormat = "%s\n%s\n%d\n%s\n%s\n" // 数字签名原文格式
 	SignatureMessageFormat = "%s\n%s\n%d\n%s\n%s\n" // 数字签名原文格式
 	// HeaderAuthorizationFormat 请求头中的 Authorization 拼接格式
 	HeaderAuthorizationFormat = "%s mchid=\"%s\",nonce_str=\"%s\",timestamp=\"%d\",serial_no=\"%s\",signature=\"%s\""
@@ -59,6 +61,6 @@ const (
 // 微信支付
 const (
 	MachID                     = "1658099442"                               // 商户号
-	MchCertificateSerialNumber = "65C260E354F071D10E4EF356CCB785B5ED0E0B83" // 商户证书序列号
+	MchCertificateSerialNumber = "5E929028375628F4F16DB35BFF1013E4F8A4929D" // 商户证书序列号
 	MchAPIv3Key                = "u2z3SsLS8EbajEmc4spCCHn7CMYnq6LJ"         // 商户APIv3密钥
 )

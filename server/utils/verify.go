@@ -8,6 +8,7 @@ var (
 	LoginVerify            = Rules{"CaptchaId": {NotEmpty()}, "UserName": {NotEmpty()}, "Password": {NotEmpty()}}
 	RegisterVerify         = Rules{"UserName": {NotEmpty()}, "NickName": {NotEmpty()}, "Password": {NotEmpty()}, "AuthorityId": {NotEmpty()}}
 	PageInfoVerify         = Rules{"Page": {NotEmpty()}, "PageSize": {NotEmpty()}}
+	StateInfoVerify        = Rules{"Page": {NotEmpty()}, "PageSize": {NotEmpty()}}
 	CustomerVerify         = Rules{"CustomerName": {NotEmpty()}, "CustomerPhoneData": {NotEmpty()}}
 	AutoCodeVerify         = Rules{"Abbreviation": {NotEmpty()}, "StructName": {NotEmpty()}, "PackageName": {NotEmpty()}, "Fields": {NotEmpty()}}
 	AutoPackageVerify      = Rules{"PackageName": {NotEmpty()}}

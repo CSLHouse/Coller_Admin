@@ -2,9 +2,12 @@ package wechat
 
 import (
 	"fmt"
+	"github.com/flipped-aurora/gin-vue-admin/server/client/consts"
 	"github.com/flipped-aurora/gin-vue-admin/server/global"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/common/request"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/common/response"
+	payRequest "github.com/flipped-aurora/gin-vue-admin/server/model/pay/request"
+	payRes "github.com/flipped-aurora/gin-vue-admin/server/model/pay/response"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/wechat"
 	wechatReq "github.com/flipped-aurora/gin-vue-admin/server/model/wechat/request"
 	wechatRes "github.com/flipped-aurora/gin-vue-admin/server/model/wechat/response"
@@ -243,22 +246,37 @@ func (e *OrderApi) GetOrderDetail(c *gin.Context) {
 		response.FailWithMessage("获取订单数据失败", c)
 		return
 	}
-	response.OkWithData(order, c)
+
+	var queryReq payRequest.QueryOrderByOutTradeNoRequest
+	queryReq.Mchid = utils.String(consts.MachID)
+	queryReq.OutTradeNo = utils.String(order.OrderSn)
+	_, res, _, err := jspaymentService.QueryOrderByOutTradeNo(queryReq, order.PrepayId)
+	if err != nil {
+		global.GVA_LOG.Error("更新失败!", zap.Error(err))
+		fmt.Println("支付失败!", zap.Error(err))
+		response.FailWithMessage(err.Error(), c)
+		return
+	}
+	fmt.Println("--[GetOrderDetail]-res:", *res)
+	var data payRes.GenerateOrderDetailResponse
+	data.Order = order
+	data.Payment = *res
+	response.OkWithData(data, c)
 }
 
 func (e *OrderApi) GetOrderList(c *gin.Context) {
-	var pageInfo request.PageInfo
-	err := c.ShouldBindQuery(&pageInfo)
+	var stateInfo request.StateInfo
+	err := c.ShouldBindQuery(&stateInfo)
 	if err != nil {
 		response.FailWithMessage(err.Error(), c)
 		return
 	}
-	err = utils.Verify(pageInfo, utils.PageInfoVerify)
+	err = utils.Verify(stateInfo, utils.StateInfoVerify)
 	if err != nil {
 		response.FailWithMessage(err.Error(), c)
 		return
 	}
-	orderList, total, err := orderService.GetProductOrderList(pageInfo)
+	orderList, total, err := orderService.GetProductOrderListByStatus(stateInfo)
 	if err != nil {
 		global.GVA_LOG.Error("获取订单数据失败!", zap.Error(err))
 		response.FailWithMessage("获取订单数据失败", c)
@@ -267,8 +285,8 @@ func (e *OrderApi) GetOrderList(c *gin.Context) {
 	response.OkWithDetailed(response.PageResult{
 		List:     orderList,
 		Total:    total,
-		Page:     pageInfo.Page,
-		PageSize: pageInfo.PageSize,
+		Page:     stateInfo.Page,
+		PageSize: stateInfo.PageSize,
 	}, "获取成功", c)
 }
 
@@ -286,4 +304,26 @@ func (e *OrderApi) PaySuccess(c *gin.Context) {
 		return
 	}
 	response.OkWithMessage("支付成功", c)
+}
+
+func (e *OrderApi) CancelOrder(c *gin.Context) {
+	var reqId request.GetById
+	err := c.ShouldBindJSON(&reqId)
+	if err != nil {
+		response.FailWithMessage(err.Error(), c)
+		return
+	}
+	outTrade, err := orderService.CancelOrder(reqId.ID)
+	if err != nil {
+		global.GVA_LOG.Error("更新订单数据失败!", zap.Error(err))
+		response.FailWithMessage("更新订单数据失败", c)
+		return
+	}
+	err = jspaymentService.CloseOrder(outTrade)
+	if err != nil {
+		global.GVA_LOG.Error("删除订单数据失败!", zap.Error(err))
+		response.FailWithMessage("删除订单数据失败", c)
+		return
+	}
+	response.OkWithMessage("删除成功", c)
 }

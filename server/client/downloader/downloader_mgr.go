@@ -6,8 +6,7 @@ import (
 	"context"
 	"crypto/rsa"
 	"crypto/x509"
-	"github.com/flipped-aurora/gin-vue-admin/server/core"
-	"github.com/flipped-aurora/gin-vue-admin/server/core/pay"
+	"github.com/flipped-aurora/gin-vue-admin/server/client"
 	"sync"
 	"time"
 
@@ -135,7 +134,7 @@ func (mgr *CertificateDownloaderMgr) ExportCertificateMap(ctx context.Context, m
 }
 
 // GetCertificateVisitor 获取某个商户的平台证书访问器
-func (mgr *CertificateDownloaderMgr) GetCertificateVisitor(mchID string) pay.CertificateVisitor {
+func (mgr *CertificateDownloaderMgr) GetCertificateVisitor(mchID string) client.CertificateVisitor {
 	return &pseudoCertificateDownloader{mgr: mgr, mchID: mchID}
 }
 
@@ -179,7 +178,7 @@ func (mgr *CertificateDownloaderMgr) RegisterDownloaderWithPrivateKey(
 
 // RegisterDownloaderWithClient 向 Mgr 注册商户的平台证书下载器
 func (mgr *CertificateDownloaderMgr) RegisterDownloaderWithClient(
-	ctx context.Context, client *core.Client, mchID string, mchAPIv3Key string,
+	ctx context.Context, client *client.Client, mchID string, mchAPIv3Key string,
 ) error {
 	downloader, err := NewCertificateDownloaderWithClient(ctx, client, mchAPIv3Key)
 	if err != nil {

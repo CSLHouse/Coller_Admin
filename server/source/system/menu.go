@@ -93,6 +93,7 @@ func (i *initMenu) InitializeData(ctx context.Context) (next context.Context, er
 		{MenuLevel: 0, Hidden: false, ParentId: "0", Path: "orderManage", Name: "orderManage", Component: "view/orderManage/index.vue", Sort: 5, Meta: Meta{Title: "订单管理", Icon: "Management"}},
 		{MenuLevel: 0, Hidden: false, ParentId: "19", Path: "statistics", Name: "Statistics", Component: "view/orderManage/Statistics/Statistics.vue", Sort: 4, Meta: Meta{Title: "数据统计", Icon: "Collection"}},
 		{MenuLevel: 0, Hidden: false, ParentId: "19", Path: "orderView", Name: "orderView", Component: "view/orderManage/orderView/orderView.vue", Sort: 4, Meta: Meta{Title: "订单查看", Icon: "Reading"}},
+		
 		{MenuLevel: 0, Hidden: false, ParentId: "0", Path: "product", Name: "Product", Component: "view/product/index.vue", Sort: 6, Meta: Meta{Title: "商品", Icon: "Goods"}},
 		{MenuLevel: 0, Hidden: false, ParentId: "22", Path: "productList", Name: "ProductList", Component: "view/product/productList/ProductList.vue", Sort: 1, Meta: Meta{Title: "商品列表", Icon: "Box"}},
 		{MenuLevel: 0, Hidden: false, ParentId: "22", Path: "newProduct", Name: "NewProduct", Component: "view/product/newProduct/NewProduct.vue", Sort: 2, Meta: Meta{Title: "添加商品", Icon: "Sell"}},

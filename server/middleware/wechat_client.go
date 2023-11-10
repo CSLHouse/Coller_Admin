@@ -48,15 +48,6 @@ func (pc *WechatClient) WXLogin(jscode string) (wxMap map[string]string, error e
 		fmt.Println("----err:", err)
 	}
 
-	//err = json.NewDecoder(httpResp.Body).Decode(&session)
-	////respData := NewPayData()
-	////err = respData.FromJson(httpResp.Body)
-	//if err != nil {
-	//	fmt.Println("--1--session:", session)
-	//	fmt.Println("--1--err:", err)
-	//	return session, err
-	//}
-
 	return wxMap, nil
 }
 

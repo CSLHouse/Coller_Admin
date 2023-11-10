@@ -234,6 +234,7 @@ func (e *HomeApi) CreateProduct(c *gin.Context) {
 		response.FailWithMessage(err.Error(), c)
 		return
 	}
+	fmt.Println(home)
 	var product wechat.HomeProduct
 	product = home.Product
 	err = wechatService.CreateHomeProduct(&product)
@@ -1140,6 +1141,26 @@ func (e *HomeApi) DeleteProductCartById(c *gin.Context) {
 		global.GVA_LOG.Error("删除失败!", zap.Error(err))
 		response.FailWithMessage("删除失败", c)
 		return
+	}
+
+	response.OkWithMessage("删除成功", c)
+}
+
+func (e *HomeApi) DeleteProductCartByIds(c *gin.Context) {
+	var reqIds request.IdsReq
+	err := c.ShouldBindQuery(&reqIds)
+	if err != nil {
+		response.FailWithMessage(err.Error(), c)
+		return
+	}
+	userId := utils.GetUserID(c)
+	for _, id := range reqIds.Ids {
+		err = wechatService.DeleteProductCartById(userId, id)
+		if err != nil {
+			global.GVA_LOG.Error("删除失败!", zap.Error(err))
+			response.FailWithMessage("删除失败", c)
+			return
+		}
 	}
 
 	response.OkWithMessage("删除成功", c)

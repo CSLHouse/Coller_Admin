@@ -1,4 +1,4 @@
-package core
+package client
 
 // 初始化 Client 时，你需要指定以下参数：
 //  - Credential 用于生成 HTTP Header 中的 Authorization 信息，微信支付 API v3依赖该值来保证请求的真实性和数据的完整性
@@ -10,11 +10,13 @@ import (
 	"encoding/json"
 	"encoding/xml"
 	"fmt"
-	"github.com/flipped-aurora/gin-vue-admin/server/core/auth"
-	"github.com/flipped-aurora/gin-vue-admin/server/core/auth/credentials"
-	"github.com/flipped-aurora/gin-vue-admin/server/core/cipher"
-	"github.com/flipped-aurora/gin-vue-admin/server/core/consts"
-	"github.com/flipped-aurora/gin-vue-admin/server/core/pay"
+	auth2 "github.com/flipped-aurora/gin-vue-admin/server/client/auth"
+	"github.com/flipped-aurora/gin-vue-admin/server/client/auth/credentials"
+	"github.com/flipped-aurora/gin-vue-admin/server/client/cipher"
+	"github.com/flipped-aurora/gin-vue-admin/server/client/consts"
+
+	"runtime"
+
 	"io"
 	"mime/multipart"
 	"net/http"
@@ -23,7 +25,6 @@ import (
 	"os"
 	"reflect"
 	"regexp"
-	"runtime"
 	"strings"
 	"time"
 )
@@ -44,23 +45,23 @@ type APIResult struct {
 // ClientOption 微信支付 API v3 HTTPClient core.Client 初始化参数
 type ClientOption interface {
 	// Apply 将初始化参数应用到 DialSettings 中
-	Apply(settings *pay.DialSettings) error
+	Apply(settings *DialSettings) error
 }
 
 // ErrorOption 错误初始化参数，用于返回错误
 type ErrorOption struct{ Error error }
 
 // Apply 返回初始化错误
-func (w ErrorOption) Apply(*pay.DialSettings) error {
+func (w ErrorOption) Apply(*DialSettings) error {
 	return w.Error
 }
 
 // Client 微信支付API v3 基础 Client
 type Client struct {
 	httpClient *http.Client
-	credential auth.Credential
-	validator  auth.Validator
-	signer     auth.Signer
+	credential auth2.Credential
+	validator  auth2.Validator
+	signer     auth2.Signer
 	cipher     cipher.Cipher
 }
 
@@ -68,6 +69,7 @@ type Client struct {
 //
 // 初始化的时候你可以传递多个配置信息
 func NewClient(opts ...ClientOption) (*Client, error) {
+
 	settings, err := initSettings(opts)
 	if err != nil {
 		return nil, fmt.Errorf("init client setting err:%v", err)
@@ -78,7 +80,7 @@ func NewClient(opts ...ClientOption) (*Client, error) {
 }
 
 // NewClientWithDialSettings 使用 DialSettings 初始化一个微信支付API v3 HTTPClient
-func NewClientWithDialSettings(ctx context.Context, settings *pay.DialSettings) (*Client, error) {
+func NewClientWithDialSettings(ctx context.Context, settings *DialSettings) (*Client, error) {
 	if err := settings.Validate(); err != nil {
 		return nil, err
 	}
@@ -89,7 +91,7 @@ func NewClientWithDialSettings(ctx context.Context, settings *pay.DialSettings) 
 
 // NewClientWithValidator 使用原 Client 复制一个新的 Client，并设置新 Client 的 validator。
 // 原 Client 不受任何影响
-func NewClientWithValidator(client *Client, validator auth.Validator) *Client {
+func NewClientWithValidator(client *Client, validator auth2.Validator) *Client {
 	return &Client{
 		httpClient: client.httpClient,
 		credential: client.credential,
@@ -99,7 +101,7 @@ func NewClientWithValidator(client *Client, validator auth.Validator) *Client {
 	}
 }
 
-func initClientWithSettings(settings *pay.DialSettings) *Client {
+func initClientWithSettings(settings *DialSettings) *Client {
 	client := &Client{
 		signer:     settings.Signer,
 		validator:  settings.Validator,
@@ -116,9 +118,9 @@ func initClientWithSettings(settings *pay.DialSettings) *Client {
 	return client
 }
 
-func initSettings(opts []ClientOption) (*pay.DialSettings, error) {
+func initSettings(opts []ClientOption) (*DialSettings, error) {
 	var (
-		o   pay.DialSettings
+		o   DialSettings
 		err error
 	)
 	for _, opt := range opts {
@@ -222,7 +224,6 @@ func (client *Client) doRequest(
 		return nil, fmt.Errorf("generate authorization err:%s", err.Error())
 	}
 	request.Header.Set(consts.Authorization, authorization)
-
 	// Send HTTP Request
 	result, err := client.doHTTP(request)
 	if err != nil {
@@ -316,7 +317,7 @@ func (client *Client) DecryptResponse(ctx context.Context, resp interface{}) err
 }
 
 // Sign 使用 signer 对字符串进行签名
-func (client *Client) Sign(ctx context.Context, message string) (result *auth.SignatureResult, err error) {
+func (client *Client) Sign(ctx context.Context, message string) (result *auth2.SignatureResult, err error) {
 	return client.signer.Sign(ctx, message)
 }
 
@@ -334,7 +335,7 @@ func CheckResponse(resp *http.Response) error {
 	_ = resp.Body.Close()
 
 	resp.Body = io.NopCloser(bytes.NewBuffer(slurp))
-	apiError := &pay.APIError{
+	apiError := &APIError{
 		StatusCode: resp.StatusCode,
 		Header:     resp.Header,
 		Body:       string(slurp),

@@ -1,4 +1,4 @@
-package pay
+package client
 
 import (
 	"fmt"
