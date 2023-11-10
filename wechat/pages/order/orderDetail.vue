@@ -120,7 +120,8 @@
 	import {
 		fetchOrderDetail,
 		cancelUserOrder,
-		confirmReceiveOrder
+		confirmReceiveOrder,
+		payOrderSuccess
 	} from '@/api/order.js';
 	import {
 		formatDate
@@ -131,7 +132,8 @@
 			return {
 				orderId: null,
 				order: {},
-				orderStatus: {}
+				orderStatus: {},
+				orderPayment: {},
 			}
 		},
 		onLoad(option) {
@@ -173,9 +175,10 @@
 			//生成确认单信息
 			async loadData() {
 				fetchOrderDetail({id: this.orderId}).then(response => {
-					console.log("--this.order---", this.order)
 					if (response.code == 0) {
-						this.order = response.data;
+						this.order = response.data.order;
+						console.log("-[fetchOrderDetail]-this.order---", this.order)
+						this.orderPayment = response.data.payment
 						this.order.orderItemList.forEach(item => {
 							item.productPrice = numFilter(item.productPrice)
 							item.productQuantity = numFilter(item.productQuantity)
@@ -211,9 +214,33 @@
 			},
 			//支付订单
 			payOrder(orderId) {
-				uni.redirectTo({
-					url: `/pages/money/pay?orderId=${orderId}`
-				});
+				let _this = this
+				if (this.order.status == 0) {
+					wx.requestPayment({
+						"timeStamp": _this.orderPayment.timeStamp,
+						"nonceStr": _this.orderPayment.nonceStr,
+						"package": _this.orderPayment.package,
+						"signType": _this.orderPayment.signType,
+						"paySign": _this.orderPayment.paySign,
+						"success":function(res){
+							payOrderSuccess({ orderId: parseInt(this.orderId), payType: this.payType }).then(response => {
+								uni.redirectTo({
+									url: '/pages/money/paySuccess'
+								})
+							});
+						},
+						"fail":function(res){
+							console.log("---支付失败：", res)
+						},
+						"complete":function(res){
+							console.log("---支付完成：", res)
+						}
+					})
+				}
+				
+				// uni.redirectTo({
+				// 	url: `/pages/money/pay?orderId=${orderId}`
+				// });
 			},
 			//确认收货
 			receiveOrder(orderId) {

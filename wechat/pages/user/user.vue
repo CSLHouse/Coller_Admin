@@ -47,7 +47,7 @@
 					<text class="num">{{couponCount || '暂无'}}</text>
 					<text>优惠券</text>
 				</view>
-			</view>
+			</view>  -->
 			<view class="order-section">
 				<view class="order-item" @click="navTo('/pages/order/order?state=0')" hover-class="common-hover"  :hover-stay-time="50">
 					<text class="yticon icon-shouye"></text>
@@ -65,7 +65,7 @@
 					<text class="yticon icon-shouhoutuikuan"></text>
 					<text>退款/售后</text>
 				</view>
-			</view> -->
+			</view>
 			<!-- 浏览历史 -->
 			<view class="history-section icon">
 				<list-cell icon="icon-dizhi" iconColor="#5fcda2" title="会员管理" @eventClick="navTo('/pages/member/member')"></list-cell>
@@ -77,12 +77,12 @@
 				<list-cell icon="icon-shezhi1" iconColor="#e07472" title="设置" border="" @eventClick="navTo('/pages/set/set')"></list-cell>
 			</view>
 		<!-- </view> -->
-		<view v-if='!hasLogin && !isCloseModel' @click="closePop">
-			<div class="modal-mask">
+		<view v-if='!hasLogin && !isCloseModel'>
+			<div class="modal-mask" @click="closePop">
 			</div>
 			<div class="modal-dialog">
 			  <div class="modal-content">
-			    <image class="img" src="/static/pop.png"></image>
+			    <image class="img" src="/static/pop.jpg"></image>
 			    <div class="content-text">
 			      <p class="key-bold-tip">注册会员</p>
 			      <p class="key-bold">注册成为会员享受更多优惠</p>
@@ -99,12 +99,12 @@
 			  </div>
 			</div>
 		</view>
-		<view v-if='hasLogin && !hadNickName && !isCloseNickNameModel'>
+		<view v-if='hasLogin && !hadNickName && !isCloseNickNameModel' >
 			<div class="modal-mask" @click="closeNickNamePop">
 			</div>
 			<div class="modal-dialog">
 			  <div class="modal-content">
-			    <image class="img" src="/static/pop.png"></image>
+			    <image class="img" src="/static/pop.jpg"></image>
 			    <div class="content-text">
 			      <p class="info-bold-tip">完善信息可体验更多功能</p>
 			      <p class="key-bold">99%用户选择使用微信昵称</p>
@@ -129,14 +129,10 @@
 	} from '@/api/coupon.js';
 	import { getWXPhoneNumber, wxRefreshLogin, WXResetNickName } from '@/api/member.js';
     import { mapState, mapMutations } from 'vuex';
-	// import phonePop from '@/components/phone-pop.vue';
-	// import loginPop from '@/components/login-pop.vue';
 	let startY = 0, moveY = 0, pageAtTop = true;
     export default {
 		components: {
 			listCell,
-			// phonePop,
-			// loginPop
 		},
 		data(){
 			return {
@@ -151,30 +147,25 @@
 		},
 		onLoad(){
 		},
-		// onReady(){
-		// 	if (!this.hasLogin) {
-		// 		this.$refs.popup.open('top')
-		// 	}
-		// },
 		onShow(){
-			uni.login({
-				provider: 'weixin',
-				success: function(loginRes) {
-					console.log("登录", loginRes.code)
+			// uni.login({
+			// 	provider: 'weixin',
+			// 	success: function(loginRes) {
+			// 		console.log("登录", loginRes.code)
 					
-				},
-			})
+			// 	},
+			// })
 			
-			if(this.hasLogin){
-				// 获取优惠券
-				// fetchMemberCouponList(0).then(response=>{
-				// 	if(response.data!=null&&response.data.length>0){
-				// 		this.couponCount = response.data.length;
-				// 	}
-				// });
-			}else{
-				this.couponCount=null;
-			}
+			// if(this.hasLogin){
+			// 	// 获取优惠券
+			// 	fetchMemberCouponList(0).then(response=>{
+			// 		if(response.data!=null&&response.data.length>0){
+			// 			this.couponCount = response.data.length;
+			// 		}
+			// 	});
+			// }else{
+			// 	this.couponCount=null;
+			// }
 		},
 		// #ifndef MP
 		onNavigationBarButtonTap(e) {
@@ -222,13 +213,6 @@
 					return false
 				}
 				this.nickName = str
-				// if ((/[^/a-zA-Z0-9\u4E00-\u9FA5]/g).test(str)) {
-				//  uni.showToast({
-				//      title: '请输入中英文和数字',
-				//      icon: 'none'
-				//  })
-				//  return false
-				// }
 				return true
 			},
 						
@@ -242,7 +226,7 @@
 							uni.showToast({ title: '设置成功', duration: 2000 })
 							console.log("------WXResetNickName----userInfo---", this.$store.state.userInfo)
 							_this.$store.state.hadNickName = true
-							uni.setStorage({//缓存用户登陆状态
+							uni.setStorage({ //缓存用户登陆状态
 							    key: 'userInfo',  
 							    data: this.$store.state.userInfo  
 							})
@@ -263,15 +247,11 @@
 			},
 			decryptPhoneNumber: function(e) {
 				let _this = this
-				console.log("-------decryptPhoneNumber------", e)
-				console.log("-------_this.$store.state.openIdr------", _this.$store.state.openId)
 				if(e.detail.errMsg == "getPhoneNumber:ok"){
 					if (_this.$store.state.openId && _this.$store.state.openId.length > 0) {
 						getWXPhoneNumber({openId: _this.$store.state.openId, code: e.detail.code}).then(res=>{
-							console.log("------getWXPhoneNumber----res---", res)
 							if (res.code == 0) {
 								uni.showToast({ title: '注册成功', duration: 2000 })
-								console.log("-----phoneNumber:", res.data.phoneNumber)//成功后打印微信手机号
 								_this.getToken()
 							}
 							else {
@@ -284,12 +264,10 @@
 			getToken() {
 				let _this = this
 				wxRefreshLogin({openId: _this.$store.state.openId}).then(res => {
-					console.log("-[wxRefreshLogin]--", res)
 					if (res.code == 0) {
 						const userinfo = res.data
-						wx.setStorageSync("UserInfo", userinfo.customer,)
 						wx.setStorageSync("Token", userinfo.token)
-						wx.setStorageSync("TokenTime", (new Date()).getTime())
+						wx.setStorageSync("TokenTime", userinfo.expiresAt)
 						_this.$store.token = userinfo.token
 						this.login(userinfo.user);
 					}
@@ -351,30 +329,10 @@
 				this.coverTransition = 'transform 0.3s cubic-bezier(.21,1.93,.53,.64)';
 				this.coverTransform = 'translateY(0px)';
 			},
-			closePop() {
-				// 关闭弹窗
-				this.isClosePhoneModel = true
-			},
         }  
     }  
 </script>  
 <style lang='scss'>
-	/* .content {
-		text-align: center;
-		margin: 50rpx 30rpx 50rpx 30rpx;
-	}
-	.content .content_text {
-		font-size: 30rpx;
-		padding: 8rpx;
-	}
-	.content text {
-		font-size: 30rpx;
-		display: block;
-		color: #f5f5f5;
-		margin-top: 10rpx;
-		float: left;
-	} */
-	
 	%flex-center {
 	 display:flex;
 	 flex-direction: column;

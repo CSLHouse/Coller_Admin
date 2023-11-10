@@ -27,7 +27,7 @@
 		</view>
 
 		<!--  分享 -->
-		<view class="share-section" @click="share">
+		<!-- <view class="share-section" @click="share">
 			<view class="share-icon">
 				<text class="yticon icon-xingxing"></text>
 				返
@@ -38,8 +38,7 @@
 				立即分享
 				<text class="yticon icon-you"></text>
 			</view>
-
-		</view>
+		</view> -->
 
 		<view class="c-list">
 			<view class="c-row b-b" @click="toggleSpec">
@@ -58,11 +57,11 @@
 				</view>
 				<text class="yticon icon-you"></text>
 			</view>
-			<view class="c-row b-b" @click="toggleCoupon('show')">
+			<!-- <view class="c-row b-b" @click="toggleCoupon('show')">
 				<text class="tit">优惠券</text>
 				<text class="con t-r red">领取优惠券</text>
 				<text class="yticon icon-you"></text>
-			</view>
+			</view> -->
 			<view class="c-row b-b">
 				<text class="tit">促销活动</text>
 				<view class="con-list">
@@ -127,14 +126,15 @@
 				<text class="yticon icon-xiatubiao--copy"></text>
 				<text>首页</text>
 			</navigator>
+			<view class="p-b-btn" :class="{active: favorite}" @click="toFavorite">
+				<text class="yticon icon-bangzhu1"></text>
+				<text>客服</text>
+			</view>
 			<navigator url="/pages/cart/cart" open-type="switchTab" class="p-b-btn">
 				<text class="yticon icon-gouwuche"></text>
 				<text>购物车</text>
 			</navigator>
-			<view class="p-b-btn" :class="{active: favorite}" @click="toFavorite">
-				<text class="yticon icon-shoucang"></text>
-				<text>收藏</text>
-			</view>
+			
 
 			<view class="action-btn-group">
 				<button type="primary" class=" action-btn no-border buy-now-btn" @click="buy">立即购买</button>
@@ -212,6 +212,18 @@
 		</view>
 		<!-- 分享 -->
 		<share ref="share" :contentHeight="580" :shareList="shareList"></share>
+		<view v-if='!isCloseModel'>
+			<div class="modal-mask" @click="closePop">
+			</div>
+			<div class="modal-dialog">
+			  <div class="modal-content">
+			    <image class="img" src="/static/pop.jpg"></image>
+			    <image class="qr-code" :show-menu-by-longpress="true" src="/static/my.jpg" @click="previewImage"></image>
+				<image style="width:402rpx;height:94rpx;" src="/static/longbtn.jpg"></image>
+			  </div>
+			  
+			</div>
+		</view>
 	</view>
 </template>
 
@@ -244,13 +256,13 @@
 	import { numFilter } from '@/utils/common';
 	
 	const defaultServiceList = [{
-		id: 1,
+		id: 0,
 		name: "无忧退货"
 	}, {
-		id: 2,
+		id: 1,
 		name: "快速退款"
 	}, {
-		id: 3,
+		id: 2,
 		name: "免费包邮"
 	}];
 	const defaultShareList = [{
@@ -296,7 +308,8 @@
 				attrList: [],
 				promotionTipList: [],
 				couponState: 0,
-				couponList: []
+				couponList: [],
+				isCloseModel: true,
 			};
 		},
 		async onLoad(options) {
@@ -420,42 +433,43 @@
 				});
 			},
 			//分享
-			share() {
-				this.$refs.share.toggleMask();
-			},
+			// share() {
+			// 	this.$refs.share.toggleMask();
+			// },
 			//收藏
 			toFavorite() {
-				if (!this.checkForLogin()) {
-					return;
-				}
-				if (this.favorite) {
-					//取消收藏
-					deleteProductCollection({
-						productId: this.product.id
-					}).then(response => {
-						uni.showToast({
-							title: "取消收藏成功！",
-							icon: 'none'
-						});
-						this.favorite = !this.favorite;
-					});
-				} else {
-					//收藏
-					let productCollection = {
-						productId: this.product.id,
-						productName: this.product.name,
-						productPic: this.product.pic,
-						productPrice: this.product.price,
-						productSubTitle: this.product.subTitle
-					}
-					createProductCollection(productCollection).then(response => {
-						uni.showToast({
-							title: "收藏成功！",
-							icon: 'none'
-						});
-						this.favorite = !this.favorite;
-					});
-				}
+				this.isCloseModel = false
+				// if (!this.checkForLogin()) {
+				// 	return;
+				// }
+				// if (this.favorite) {
+				// 	//取消收藏
+				// 	deleteProductCollection({
+				// 		productId: this.product.id
+				// 	}).then(response => {
+				// 		uni.showToast({
+				// 			title: "取消收藏成功！",
+				// 			icon: 'none'
+				// 		});
+				// 		this.favorite = !this.favorite;
+				// 	});
+				// } else {
+				// 	//收藏
+				// 	let productCollection = {
+				// 		productId: this.product.id,
+				// 		productName: this.product.name,
+				// 		productPic: this.product.pic,
+				// 		productPrice: this.product.price,
+				// 		productSubTitle: this.product.subTitle
+				// 	}
+				// 	createProductCollection(productCollection).then(response => {
+				// 		uni.showToast({
+				// 			title: "收藏成功！",
+				// 			icon: 'none'
+				// 		});
+				// 		this.favorite = !this.favorite;
+				// 	});
+				// }
 			},
 			buy() {
 				uni.showToast({
@@ -478,8 +492,9 @@
 			},
 			//设置服务信息
 			initServiceList() {
+				let serviceList = this.product.serviceIds.split(',');
 				for (let item of defaultServiceList) {
-					if (this.product.serviceIds.indexOf(item.id) != -1) {
+					if (serviceList[item.id]) {
 						this.serviceList.push(item.name);
 					}
 				}
@@ -525,6 +540,8 @@
 				let availAbleSpecSet = new Set();
 				for (let i = 0; i < this.skuStockList.length; i++) {
 					let spDataArr = JSON.parse(this.skuStockList[i].spData);
+					// let spDataArr = this.skuStockList[i].spData;
+					
 					for (let j = 0; j < spDataArr.length; j++) {
 						availAbleSpecSet.add(spDataArr[j].value);
 					}
@@ -722,6 +739,28 @@
 				uni.navigateTo({
 					url: `/pages/brand/brandDetail?id=${id}`
 				})
+			},
+			closePop() {
+				this.isCloseModel = true
+			},
+			previewImage(e) {
+				uni.previewImage({
+					// 需要预览的图片链接列表。若无需预览，可以注释urls
+					urls: [e.target.src],
+					// 图片指示器样式	
+					indicator:'default',
+					
+					// 长按图片显示操作菜单，如不填默认为保存相册
+					longPressActions:{
+						itemList:[this.l('发送给朋友'),this.l]
+					},
+					success: res => {
+						console.log('previewImage res', res);
+					}, 
+					fail: err => {
+						console.log('previewImage err', err);
+					}
+				});
 			},
 		},
 
@@ -1276,6 +1315,9 @@
 			.icon-shoucang {
 				font-size: 46upx;
 			}
+			.icon-bangzhu1 {
+				font-size: 46upx;
+			}
 		}
 
 		.action-btn-group {
@@ -1509,4 +1551,50 @@
 			}
 		}
 	}
+	
+	.modal-mask {
+	  width: 100%;
+	  height: 100%;
+	  position: fixed;
+	  top: 0;
+	  left: 0;
+	  background: #000;
+	  opacity: 0.5;
+	  overflow: hidden;
+	  z-index: 9000;
+	  color: #fff;
+	}
+	.modal-dialog {
+	  box-sizing: border-box;
+	  width: 560rpx;
+	  /* height: 840rpx; */
+	  overflow: hidden;
+	  position: fixed;
+	  top: 40%;
+	  left: 0;
+	  z-index: 9999;
+	  background: #fff;
+	  margin: -150rpx 95rpx;
+	  border-radius: 16rpx;
+	}
+	.modal-content {
+	  box-sizing: border-box;
+	  display: flex;
+	  padding: 0rpx 53rpx 50rpx 53rpx;
+	  font-size: 32rpx;
+	  align-items: center;
+	  justify-content: center;
+	  flex-direction: column;
+	}
+	.qr-code {
+	  /* height:230px; */
+	  padding:10px 0px 10px 0px;
+	  width: 402rpx;
+	  height:404rpx;
+	}
+	.img {
+	  width: 560rpx;
+	  height:140rpx;
+	}
+	
 </style>

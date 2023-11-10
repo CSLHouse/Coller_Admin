@@ -23,6 +23,14 @@ export function deletCartItem(params) {
 	})
 }
 
+export function deletCartItemWithList(params) {
+	return request({
+		method: 'DELETE',
+		url: '/product/carts',
+		params:params
+	})
+}
+
 export function updateQuantity(params) {
 	return request({
 		method: 'PUT',

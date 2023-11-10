@@ -56,8 +56,7 @@
 				console.log("--[initWXLogin]-userInfo:", userInfo)
 				
 				// token有效时间 82800000 23h
-				// if (userInfo && token && (tokenTime + 82800000 > (new Date()).getTime())) {
-				if (userInfo && token ) {
+				if (userInfo && token && (tokenTime > (new Date()).getTime())) {
 					_this.$store.state.token = token
 					if (userInfo.nickName) {
 						_this.$store.state.hadNickName = true
@@ -75,20 +74,11 @@
 				wxRefreshLogin({openId: _this.$store.state.openId}).then(res => {
 					if (res.code == 0) {
 						const userinfo = res.data
-						uni.setStorage({//缓存用户登陆状态
-						    key: 'UserInfo',  
-						    data: userinfo.user
-						})
-						uni.setStorage({//缓存用户登陆状态
-						    key: 'Token',  
-						    data: userinfo.token
-						})
-						uni.setStorage({//缓存用户登陆状态
-						    key: 'TokenTime',  
-						    data: (new Date()).getTime()
-						})
-						this.login(userinfo.user);
-						_this.$store.token = userinfo.token
+						wx.setStorageSync("Token", userinfo.token)
+						console.log("--[getToken]expiresAt:", userinfo.expiresAt)
+						wx.setStorageSync("TokenTime", userinfo.expiresAt)
+						_this.$store.state.token = userinfo.token
+						this.login(userinfo.customer);
 					}
 				}).catch(errors => {
 					console.log("------wxRefreshLogin---errors--------", errors)

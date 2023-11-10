@@ -46,14 +46,17 @@ const store = new Vuex.Store({
 		login(state, provider) {
 			state.hasLogin = true;
 			state.userInfo = provider;
+			state.hadNickName = true
 			uni.setStorage({//缓存用户登陆状态
 			    key: 'UserInfo',  
 			    data: provider
 			})
 		},
 		logout(state) {
-			state.hasLogin = false;
-			state.userInfo = {};
+			state.hasLogin = false
+			state.hadNickName = false
+			state.userInfo = {}
+			state.token = null
 			uni.removeStorage({  
                 key: 'UserInfo'  
             });

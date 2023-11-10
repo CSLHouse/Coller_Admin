@@ -163,12 +163,12 @@
 		</view>
 		<uni-load-more :status="loadingType"></uni-load-more>
 		
-		<view v-if='!hasLogin && !isCloseModel' @click="closePop">
-			<div class="modal-mask">
+		<view v-if='!hasLogin && !isCloseModel' >
+			<div class="modal-mask" @click="closePop">
 			</div>
 			<div class="modal-dialog">
 			  <div class="modal-content">
-			    <image class="img" src="/static/pop.png"></image>
+			    <image class="img" src="/static/pop.jpg"></image>
 			    <div class="content-text">
 			      <p class="key-bold-tip">注册会员</p>
 			      <p class="key-bold">注册成为会员享受更多优惠</p>
@@ -190,7 +190,7 @@
 			</div>
 			<div class="modal-dialog">
 			  <div class="modal-content">
-			    <image class="img" src="/static/pop.png"></image>
+			    <image class="img" src="/static/pop.jpg"></image>
 			    <div class="content-text">
 			      <p class="info-bold-tip">完善信息可体验更多功能</p>
 			      <p class="key-bold">99%用户选择使用微信昵称</p>
@@ -221,13 +221,9 @@
 		formatDate
 	} from '@/utils/date';
 	import uniLoadMore from '@/components/uni-load-more/uni-load-more.vue';
-	// import loginPop from '@/components/login-pop.vue';
-	// import phonePop from '@/components/phone-pop.vue';
 	export default {
 		components: {
 			uniLoadMore,
-			// loginPop,
-			// phonePop,
 		},
 		data() {
 			return {
@@ -340,13 +336,6 @@
 					return false
 				}
 				this.nickName = str
-				// if ((/[^/a-zA-Z0-9\u4E00-\u9FA5]/g).test(str)) {
-				//  uni.showToast({
-				//      title: '请输入中英文和数字',
-				//      icon: 'none'
-				//  })
-				//  return false
-				// }
 				return true
 			},
 						
@@ -358,7 +347,6 @@
 					WXResetNickName(this.$store.state.userInfo).then(res=>{
 						if (res.code == 0) {
 							uni.showToast({ title: '设置成功', duration: 2000 })
-							console.log("------WXResetNickName----userInfo---", _this.$store.state.userInfo)
 							_this.$store.state.hadNickName = true
 							uni.setStorage({//缓存用户登陆状态
 							    key: 'UserInfo',
@@ -375,22 +363,16 @@
 			},	
 			closePop() {
 				this.isCloseModel = true
+				console.log("--index-this.isCloseModel:", this.isCloseModel)
 			},
 			closeNickNamePop() {
 				this.isCloseNickNameModel = true
 			},
-			handleShowLoginModel(e) {
-				console.log("-------------e:", e)
-				this.isCloseModel = e
-			},
 			decryptPhoneNumber: function(e) {
 				let _this = this
-				console.log("-------decryptPhoneNumber------", e)
-				console.log("-------_this.$store.state.openIdr------", _this.$store.state.openId)
 				if(e.detail.errMsg == "getPhoneNumber:ok"){
 					if (_this.$store.state.openId && _this.$store.state.openId.length > 0) {
 						getWXPhoneNumber({openId: _this.$store.state.openId, code: e.detail.code}).then(res=>{
-							console.log("------getWXPhoneNumber----res---", res)
 							if (res.code == 0) {
 								uni.showToast({ title: '注册成功', duration: 2000 })
 								console.log("-----phoneNumber:", res.data.phoneNumber)//成功后打印微信手机号
@@ -409,11 +391,11 @@
 					console.log("-[wxRefreshLogin]--", res)
 					if (res.code == 0) {
 						const userinfo = res.data
-						wx.setStorageSync("UserInfo", userinfo.customer,)
 						wx.setStorageSync("Token", userinfo.token)
-						wx.setStorageSync("TokenTime", (new Date()).getTime())
+						console.log("--[getToken]expiresAt:", userinfo.expiresAt)
+						wx.setStorageSync("TokenTime", userinfo.expiresAt)
 						_this.$store.token = userinfo.token
-						this.login(userinfo.user);
+						this.login(userinfo.customer);
 					}
 				}).catch(errors => {
 					console.log("------wxRefreshLogin---errors--------", errors)

@@ -309,8 +309,8 @@
 			},
 			{
 				"pagePath": "pages/certificate/certificate",
-				"iconPath": "static/tab-cate.png",
-				"selectedIconPath": "static/tab-cate-current.png",
+				"iconPath": "static/card.png",
+				"selectedIconPath": "static/card-current.png",
 				"text": "共通卡"
 			},
 			{

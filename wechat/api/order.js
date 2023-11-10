@@ -11,7 +11,7 @@ export function generateConfirmOrder(data) {
 export function generateOrder(data) {
 	return request({
 		method: 'POST',
-		url: '/order/generateOrder',
+		url: '/pay/generateOrder',
 		data: data
 	})
 }

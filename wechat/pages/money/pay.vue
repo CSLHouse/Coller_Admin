@@ -14,20 +14,20 @@
 					<text>推荐使用微信支付</text>
 				</view>
 				<label class="radio">
-					<!-- <radio value="" color="#fa436a" :checked='payType == 2' />
-					</radio> -->
+					<radio value="" color="#fa436a" :checked='payType == 2' />
+					</radio>
 				</label>
 			</view>
-			<view class="type-item b-b" @click="changePayType(1)">
+			<!-- <view class="type-item b-b" @click="changePayType(1)">
 				<text class="icon yticon icon-alipay"></text>
 				<view class="con">
 					<text class="tit">支付宝支付</text>
 				</view>
 				<label class="radio">
-					<!-- <radio value="" color="#fa436a" :checked='payType == 1' />
-					</radio> -->
+					<radio value="" color="#fa436a" :checked='payType == 1' />
+					</radio>
 				</label>
-			</view>
+			</view> -->
 		</view>
 
 		<text class="mix-btn" @click="confirm">确认支付</text>
@@ -44,11 +44,14 @@
 			return {
 				orderId: null,
 				payType: 2,
-				orderInfo: {}
+				orderInfo: {},
+				payment: null
 			};
 		},
 		onLoad(options) {
 			this.orderId = options.orderId;
+			this.payment = options.payment;
+			console.log("-【onLoad】-payment---", this.payment.timeStamp)
 			fetchOrderDetail({id: this.orderId}).then(response => {
 				this.orderInfo = response.data;
 			});
@@ -60,11 +63,33 @@
 			},
 			//确认支付
 			confirm: async function() {
-				payOrderSuccess({ orderId: parseInt(this.orderId), payType: this.payType }).then(response => {
-					uni.redirectTo({
-						url: '/pages/money/paySuccess'
+				let _this = this
+				console.log("-【confirm】-payment---", _this.payment)
+				if (_this.payment) {
+					wx.requestPayment({
+						"timeStamp": _this.payment.timeStamp,
+						"nonceStr": _this.payment.nonceStr,
+						"package": "prepay_id=" +  _this.payment.package,
+						"signType": _this.payment.SignType,
+						"paySign": _this.payment.paySign,
+						"success":function(res){
+							console.log("---支付成功：", res)
+							payOrderSuccess({ orderId: parseInt(_this.orderId), payType: _this.payType }).then(response => {
+								uni.redirectTo({
+									url: '/pages/money/paySuccess'
+								})
+							});
+						},
+						"fail":function(res){
+							console.log("---支付失败：", res)
+						},
+						"complete":function(res){
+							console.log("---支付完成：", res)
+						}
 					})
-				});
+				}
+				
+				
 			},
 		}
 	}

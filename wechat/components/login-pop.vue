@@ -145,7 +145,8 @@
 						wx.setStorageSync("UserInfo", userinfo.user)
 						this.login(userinfo.user);
 						wx.setStorageSync("Token", userinfo.token)
-						wx.setStorageSync("TokenTime", (new Date()).getTime())
+						console.log("--[getToken]expiresAt:", userinfo.expiresAt)
+						wx.setStorageSync("TokenTime", userinfo.expiresAt)
 						if (userinfo.user.phone.length == 11) {
 							uni.setStorageSync('HadPhone', true)
 						}

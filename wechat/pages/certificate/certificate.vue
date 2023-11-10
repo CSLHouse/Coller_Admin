@@ -1,7 +1,7 @@
 <template>
 	<view class="container">
 		<view class="card" v-if="certificateList.length > 0">
-			<image class="bg" src="/static/bg.png"></image>
+			<image class="bg" src="/static/bg.jpg"></image>
 			<text class="card-title">共通卡</text>
 			<text class="card-content">凭此卡可在多个店铺享受至尊优惠</text>
 		</view>

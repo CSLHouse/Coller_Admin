@@ -141,6 +141,9 @@
 		generateOrder
 	} from '@/api/order.js';
 	import {
+		deletCartItemWithList
+	} from '@/api/cart.js';
+	import {
 		formatDate
 	} from '@/utils/date';
 	export default {
@@ -164,7 +167,7 @@
 		onLoad(option) {
 			//商品数据
 			this.cartIds = JSON.parse(option.cartIds);
-			console.log(this.cartIds);
+			console.log("--[createOrder]-onLoad-this.cartIds:", this.cartIds);
 			this.loadData();
 		},
 		filters: {
@@ -229,39 +232,80 @@
 				this.payType = type;
 			},
 			submit() {
-				let orderParam = {
-					payType: 0,
-					couponId: null,
-					cartIds: this.cartIds,
-					memberReceiveAddressId: this.currentAddress.id,
-					useIntegration: this.useIntegration
-				}
-				if(this.currCoupon != null){
-					orderParam.couponId = this.currCoupon.id;
-				}
-				generateOrder(orderParam).then(response => {
-					console.log("--generateOrder-", response.data)
-					// let orderId = response.data.order.id;
-					let orderId = response.data.id;
-					uni.showModal({
-						title: '提示',
-						content: '订单创建成功，是否要立即支付？',
-						confirmText:'去支付',
-						cancelText:'取消',
-						success: function(res) {
-							if (res.confirm) {
-								uni.redirectTo({
-									url: `/pages/money/pay?orderId=${orderId}`
-								})
-							} else if (res.cancel) {
-								console.log("cancel")
-								uni.redirectTo({
-									url: '/pages/order/order?state=0'
-								})
-							}
+				let _this = this
+				let ip
+				let appId
+				const accountInfo = uni.getAccountInfoSync();
+				appId = accountInfo.miniProgram.appId
+				
+				wx.request({
+				    url: 'http://ip-api.com/json',
+				    success: function (res) {
+				        console.log("ip =>", res.data.query, res.data);
+						ip = res.data.query
+						let orderParam = {
+							appId: appId,
+							openId: _this.$store.state.openId,
+							ip: ip,
+							payType: 0,
+							couponId: null,
+							cartIds: _this.cartIds,
+							memberReceiveAddressId: _this.currentAddress.id,
+							useIntegration: _this.useIntegration
 						}
-					});
-				});
+						if(_this.currCoupon != null){
+							orderParam.couponId = _this.currCoupon.id;
+						}
+						generateOrder(orderParam).then(response => {
+							console.log("--generateOrder-", response.data)
+							let orderId = response.data.orderId;
+							let payment = response.data.payment
+							deletCartItemWithList({ids: _this.cartIds}).then(response=>{
+								if (response.code !== 0) {
+									console.log("--[generateOrder]-deletCartItemWithList:", response.data)
+									return
+								}
+							});
+							
+							console.log("--payment---", payment)
+							wx.requestPayment({
+								"timeStamp": payment.timeStamp,
+								"nonceStr": payment.nonceStr,
+								"package": payment.package,
+								"signType": payment.signType,
+								"paySign": payment.paySign,
+								"success":function(res){
+									console.log("---支付成功：", res)
+								},
+								"fail":function(res){
+									console.log("---支付失败：", res)
+								},
+								"complete":function(res){
+									console.log("---支付完成：", res)
+								}
+							})
+							
+							// uni.showModal({
+							// 	title: '提示',
+							// 	content: '订单创建成功，是否要立即支付？',
+							// 	confirmText:'去支付',
+							// 	cancelText:'取消',
+							// 	success: function(res) {
+							// 		if (res.confirm) {
+							// 			uni.redirectTo({
+							// 				url: `/pages/money/pay?orderId=${orderId}&payment=${payment}`
+							// 			})
+							// 		} else if (res.cancel) {
+							// 			console.log("cancel")
+							// 			uni.redirectTo({
+							// 				url: '/pages/order/order?state=0'
+							// 			})
+							// 		}
+							// 	}
+							// });
+						});
+				    }
+				})
 			},
 			stopPrevent() {},
 			//获取默认收货地址
