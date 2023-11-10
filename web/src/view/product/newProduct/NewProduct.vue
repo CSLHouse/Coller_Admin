@@ -1,7 +1,10 @@
 <template>
     <el-card>
         <el-steps :active="active" finish-status="success">
-            <el-step :title="item" v-for="item in titleList" :key="item"/>
+            <el-step title="填写商品信息"></el-step>
+            <el-step title="填写商品促销"></el-step>
+            <el-step title="填写商品属性"></el-step>
+            <el-step title="选择商品关联"></el-step>
         </el-steps>
         <div class="h-6" />
         <el-form
@@ -10,6 +13,7 @@
             status-icon
             label-width="120px"
             class="demo-ruleForm"
+            :rules="rules"
             style="max-width: 860px;margin-left: 20px;"
             >
             <div v-if="active==0">
@@ -23,7 +27,7 @@
                 <el-form-item label="副标题" prop="subTitle">
                     <el-input v-model="productForm.subTitle" type="text" autocomplete="off" />
                 </el-form-item>
-                <el-form-item label="商品品牌" prop="comboId">
+                <el-form-item label="商品品牌" prop="brand">
                     <el-select v-model="productBrandOption" class="m-2" placeholder="请选择品牌" size="large">
                         <el-option
                             v-for="item in productBrandOptions"
@@ -130,7 +134,7 @@
                     <el-row>
                         
                     </el-row>
-                    <div v-if="promotionTypeState == 1">
+                    <div v-if="promotionTypeState == '1'">
                         <el-form
                             ref="ruleFormRef"
                             :model="productForm"
@@ -160,7 +164,7 @@
                             </el-form-item>
                         </el-form>
                     </div>
-                    <div v-if="promotionTypeState == 2">
+                    <div v-if="promotionTypeState == '2'">
                         <el-form
                             ref="ruleFormRef"
                             :model="item"
@@ -186,7 +190,7 @@
                             </el-form-item> -->
                         </el-form>
                     </div>
-                    <div v-if="promotionTypeState == 3">
+                    <div v-if="promotionTypeState == '3'">
                         <el-table :data="productLadderList" style="width: 600px;margin-top: 10px;">
                             <el-table-column label="数量" >
                                 <template #default="scope">
@@ -210,7 +214,7 @@
                             </el-table-column>
                         </el-table>
                     </div>
-                    <div v-if="promotionTypeState == 4">
+                    <div v-if="promotionTypeState == '4'">
                         <el-table :data="productFullReductionList" style="width: 600px;margin-top: 10px;">
                             <el-table-column label="满" >
                                 <template #default="scope">
@@ -269,7 +273,7 @@
                             <el-table-column v-for="(item, index) in skuColumsData" :key="index" :prop="item.prop" :label="item.label" :width="item.width" >
                                 <template #default="scope">
                                     <div v-if="item.operation">
-                                        <el-button link type="primary" size="small" @click.prevent="handleDeleteRow(scop.$index)">删除</el-button>
+                                        <el-button link type="primary" size="small" @click.prevent="handleDeleteRow(scope.$index)">删除</el-button>
                                     </div>
                                     <div v-if="item.canEdit">
                                         <el-input-number v-model="scope.row[item.prop]" :precision="2" size="small"></el-input-number>
@@ -343,10 +347,7 @@
   import { createProduct, getProductAttributeList } from '@/api/product'
   import { reactive, ref, onBeforeMount, watch } from 'vue'
   import { FormInstance, FormRules, ElMessage } from 'element-plus'
-  import { Plus } from '@element-plus/icons-vue'
   import { ProductStore } from '@/pinia/modules/product'  
-import { number } from 'echarts'
-  const titleList = ["填写商品信息", "填写商品促销", "填写商品属性", "选择商品关联"]
   const active = ref(0)
   const back = () => {
     if (active.value-- < 0) active.value = 0
@@ -354,47 +355,37 @@ import { number } from 'echarts'
   const next = () => {
     if (active.value++ > 3) active.value = 0
   }
+  const productStore = ProductStore()
 
   const ruleFormRef = ref<FormInstance>()
+  const validateCategoryName = (rule: any, value: any, callback: any) => {
+    if (value === '') {
+      callback(new Error('Please input the id'))
+    } else {
+      if (productForm.value.productCategoryName !== '') {
+        if (!ruleFormRef.value) return
+        ruleFormRef.value.validateField('cardId', () => null)
+      }
+      callback()
+    }
+  }
+  const rules = reactive<FormRules>({
+    productCategoryName: [
+        { required: true, message: "请选择分类", trigger: "blur" }
+    ],
+    name: [
+        { required: true, message: "请输入商品名称", trigger: "blur" }
+    ],
+    brand: [
+        { required: true, message: "请选择品牌", trigger: "blur" }
+    ],
+  })
   
-  const productStore = ProductStore()
   
   const productAttributeOption = ref<elementItem>()
   const productAttributeOptions = ref<elementItem[]>([])
   const productCategoryOptions = ref([])
-//   const parseProductAttributeCategory = (productAttributeCategoryList) => {
-//     let productAttributeMap = {}
-//     productAttributeCategoryList.forEach((item) => {
-//         let splitted = item.name.split("-")
-//         if ( !productAttributeMap[splitted[0]]) {
-//             if (splitted.length > 1) {
-//                 productAttributeMap[splitted[0]] = [{"id": item.id, "data": splitted[1]}]
-//             } else {
-//                 productAttributeMap[splitted[0]] = {"id": item.id, "data": splitted[0]}
-//             }
-//         } else {
-//             if (splitted.length > 1) {
-//                 productAttributeMap[splitted[0]].push({"id": item.id, "data": splitted[1]})
-//             }
-//         }
-//     })
-//     for (let key in productAttributeMap) {
-//         let productAttribute = {}
-//         productAttribute["label"] = key
-//         productAttribute["value"] = productAttributeMap[key].id
-//         if (Array.isArray(productAttributeMap[key])) {
-//             productAttribute["children"] = []
-//             productAttributeMap[key].forEach((item) => {
-//                 let productAttributeItem = {}
-//                 productAttributeItem["label"] = item.data
-//                 productAttributeItem["value"] = item.id
-//                 productAttribute["children"].push(productAttributeItem)
-//             })
-//         }
-//         productCategoryOptions.value.push(productAttribute)
-//     }
-//     console.log("----productCategoryOptions---", productCategoryOptions.value)
-//   }
+
   const getProductAttributeData = async() => {
     await productStore.BuildProductAttributeData()
     productCategoryOptions.value = productStore.ProductCategoryOptions
@@ -405,7 +396,6 @@ import { number } from 'echarts'
     productAttributeOptions.value = productAttributeCategoryList.map((item) => {
         return {key: item.id, value: item.name}
     })
-    // parseProductAttributeCategory(productAttributeCategoryList)
   }
   const productType = ref()
   const handleProductTypeChange = (value) => {
@@ -633,11 +623,7 @@ import { number } from 'echarts'
 
     productBrandOption.value = {key: 0, value: ""}
   }
-  const resetForm = (formEl: FormInstance | undefined) => {
-    if (!formEl) return
-    formEl.resetFields()
-    resetData()
-  }
+
   const checkList = ref([])
   const HandleServiceIdsRadioChanged = () => {
     let serviceIdsStr = ""
@@ -718,7 +704,6 @@ import { number } from 'echarts'
         )
     }
   }
-  const attributeValue = {}
 
   const addStandard = async(item) => {
     if (item.newSelect == '') {
