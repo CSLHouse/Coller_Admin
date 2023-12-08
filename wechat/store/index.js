@@ -21,7 +21,6 @@ const store = new Vuex.Store({
 				provider: 'weixin', //使用微信登录
 				success: function (loginRes) {
 					wxLogin({code: loginRes.code}).then(res => {
-						console.log("------login---res--------", res)
 						if (res.code == 0) {
 							uni.setStorage({//缓存用户登陆状态
 							    key: 'OpenId',  
@@ -30,7 +29,6 @@ const store = new Vuex.Store({
 							// wx.setStorageSync("WxCode", loginRes.code)
 							// wx.setStorageSync("WxCodeTime", (new Date()).getTime())
 							_this.state.openId = res.data.openid
-							console.log("-[refreshLoginSession]-openId-", _this.state.openId)
 						} else {
 							uni.showToast({
 								title: res.data,
@@ -38,7 +36,11 @@ const store = new Vuex.Store({
 							})
 						}
 					}).catch(errors => {
-						console.log("------login---errors--------", errors)
+						uni.showModal({
+							title:'提示',
+							content:'登录失败',
+							showCancel:false
+						})
 					});
 				}
 			});
@@ -46,7 +48,9 @@ const store = new Vuex.Store({
 		login(state, provider) {
 			state.hasLogin = true;
 			state.userInfo = provider;
-			state.hadNickName = true
+			if (provider.nickName) {
+				state.hadNickName = true
+			}
 			uni.setStorage({//缓存用户登陆状态
 			    key: 'UserInfo',  
 			    data: provider

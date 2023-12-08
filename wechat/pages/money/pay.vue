@@ -64,7 +64,7 @@
 			//确认支付
 			confirm: async function() {
 				let _this = this
-				console.log("-【confirm】-payment---", _this.payment)
+				// console.log("-【confirm】-payment---", _this.payment)
 				if (_this.payment) {
 					wx.requestPayment({
 						"timeStamp": _this.payment.timeStamp,
@@ -73,7 +73,7 @@
 						"signType": _this.payment.SignType,
 						"paySign": _this.payment.paySign,
 						"success":function(res){
-							console.log("---支付成功：", res)
+							// console.log("---支付成功：", res)
 							payOrderSuccess({ orderId: parseInt(_this.orderId), payType: _this.payType }).then(response => {
 								uni.redirectTo({
 									url: '/pages/money/paySuccess'
@@ -81,10 +81,10 @@
 							});
 						},
 						"fail":function(res){
-							console.log("---支付失败：", res)
+							// console.log("---支付失败：", res)
 						},
 						"complete":function(res){
-							console.log("---支付完成：", res)
+							// console.log("---支付完成：", res)
 						}
 					})
 				}

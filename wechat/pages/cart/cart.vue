@@ -128,7 +128,7 @@
 			},
 			navToLogin() {
 				uni.navigateTo({
-					url: '/pages/public/login'
+					url: '/pages/user/user'
 				})
 			},
 			//选中状态处理

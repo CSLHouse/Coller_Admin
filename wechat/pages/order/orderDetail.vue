@@ -177,7 +177,7 @@
 				fetchOrderDetail({id: this.orderId}).then(response => {
 					if (response.code == 0) {
 						this.order = response.data.order;
-						console.log("-[fetchOrderDetail]-this.order---", this.order)
+						// console.log("-[fetchOrderDetail]-this.order---", this.order)
 						this.orderPayment = response.data.payment
 						this.order.orderItemList.forEach(item => {
 							item.productPrice = numFilter(item.productPrice)
@@ -207,7 +207,7 @@
 								superThis.loadData();
 							});
 						} else if (res.cancel) {
-							console.log('用户点击取消');
+							// console.log('用户点击取消');
 						}
 					}
 				});
@@ -230,10 +230,10 @@
 							});
 						},
 						"fail":function(res){
-							console.log("---支付失败：", res)
+							// console.log("---支付失败：", res)
 						},
 						"complete":function(res){
-							console.log("---支付完成：", res)
+							// console.log("---支付完成：", res)
 						}
 					})
 				}
@@ -260,7 +260,7 @@
 								superThis.loadData();
 							});
 						} else if (res.cancel) {
-							console.log('用户点击取消');
+							// console.log('用户点击取消');
 						}
 					}
 				});

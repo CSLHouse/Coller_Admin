@@ -12,9 +12,9 @@
 			<!-- 标题栏和状态栏占位符 -->
 			<view class="titleNview-placing"></view>
 			<!-- 背景色区域 -->
-			<view class="titleNview-background" :style="{backgroundColor:titleNViewBackground}"></view>
+			<view class="titleNview-background"></view>
 			<swiper class="carousel" circular indicator-dots autoplay :interval="5000"
-				:duration="500" @change="swiperChange">
+				:duration="500" >
 				<swiper-item v-for="(item, index) in advertiseList" :key="index" class="carousel-item" @click="navToAdvertisePage(item)">
 					<image :src="item.pic" />
 				</swiper-item>
@@ -27,7 +27,7 @@
 			</view>
 		</view>
 		<!-- 头部功能区 -->
-		<view class="cate-section">
+		<!-- <view class="cate-section">
 			<view class="cate-item">
 				<image src="/static/temp/c3.png"></image>
 				<text>专题</text>
@@ -44,7 +44,7 @@
 				<image src="/static/temp/c7.png"></image>
 				<text>特惠</text>
 			</view>
-		</view>
+		</view> -->
 
 		<!-- 品牌制造商直供 -->
 		<!-- <view class="f-header m-t" @click="navToRecommendBrandPage()">
@@ -185,26 +185,6 @@
 			  </div>
 			</div>
 		</view>
-		<view v-if=' hasLogin && !hadNickName && !isCloseNickNameModel' >
-			<div class="modal-mask" @click="closeNickNamePop">
-			</div>
-			<div class="modal-dialog">
-			  <div class="modal-content">
-			    <image class="img" src="/static/pop.jpg"></image>
-			    <div class="content-text">
-			      <p class="info-bold-tip">完善信息可体验更多功能</p>
-			      <p class="key-bold">99%用户选择使用微信昵称</p>
-				   <input type="nickname" class="weui-input" placeholder="请选择微信昵称" maxlength="15" v-model="nickName"
-				    @change="getNickname" />
-			    </div>
-			  </div>
-			  <div class="modal-footer">
-			    <button class='btn' @click="confirmNickName">
-			    	确认
-			    </button>
-			  </div>
-			</div>
-		</view>
 	</view>
 </template>
 
@@ -228,7 +208,6 @@
 		data() {
 			return {
 				titleNViewBackground: '',
-				titleNViewBackgroundList: ['rgb(203, 87, 60)', 'rgb(205, 215, 218)'],
 				swiperCurrent: 0,
 				swiperLength: 0,
 				carouselList: [],
@@ -237,7 +216,7 @@
 				brandList: [],
 				homeFlashPromotion: [],
 				newProductList: [],
-				hotProductList: [],
+				// hotProductList: [],
 				recommendProductList: [],
 				recommendParams: {
 					page: 1,
@@ -253,12 +232,6 @@
 			this.loadData();
 		},
 		onShow() {
-			// uni.login({
-			// 	provider: 'weixin',
-			// 	success: function(loginRes) {
-			// 		console.log("登录", loginRes)
-			// 	},
-			// })
 		},
 		//下拉刷新
 		onPullDownRefresh(){
@@ -271,8 +244,7 @@
 			this.loadingType = 'loading';
 			fetchRecommendProductList(this.recommendParams).then(response => {
 				let addProductList = response.data.list;
-				console.log("-addProductList--", addProductList)
-				if(response.data.list.length===0){
+				if(!response.data.list){
 					//没有更多了
 					this.recommendParams.page;
 					this.loadingType = 'nomore';
@@ -283,7 +255,7 @@
 			})
 		},
 		computed: {
-			...mapState(['hasLogin','userInfo', 'hadNickName']),
+			...mapState(['hasLogin','userInfo']),
 			cutDownTime() {
 				let endTime = new Date(this.homeFlashPromotion.endTime);
 				let endDateTime = new Date();
@@ -316,7 +288,6 @@
 		methods: {
 			...mapMutations(['login', 'refreshLoginSession']),
 			getNickname(e) {
-				console.log("--[onNickName]-e:", e)
 				this.nickName = e.detail.value
 			},
 			checkNickName() {
@@ -340,7 +311,6 @@
 			},
 						
 			confirmNickName() {
-				console.log("--[confirmNickName]-this.userInfo:", this.$store.state.userInfo)
 				let _this = this
 				if (this.$store.state.userInfo) {
 					_this.$store.state.userInfo.nickName = this.nickName
@@ -363,7 +333,6 @@
 			},	
 			closePop() {
 				this.isCloseModel = true
-				console.log("--index-this.isCloseModel:", this.isCloseModel)
 			},
 			closeNickNamePop() {
 				this.isCloseNickNameModel = true
@@ -375,7 +344,6 @@
 						getWXPhoneNumber({openId: _this.$store.state.openId, code: e.detail.code}).then(res=>{
 							if (res.code == 0) {
 								uni.showToast({ title: '注册成功', duration: 2000 })
-								console.log("-----phoneNumber:", res.data.phoneNumber)//成功后打印微信手机号
 								_this.getToken()
 							}
 							else {
@@ -388,17 +356,19 @@
 			getToken() {
 				let _this = this
 				wxRefreshLogin({openId: _this.$store.state.openId}).then(res => {
-					console.log("-[wxRefreshLogin]--", res)
 					if (res.code == 0) {
 						const userinfo = res.data
 						wx.setStorageSync("Token", userinfo.token)
-						console.log("--[getToken]expiresAt:", userinfo.expiresAt)
 						wx.setStorageSync("TokenTime", userinfo.expiresAt)
-						_this.$store.token = userinfo.token
+						_this.$store.state.token = userinfo.token
 						this.login(userinfo.customer);
 					}
 				}).catch(errors => {
-					console.log("------wxRefreshLogin---errors--------", errors)
+					uni.showModal({
+						title:'提示',
+						content:'网络错误',
+						showCancel:false
+					})
 				});
 			},
 			/**
@@ -406,33 +376,22 @@
 			 */
 			async loadData() {
 				fetchContent().then(response => {
-					console.log("onLoad", response.data);
 					this.advertiseList = response.data.advertiseList;
 					this.swiperLength = this.advertiseList.length;
-					this.titleNViewBackground = this.titleNViewBackgroundList[0];
 					this.brandList = response.data.brandList;
-					
 					this.homeFlashPromotion = response.data.homeFlashPromotion;
 					
 					this.newProductList = response.data.newProductList;
-					this.hotProductList = response.data.hotProductList;
+					// this.hotProductList = response.data.hotProductList;
 					fetchRecommendProductList(this.recommendParams).then(response => {
 						this.recommendProductList = response.data.list;
-						console.log("this.recommendProductList", this.recommendProductList);
 						uni.stopPullDownRefresh();
 					})
 				});
 			},
-			//轮播图切换修改背景色
-			swiperChange(e) {
-				const index = e.detail.current;
-				this.swiperCurrent = index;
-				let changeIndex = index % this.titleNViewBackgroundList.length;
-				this.titleNViewBackground = this.titleNViewBackgroundList[changeIndex];
-			},
+			
 			//商品详情页
 			navToDetailPage(item) {
-				console.log("---item:", item)
 				let id = item.id;
 				uni.navigateTo({
 					url: `/pages/product/product?id=${id}`
@@ -441,7 +400,6 @@
 			//广告详情页
 			navToAdvertisePage(item) {
 				let id = item.id;
-				console.log("navToAdvertisePage",item)
 				uni.navigateTo({
 					url: item.url
 				})
@@ -466,11 +424,11 @@
 				})
 			},
 			//人气推荐列表页
-			navToHotProudctListPage() {
-				uni.navigateTo({
-					url: `/pages/product/hotProductList`
-				})
-			},
+			// navToHotProudctListPage() {
+			// 	uni.navigateTo({
+			// 		url: `/pages/product/hotProductList`
+			// 	})
+			// },
 		},
 		// #ifndef MP
 		// 标题栏input搜索框点击
@@ -566,7 +524,7 @@
 	.carousel-section {
 		position: relative;
 		padding-top: 10px;
-
+		margin-bottom: 10px;
 		.titleNview-placing {
 			height: var(--status-bar-height);
 			padding-top: 44px;
@@ -887,13 +845,13 @@
 		flex-wrap: wrap;
 		padding: 0 30upx;
 		background: #fff;
-
+		
 		.guess-item {
 			display: flex;
 			flex-direction: column;
 			width: 48%;
 			padding-bottom: 40upx;
-
+			
 			&:nth-child(2n+1) {
 				margin-right: 4%;
 			}
@@ -917,7 +875,9 @@
 			height: 150upx;
 			border-radius: 3px;
 			overflow: hidden;
-		
+			border-style:solid;
+			border-color: rgba(250, 250, 255, 0.9);
+			
 			image {
 				width: 100%;
 				height: 100%;

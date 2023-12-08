@@ -2,11 +2,13 @@
 	<view class="container">
 		<view class="card" v-if="certificateList.length > 0">
 			<image class="bg" src="/static/bg.jpg"></image>
-			<text class="card-title">共通卡</text>
-			<text class="card-content">凭此卡可在多个店铺享受至尊优惠</text>
+			<text class="card-title">互通卡</text>
+			<text class="card-content" style="color: green;">凭此卡可在多个店铺享受至尊优惠!</text>
 		</view>
-		<view v-else>
-			<p>填充一张普通卡</p>
+		<view class="card" v-else>
+			<image class="bg" src="/static/bg.jpg" style="opacity: 0.3;"></image>
+			<text class="card-title" style="font-size: 60upx;color: black;">暂无</text>
+			<text class="card-content">猪迪克，让孩子们远离电视，尽享欢乐！</text>
 		</view>
 		<view class="list b-b" v-for="(item, index) in certificateList" >
 			<view class="wrapper" >
@@ -39,11 +41,8 @@
 			async loadData() {
 				let _this = this
 				if (_this.hasLogin) {
-					console.log("-------_this.$store.state.openId------", _this.$store.state.userInfo)
 					if (_this.$store.state.userInfo && _this.$store.state.userInfo.telephone) {
-						console.log("-----openId---", _this.$store.state.openId)
 						GetCertificateList({onlyId: _this.$store.state.userInfo.telephone}).then(response => {
-							console.log("--response--", response)
 							this.certificateList = response.data;
 							this.certificateList.forEach(item => {
 								if (item.isFirst) {
@@ -63,20 +62,19 @@
 
 <style lang='scss'>
 	.card {
-		height: 520upx;
-		padding: 90upx 30upx 0;
+		background: $page-color-base;
+		height: 480upx;
+		padding: 40upx 0upx 0;
 		position:relative;
 		border-radius: 0.5rem;
 		display:flex;
 		justify-content:center;
 		.bg{
-			position:absolute;
-			left: 0;
-			top: 0;
-			width: 100%;
-			height: 100%;
-			opacity: .8;
-			/* background-color: yellow; */
+			display: block;
+			margin: 0 auto;
+			width: 700upx;
+			height: 420upx;
+			border-radius: 5%;
 		}
 	}
 	.card-title {
@@ -84,18 +82,20 @@
 		box-sizing: border-box;
 		text-align: center;
 		margin:0 auto;
-		font-size: 80upx;
+		font-size: 70upx;
 		color: red;
 		align-items: center;
 		justify-content: center;
 		flex-direction: column;
 		opacity: 1;
+		top: 20%;
 	}
 	.card-content {
 		position:absolute;
-		margin: 35% auto;
-		font-size:40upx;
+		/* margin: 35% auto; */
+		font-size:36upx;
 		margin-top: 1;
+		top: 70%;
 	}
 	.list {
 		display: flex;

@@ -342,10 +342,10 @@
 		methods: {
 			async loadData(id) {
 				fetchProductDetail(id).then(response => {
-					console.log("---productDetail--", response)
-					this.product = response.data.product;
+					// console.log("---productDetail--", response)
+					this.product = response.data;
 					this.skuStockList = response.data.skuStockList;
-					this.brandId = response.data.product.brandId;
+					this.brandId = response.data.brandId;
 					this.initImgList();
 					this.initServiceList();
 					this.initSpecList(response.data);
@@ -513,7 +513,7 @@
 							let valueList = data.productAttributeValueList;
 							let filterValueList = valueList.filter(value => value.productAttributeId == item.id);
 							if (filterValueList.length > 0) {
-								let inputList = filterValueList[0].value.split(',');
+								let inputList = filterValueList[0].inputList.split(',');
 								for (let j = 0; j < inputList.length; j++) {
 									this.specChildList.push({
 										pid: item.id,
@@ -522,7 +522,7 @@
 									});
 								}
 							} else {
-								console.log("--initSpecList-valueList,无参:", valueList)
+								// console.log("--initSpecList-valueList,无参:", valueList)
 							}
 						} else if (item.handAddStatus == 0) {
 							//不支持手动新增的
@@ -575,7 +575,7 @@
 								value: value
 							});
 						} else {
-							console.log("--initAttrList-valueList,无参:", valueList)
+							// console.log("--initAttrList-valueList,无参:", valueList)
 						}
 					}
 				}
@@ -670,7 +670,7 @@
 					return;
 				}
 				let productSkuStock = this.getSkuStock();
-				console.log("---productSkuStock---", productSkuStock)
+				// console.log("---productSkuStock---", productSkuStock)
 				let cartItem = {
 					price: this.product.price,
 					productAttr: productSkuStock.spData,
@@ -685,7 +685,7 @@
 					productSubTitle: this.product.subTitle,
 					quantity: 1
 				};
-				console.log("---cartItem--", cartItem)
+				// console.log("---cartItem--", cartItem)
 				addCartItem(cartItem).then(response => {
 					if (response.code == 0) {
 						uni.showToast({
@@ -714,7 +714,7 @@
 									url: '/pages/user/user'
 								})
 							} else if (res.cancel) {
-								console.log('用户点击取消');
+								// console.log('用户点击取消');
 							}
 						}
 					});
@@ -755,10 +755,10 @@
 						itemList:[this.l('发送给朋友'),this.l]
 					},
 					success: res => {
-						console.log('previewImage res', res);
+						// console.log('previewImage res', res);
 					}, 
 					fail: err => {
-						console.log('previewImage err', err);
+						// console.log('previewImage err', err);
 					}
 				});
 			},

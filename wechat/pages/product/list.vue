@@ -109,7 +109,21 @@
 			//加载分类
 			async loadCateList(fid, sid) {
 				fetchCategoryTreeList().then(response => {
-					this.cateList = response.data;
+					let categoryList = response.data
+					for (var i=0; i < categoryList.length; i++) {
+						let element = categoryList[i]
+						if (element.parentId === 0) {
+							element["children"] = []
+							for (var j = 0; j < categoryList.length; j++) {
+								let item = categoryList[j]
+								if (item.parentId === element.id) {
+									element.children.push(item)
+								}
+							}
+						}
+					}
+					this.cateList = categoryList
+					// console.log("====this.cateList===", this.cateList)
 				})
 			},
 			//加载商品 ，带下拉刷新和上滑加载

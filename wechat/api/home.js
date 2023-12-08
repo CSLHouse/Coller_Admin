@@ -1,9 +1,10 @@
 import request from '@/utils/requestUtil'
 
-export function fetchContent() {
+export function fetchContent(params) {
 	return request({
 		method: 'GET',
-		url: '/product/content'
+		url: '/product/content',
+		params: params
 	})
 }
 

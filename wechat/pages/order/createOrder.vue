@@ -167,7 +167,6 @@
 		onLoad(option) {
 			//商品数据
 			this.cartIds = JSON.parse(option.cartIds);
-			console.log("--[createOrder]-onLoad-this.cartIds:", this.cartIds);
 			this.loadData();
 		},
 		filters: {
@@ -241,7 +240,6 @@
 				wx.request({
 				    url: 'http://ip-api.com/json',
 				    success: function (res) {
-				        console.log("ip =>", res.data.query, res.data);
 						ip = res.data.query
 						let orderParam = {
 							appId: appId,
@@ -257,17 +255,14 @@
 							orderParam.couponId = _this.currCoupon.id;
 						}
 						generateOrder(orderParam).then(response => {
-							console.log("--generateOrder-", response.data)
 							let orderId = response.data.orderId;
 							let payment = response.data.payment
 							deletCartItemWithList({ids: _this.cartIds}).then(response=>{
 								if (response.code !== 0) {
-									console.log("--[generateOrder]-deletCartItemWithList:", response.data)
 									return
 								}
 							});
 							
-							console.log("--payment---", payment)
 							wx.requestPayment({
 								"timeStamp": payment.timeStamp,
 								"nonceStr": payment.nonceStr,
@@ -275,13 +270,13 @@
 								"signType": payment.signType,
 								"paySign": payment.paySign,
 								"success":function(res){
-									console.log("---支付成功：", res)
+									// console.log("---支付成功：", res)
 								},
 								"fail":function(res){
-									console.log("---支付失败：", res)
+									// console.log("---支付失败：", res)
 								},
 								"complete":function(res){
-									console.log("---支付完成：", res)
+									// console.log("---支付完成：", res)
 								}
 							})
 							

@@ -70,7 +70,7 @@
 				loadingType: 'more',
 				favoriteStatus:false,
 				queryParam: {
-					brandId: null,
+					// brandId: null,
 					page: 1,
 					pageSize: 4
 				}

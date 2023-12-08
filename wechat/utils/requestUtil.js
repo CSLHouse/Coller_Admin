@@ -1,11 +1,12 @@
 import Request from '@/js_sdk/luch-request/request.js'
 import store from '../store'
 import { wxRefreshLogin } from '@/api/member.js';
+import common from '@/utils/common.js'
 
 const http = new Request()
 
 http.setConfig((config) => { /* 设置全局配置 */
-	config.baseUrl = 'http://192.168.1.66:8888' /* 根域名不同 */
+	config.baseUrl = common.baseUrl /* 根域名不同 */
 	config.header = {
 		"Access-Control-Allow-Origin": "*",
 		"Access-Control-Allow-Methods": "*",
@@ -81,7 +82,6 @@ http.interceptor.response((response) => { /* 请求之后拦截器 */
 				cancelText:'取消',
 				success: function(res) {
 					if (res.confirm) {
-						console.log("------interceptor---401--------", res)
 						store.state.hasLogin = false
 						store.state.userInfo = {}
 						store.state.token = null
@@ -89,7 +89,11 @@ http.interceptor.response((response) => { /* 请求之后拦截器 */
 							url: '/pages/index/index'
 						})
 					} else if (res.cancel) {
-						console.log('用户点击取消');
+						uni.showModal({
+							title:'提示',
+							content:'取消',
+							showCancel:false
+						})
 					}
 				}
 			});
@@ -100,7 +104,7 @@ http.interceptor.response((response) => { /* 请求之后拦截器 */
 	}
 }, (response) => {
 	//提示错误信息
-	console.log('response error', response);
+	// console.log('response error', response);
 	uni.showToast({
 		title:response.errMsg,
 		duration:1500

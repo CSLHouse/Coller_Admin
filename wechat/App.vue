@@ -45,15 +45,12 @@
 				const openId = wx.getStorageSync("OpenId")
 				if (openId) {
 					_this.$store.state.openId = openId
-					console.log("--openId-", _this.$store.state.openId)
 				} else {
 					_this.refreshLoginSession()
 				}
 				const token = wx.getStorageSync("Token")
 				const tokenTime = wx.getStorageSync("TokenTime")
 				const userInfo = wx.getStorageSync("UserInfo")
-				console.log("--[initWXLogin]-token:", token)
-				console.log("--[initWXLogin]-userInfo:", userInfo)
 				
 				// token有效时间 82800000 23h
 				if (userInfo && token && (tokenTime > (new Date()).getTime())) {
@@ -75,13 +72,16 @@
 					if (res.code == 0) {
 						const userinfo = res.data
 						wx.setStorageSync("Token", userinfo.token)
-						console.log("--[getToken]expiresAt:", userinfo.expiresAt)
 						wx.setStorageSync("TokenTime", userinfo.expiresAt)
 						_this.$store.state.token = userinfo.token
 						this.login(userinfo.customer);
 					}
 				}).catch(errors => {
-					console.log("------wxRefreshLogin---errors--------", errors)
+					uni.showModal({
+						title:'提示',
+						content:'网络错误',
+						showCancel:false
+					})
 				});
 			}
 		},
@@ -90,9 +90,6 @@
 			this.initWXLogin()
 		},
 		onShow: function() {
-		},
-		onHide: function() {
-			console.log('App Hide')
 		},
 	}
 </script>
