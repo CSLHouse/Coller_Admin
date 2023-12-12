@@ -21,3 +21,14 @@ type ConsumeRecord struct {
 func (ConsumeRecord) TableName() string {
 	return "bus_consume_record"
 }
+
+//type DouYinRecord struct {
+//	ID        int     `json:"Id" gorm:"primary_key;"` // 主键ID
+//	Amount    float32 `json:"amount" form:"amount" gorm:"comment:消费次数/金额"`
+//	Date      string  `json:"date" form:"date" gorm:"comment:日期"`
+//	SysUserId int     `json:"sysUserId" form:"sysUserId" gorm:"comment:管理角色ID"` // 管理角色ID
+//}
+//
+//func (DouYinRecord) TableName() string {
+//	return "bus_dou_yin_record"
+//}

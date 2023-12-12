@@ -25,7 +25,7 @@ type Local struct{}
 //@param: file *multipart.FileHeader
 //@return: string, string, error
 
-func (*Local) UploadFile(file *multipart.FileHeader) (string, string, error) {
+func (*Local) UploadFile(file *multipart.FileHeader, userId int) (string, string, error) {
 	// 读取文件后缀
 	ext := path.Ext(file.Filename)
 	// 读取文件名并加密
@@ -82,5 +82,18 @@ func (*Local) DeleteFile(key string) error {
 			return errors.New("本地文件删除失败, err:" + err.Error())
 		}
 	}
+	return nil
+}
+
+func (*Local) DeleteFiles(files []string) error {
+	for _, file := range files {
+		p := global.GVA_CONFIG.Local.StorePath + "/" + file
+		if strings.Contains(p, global.GVA_CONFIG.Local.StorePath) {
+			if err := os.Remove(p); err != nil {
+				return errors.New("本地文件删除失败, err:" + err.Error())
+			}
+		}
+	}
+
 	return nil
 }

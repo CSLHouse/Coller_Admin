@@ -67,18 +67,6 @@ type StatisticsSearchInfo struct {
 	EndDate   string `json:"endDate" form:"endDate" gorm:"comment:结束日期"`
 }
 
-type ProductSearchInfo struct {
-	Name                string `json:"name" form:"name" gorm:"comment:商品编号"`
-	BrandId             int    `json:"brandId" form:"brandId" gorm:"comment:物品序号"`
-	ProductSN           string `json:"productSN" form:"productSN" gorm:"comment:货号"`
-	ProductCategoryName string `json:"productCategoryName" form:"productCategoryName" gorm:"comment:商品分类"`
-	BrandName           string `json:"brandName" form:"brandName" gorm:"comment:品牌"`
-	PublishStatus       int    `json:"publishStatus" form:"publishStatus" gorm:"comment:上架状态"`
-	VerifyStatus        int    `json:"verifyStatus" form:"verifyStatus" gorm:"comment:审核状态"`
-	Page                int    `json:"page" form:"page"`         // 页码
-	PageSize            int    `json:"pageSize" form:"pageSize"` // 每页大小
-}
-
 type TagSearchInfo struct {
 	Tag      int `json:"tag" form:"tag"`           // 商品分类id
 	State    int `json:"state" form:"state"`       // 状态
@@ -110,4 +98,8 @@ type KeyWordInfo struct {
 type QuantityInfo struct {
 	ID       int `json:"id" form:"id"`             // 主键ID
 	Quantity int `json:"quantity" form:"quantity"` // 数量
+}
+
+type OpenIdInfo struct {
+	OpenId string `json:"openId" form:"openId"`
 }

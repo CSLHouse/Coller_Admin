@@ -18,7 +18,7 @@ import (
 type TencentCOS struct{}
 
 // UploadFile upload file to COS
-func (*TencentCOS) UploadFile(file *multipart.FileHeader) (string, string, error) {
+func (*TencentCOS) UploadFile(file *multipart.FileHeader, userId int) (string, string, error) {
 	client := NewClient()
 	f, openError := file.Open()
 	if openError != nil {
@@ -44,6 +44,13 @@ func (*TencentCOS) DeleteFile(key string) error {
 		global.GVA_LOG.Error("function bucketManager.Delete() failed", zap.Any("err", err.Error()))
 		return errors.New("function bucketManager.Delete() failed, err:" + err.Error())
 	}
+	return nil
+}
+
+// DeleteFile delete file form COS
+func (*TencentCOS) DeleteFiles(files []string) error {
+
+	// TODO: 待完善
 	return nil
 }
 

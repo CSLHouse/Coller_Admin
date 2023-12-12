@@ -25,7 +25,7 @@ type AwsS3 struct{}
 //@param: file *multipart.FileHeader
 //@return: string, string, error
 
-func (*AwsS3) UploadFile(file *multipart.FileHeader) (string, string, error) {
+func (*AwsS3) UploadFile(file *multipart.FileHeader, userId int) (string, string, error) {
 	session := newSession()
 	uploader := s3manager.NewUploader(session)
 
@@ -77,6 +77,11 @@ func (*AwsS3) DeleteFile(key string) error {
 		Bucket: aws.String(bucket),
 		Key:    aws.String(filename),
 	})
+	return nil
+}
+
+func (*AwsS3) DeleteFiles(files []string) error {
+	// TODO: 待完善
 	return nil
 }
 

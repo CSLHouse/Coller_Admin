@@ -736,3 +736,25 @@ func (b *BaseApi) ResetWXNickName(c *gin.Context) {
 	}
 	response.OkWithMessage("设置昵称成功", c)
 }
+
+// RecordShareScanAccount 记录分享被读取次数
+func (b *BaseApi) RecordShareScanAccount(c *gin.Context) {
+	var openIdInfo request.OpenIdInfo
+	err := c.ShouldBindJSON(&openIdInfo)
+	if err != nil {
+		response.FailWithMessage(err.Error(), c)
+		return
+	}
+	if len(openIdInfo.OpenId) < 1 {
+		response.FailWithMessage(err.Error(), c)
+		return
+	}
+
+	err = userService.RecordShareScanAccount(&openIdInfo.OpenId)
+	if err != nil {
+		global.GVA_LOG.Error("记录分享次数失败!", zap.Error(err))
+		response.FailWithMessage("记录分享次数失败"+err.Error(), c)
+		return
+	}
+	response.OkWithMessage("记录分享次数成功", c)
+}

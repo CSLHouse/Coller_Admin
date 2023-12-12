@@ -23,7 +23,7 @@ func (i *initRecommendProduct) MigrateTable(ctx context.Context) (context.Contex
 		return ctx, system.ErrMissingDBContext
 	}
 	return ctx, db.AutoMigrate(
-		&wechatModel.HomeRecommendProduct{},
+		&wechatModel.RecommendProduct{},
 	)
 }
 
@@ -32,11 +32,11 @@ func (i *initRecommendProduct) TableCreated(ctx context.Context) bool {
 	if !ok {
 		return false
 	}
-	return db.Migrator().HasTable(&wechatModel.HomeRecommendProduct{})
+	return db.Migrator().HasTable(&wechatModel.RecommendProduct{})
 }
 
 func (i initRecommendProduct) InitializerName() string {
-	return wechatModel.HomeRecommendProduct{}.TableName()
+	return wechatModel.RecommendProduct{}.TableName()
 }
 
 func (i *initRecommendProduct) InitializeData(ctx context.Context) (next context.Context, err error) {
@@ -45,7 +45,7 @@ func (i *initRecommendProduct) InitializeData(ctx context.Context) (next context
 		return ctx, system.ErrMissingDBContext
 	}
 
-	entities := []wechatModel.HomeRecommendProduct{
+	entities := []wechatModel.RecommendProduct{
 		{
 			ProductId:       51,
 			ProductName:     "Apple iPad 10.9英寸平板电脑 2022年款（64GB WLAN版/A14芯片/1200万像素/iPadOS MPQ03CH/A ）",
@@ -78,7 +78,7 @@ func (i *initRecommendProduct) InitializeData(ctx context.Context) (next context
 		},
 	}
 	if err = db.Create(&entities).Error; err != nil {
-		return ctx, errors.Wrap(err, wechatModel.HomeRecommendProduct{}.TableName()+"表数据初始化失败!")
+		return ctx, errors.Wrap(err, wechatModel.RecommendProduct{}.TableName()+"表数据初始化失败!")
 	}
 	next = context.WithValue(ctx, i.InitializerName(), entities)
 
@@ -90,7 +90,7 @@ func (i *initRecommendProduct) DataInserted(ctx context.Context) bool {
 	if !ok {
 		return false
 	}
-	if errors.Is(db.Where("product_id = ?", 45).First(&wechatModel.HomeRecommendProduct{}).Error, gorm.ErrRecordNotFound) { // 判断是否存在数据
+	if errors.Is(db.Where("product_id = ?", 45).First(&wechatModel.RecommendProduct{}).Error, gorm.ErrRecordNotFound) { // 判断是否存在数据
 		return false
 	}
 	return true

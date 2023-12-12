@@ -17,6 +17,7 @@ type Customer struct {
 	Telephone   string     `json:"telephone" form:"telephone" gorm:"primaryKey;comment:用户手机号"`                           // 用户手机号
 	Count       uint       `json:"count" form:"count" gorm:"comment:访问次数"`
 	Enable      int        `json:"enable" gorm:"default:1;comment:用户是否被冻结 1正常 2冻结"` //用户是否被冻结 1正常 2冻结
+	ShareCount  int        `json:"shareCount" form:"shareCount" gorm:"comment:分享次数"`
 	CardList    []*VIPCard `json:"cardList" form:"cardList" gorm:"foreignKey:CustomerId;comment:会员卡号"`
 	AuthorityId int        `json:"authorityId" gorm:"default:9528;comment:用户角色ID"`
 }

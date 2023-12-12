@@ -279,6 +279,11 @@ func (userService *UserService) GetWXAccountByOpenID(openId string) (user system
 //}
 
 func (userService *UserService) ResetWXNickName(e *business.Customer) (err error) {
-	err = global.GVA_DB.Model(&business.Customer{}).Where("id = ?", e.ID).Update("nick_name", e.NickName).Error
+	err = global.GVA_DB.Save(e).Error
+	return err
+}
+
+func (userService *UserService) RecordShareScanAccount(openId *string) (err error) {
+	err = global.GVA_DB.Debug().Where("open_id = ?", openId).UpdateColumn("share_count", gorm.Expr("share_count+?", 1)).Error
 	return err
 }

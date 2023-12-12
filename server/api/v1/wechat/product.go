@@ -5,20 +5,19 @@ import (
 	"github.com/flipped-aurora/gin-vue-admin/server/global"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/common/request"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/common/response"
+	"github.com/flipped-aurora/gin-vue-admin/server/model/example"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/wechat"
 	wechatRequest "github.com/flipped-aurora/gin-vue-admin/server/model/wechat/request"
 	wechatRes "github.com/flipped-aurora/gin-vue-admin/server/model/wechat/response"
 	"github.com/flipped-aurora/gin-vue-admin/server/utils"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
-	"strconv"
-	"time"
 )
 
 type HomeApi struct{}
 
 func (e *HomeApi) CreateHomeAdvertise(c *gin.Context) {
-	var home wechat.HomeAdvertise
+	var home wechat.Advertise
 	err := c.ShouldBindJSON(&home)
 	if err != nil {
 		response.FailWithMessage(err.Error(), c)
@@ -45,14 +44,25 @@ func (e *HomeApi) CreateHomeAdvertise(c *gin.Context) {
 // @Success   200   {object}  response.Response{msg=string}  "删除客户"
 // @Router    /customer/customer [delete]
 func (e *HomeApi) DeleteHomeAdvertise(c *gin.Context) {
-	var home wechat.HomeAdvertise
-	err := c.ShouldBindJSON(&home)
+	var reqId request.GetById
+	err := c.ShouldBindQuery(&reqId)
 	if err != nil {
 		response.FailWithMessage(err.Error(), c)
 		return
 	}
+	advertise, err := wechatService.GetHomeAdvertiseById(reqId.ID)
+	if err != nil {
+		global.GVA_LOG.Error("删除失败!", zap.Error(err))
+		response.FailWithMessage("删除失败", c)
+		return
+	}
+	var file example.ExaFileUploadAndDownload
+	file.Url = advertise.Pic
+	if err := fileUploadAndDownloadService.DeleteFile(file); err != nil {
+		global.GVA_LOG.Error(fmt.Sprintf("阿里云图片删除失败:%s", file.Url), zap.Error(err))
+	}
 
-	err = wechatService.DeleteHomeAdvertise(home)
+	err = wechatService.DeleteHomeAdvertise(reqId.ID)
 	if err != nil {
 		global.GVA_LOG.Error("删除失败!", zap.Error(err))
 		response.FailWithMessage("删除失败", c)
@@ -71,7 +81,7 @@ func (e *HomeApi) DeleteHomeAdvertise(c *gin.Context) {
 // @Success   200   {object}  response.Response{msg=string}  "更新客户信息"
 // @Router    /customer/customer [put]
 func (e *HomeApi) UpdateHomeAdvertise(c *gin.Context) {
-	var home wechat.HomeAdvertise
+	var home wechat.Advertise
 	err := c.ShouldBindJSON(&home)
 	if err != nil {
 		response.FailWithMessage(err.Error(), c)
@@ -87,30 +97,20 @@ func (e *HomeApi) UpdateHomeAdvertise(c *gin.Context) {
 	response.OkWithMessage("更新成功", c)
 }
 
-// GetExaCustomer
-// @Tags      ExaCustomer
-// @Summary   获取单一客户信息
-// @Security  ApiKeyAuth
-// @accept    application/json
-// @Produce   application/json
-// @Param     data  query     example.ExaCustomer                                                true  "客户ID"
-// @Success   200   {object}  response.Response{data=exampleRes.ExaCustomerResponse,msg=string}  "获取单一客户信息,返回包括客户详情"
-// @Router    /customer/customer [get]
-func (e *HomeApi) GetHomeAdvertise(c *gin.Context) {
-	var combo wechat.HomeAdvertise
-	err := c.ShouldBindQuery(&combo)
+func (e *HomeApi) UpdateHomeAdvertiseOnlineState(c *gin.Context) {
+	var advertise wechatRequest.UpdateIdsKeywordRequest
+	err := c.ShouldBindJSON(&advertise)
 	if err != nil {
 		response.FailWithMessage(err.Error(), c)
 		return
 	}
-	data, err := wechatService.GetHomeAdvertise(combo.ID)
+	err = wechatService.UpdateHomeAdvertiseByIdForKeyword(&advertise)
 	if err != nil {
-		global.GVA_LOG.Error("获取失败!", zap.Error(err))
-		response.FailWithMessage("获取失败", c)
+		global.GVA_LOG.Error("更新失败!", zap.Error(err))
+		response.FailWithMessage("更新失败", c)
 		return
 	}
-
-	response.OkWithDetailed(response.AllResult{List: data}, "获取成功", c)
+	response.OkWithMessage("更新成功", c)
 }
 
 // GetHomeAdvertiseList
@@ -134,7 +134,7 @@ func (e *HomeApi) GetHomeAdvertiseList(c *gin.Context) {
 		response.FailWithMessage(err.Error(), c)
 		return
 	}
-	homeList, err := wechatService.GetHomeAdvertiseInfoList(pageInfo)
+	homeList, total, err := wechatService.GetHomeAdvertiseInfoList(pageInfo)
 	if err != nil {
 		global.GVA_LOG.Error("获取失败!", zap.Error(err))
 		response.FailWithMessage("获取失败"+err.Error(), c)
@@ -142,53 +142,50 @@ func (e *HomeApi) GetHomeAdvertiseList(c *gin.Context) {
 	}
 	response.OkWithDetailed(response.PageResult{
 		List:     homeList,
+		Total:    total,
 		Page:     pageInfo.Page,
 		PageSize: pageInfo.PageSize,
 	}, "获取成功", c)
 }
 
-func (e *HomeApi) GetAllHomeAdvertise(c *gin.Context) {
-	homeList, err := wechatService.GetAllHomeAdvertiseInfoList()
+func (e *HomeApi) GetAllWechatContent(c *gin.Context) {
+	homeList, err := wechatService.GetOnlineHomeAdvertiseInfoList()
 	if err != nil {
 		global.GVA_LOG.Error("获取失败!", zap.Error(err))
 		response.FailWithMessage("获取失败"+err.Error(), c)
 		return
 	}
-	brandList, err := wechatService.GetAllHomeBrandInfoList()
+	brandList, err := wechatService.GetOnlineHomeBrandInfoList()
 	if err != nil {
 		global.GVA_LOG.Error("获取失败!", zap.Error(err))
 		response.FailWithMessage("获取失败"+err.Error(), c)
 		return
 	}
-	homeFlashPromotion, err := wechatService.GetAllHomeFlashPromotionInfoList()
+	homeFlashPromotion, err := wechatService.GetOnlineHomeFlashPromotionInfoList()
 	if err != nil {
 		global.GVA_LOG.Error("获取失败!", zap.Error(err))
 		response.FailWithMessage("获取失败"+err.Error(), c)
 		return
 	}
-	var flashPromotionList wechatRes.FlashPromotionResModel
-	flashPromotionList.NextStartTime = 111
-	flashPromotionList.EndTime = 222
-	flashPromotionList.ProductList = homeFlashPromotion
 
-	newProductList, err := wechatService.GetAllNewProductInfoList()
+	newProductList, err := wechatService.GetOnlineNewProductInfoList()
 	if err != nil {
 		global.GVA_LOG.Error("获取失败!", zap.Error(err))
 		response.FailWithMessage("获取失败"+err.Error(), c)
 		return
 	}
-	hotProductList, err := wechatService.GetAllHomeHotProductListInfoList()
-	if err != nil {
-		global.GVA_LOG.Error("获取失败!", zap.Error(err))
-		response.FailWithMessage("获取失败"+err.Error(), c)
-		return
-	}
+	//hotProductList, err := wechatService.GetOnlineRecommendProductListInfoList()
+	//if err != nil {
+	//	global.GVA_LOG.Error("获取失败!", zap.Error(err))
+	//	response.FailWithMessage("获取失败"+err.Error(), c)
+	//	return
+	//}
 	response.OkWithDetailed(wechatRes.HomeContentResponse{
-		AdvertiseList:      homeList,
-		BrandList:          brandList,
-		HomeFlashPromotion: homeFlashPromotion,
-		NewProductList:     newProductList,
-		HotProductList:     hotProductList,
+		AdvertiseList:  homeList,
+		BrandList:      brandList,
+		FlashPromotion: homeFlashPromotion,
+		NewProductList: newProductList,
+		//HotProductList: hotProductList,
 	}, "获取成功", c)
 }
 
@@ -204,39 +201,31 @@ func (e *HomeApi) GetRecommendProductList(c *gin.Context) {
 		response.FailWithMessage(err.Error(), c)
 		return
 	}
-	recommendProductList, err := wechatService.GetRecommendProductList(pageInfo)
+	recommendProductList, err := wechatService.GetOnlineRecommendProductListInfoList(pageInfo)
 	if err != nil {
 		global.GVA_LOG.Error("获取失败!", zap.Error(err))
 		response.FailWithMessage("获取失败"+err.Error(), c)
 		return
 	}
-	recommendDataList := make([]wechatRes.HomeRecommendResponse, 0)
-	//var recommendData wechatRes.HomeRecommendResponse
+	var list []wechat.Product
 	for _, recommend := range recommendProductList {
-		recommendData := wechatRes.HomeRecommendResponse{}
-		recommendData.ID = recommend.ProductId
-		recommendData.Name = recommend.ProductName
-		recommendData.Pic = recommend.Product.Pic
-		recommendData.SubTitle = recommend.Product.SubTitle
-		recommendData.Price = recommend.Product.Price
-		recommendDataList = append(recommendDataList, recommendData)
+		if recommend.Product.ID != 0 {
+			list = append(list, recommend.Product)
+		}
 	}
-
 	response.OkWithDetailed(response.AllResult{
-		List: recommendDataList,
+		List: list,
 	}, "获取成功", c)
 }
 
 func (e *HomeApi) CreateProduct(c *gin.Context) {
-	var home wechatRequest.ProductCreateRequest
-	err := c.ShouldBindJSON(&home)
+	var product wechat.Product
+	err := c.ShouldBindJSON(&product)
 	if err != nil {
 		response.FailWithMessage(err.Error(), c)
 		return
 	}
-	fmt.Println(home)
-	var product wechat.HomeProduct
-	product = home.Product
+
 	err = wechatService.CreateHomeProduct(&product)
 	if err != nil {
 		global.GVA_LOG.Error("创建产品失败!", zap.Error(err))
@@ -245,7 +234,7 @@ func (e *HomeApi) CreateProduct(c *gin.Context) {
 	}
 	// 新品
 	if product.NewStatus == 1 {
-		var newProduct wechat.HomeNewProduct
+		var newProduct wechat.NewProduct
 		newProduct.ProductId = product.ID
 		newProduct.ProductName = product.Name
 		newProduct.RecommendStatus = product.PublishStatus
@@ -258,7 +247,7 @@ func (e *HomeApi) CreateProduct(c *gin.Context) {
 	}
 	// 推荐
 	if product.RecommandStatus == 1 {
-		var ewcommendProduct wechat.HomeRecommendProduct
+		var ewcommendProduct wechat.RecommendProduct
 		ewcommendProduct.ProductId = product.ID
 		ewcommendProduct.ProductName = product.Name
 		ewcommendProduct.RecommendStatus = product.PublishStatus
@@ -269,89 +258,7 @@ func (e *HomeApi) CreateProduct(c *gin.Context) {
 			return
 		}
 	}
-	// 会员价格
-	for _, memberPrice := range home.MemberPriceList {
-		if product.ID > 0 && memberPrice.MemberPrice > 0 {
-			var productMemberPrice wechat.MemberPrice
-			productMemberPrice.ProductId = product.ID
-			productMemberPrice.MemberLevelId = memberPrice.MemberLevelId
-			productMemberPrice.MemberLevelName = memberPrice.MemberLevelName
-			productMemberPrice.MemberPrice = memberPrice.MemberPrice
-			err = wechatService.CreateProductMemberPrice(&productMemberPrice)
-			if err != nil {
-				global.GVA_LOG.Error("创建会员价格数据失败!", zap.Error(err))
-				response.FailWithMessage("创建会员价格数据失败", c)
-				return
-			}
-		}
-	}
 
-	// 创建产品参数信
-	for _, attribute := range home.ProductAttributeValueList {
-		if product.ID > 0 && len(attribute.Value) > 0 {
-			var attributeValue wechat.HomeProductAttributeValue
-			attributeValue.ProductId = product.ID
-			attributeValue.ProductAttributeId = attribute.ProductAttributeId
-			attributeValue.Value = attribute.Value
-			err = wechatService.CreateProductAttributeValue(&attributeValue)
-			if err != nil {
-				global.GVA_LOG.Error("创建属性数据失败!", zap.Error(err))
-				response.FailWithMessage("创建属性数据失败", c)
-				return
-			}
-		}
-	}
-	//产品满减
-	for _, fullReduction := range home.ProductFullReductionList {
-		if product.ID != 0 && fullReduction.FullPrice > 0 && fullReduction.ReducePrice > 0 {
-			var productFullReduction wechat.ProductFullReduction
-			productFullReduction.ProductId = product.ID
-			productFullReduction.FullPrice = fullReduction.FullPrice
-			productFullReduction.ReducePrice = fullReduction.ReducePrice
-			err = wechatService.CreateProductFullReduction(&productFullReduction)
-			if err != nil {
-				global.GVA_LOG.Error("创建产品满减数据失败!", zap.Error(err))
-				response.FailWithMessage("创建产品满减数据失败", c)
-				return
-			}
-		}
-	}
-	// 产品阶梯价格
-	for _, ladder := range home.ProductLadderList {
-		if product.ID > 0 && ladder.Count > 0 && ladder.Discount > 0 && ladder.Price > 0 {
-			var productLadder wechat.ProductLadder
-			productLadder.ProductId = product.ID
-			productLadder.Count = ladder.Count
-			productLadder.Discount = ladder.Discount
-			productLadder.Price = ladder.Price
-			err = wechatService.CreateProductLadder(&productLadder)
-			if err != nil {
-				global.GVA_LOG.Error("创建产品阶梯价格数据失败!", zap.Error(err))
-				response.FailWithMessage("创建产品阶梯价格数据失败", c)
-				return
-			}
-		}
-	}
-	// sku的库存
-	for _, stock := range home.SkuStockList {
-		if product.ID > 0 && stock.Price > 0 && stock.PromotionPrice > 0 {
-			var skuStock wechat.SKUStock
-			skuStock.ProductId = product.ID
-			skuStock.Price = stock.Price
-			skuStock.Stock = product.Stock
-			skuStock.LowStock = stock.LowStock
-			skuStock.PromotionPrice = stock.PromotionPrice
-			skuStock.SkuCode = fmt.Sprintf("%d", time.Now().UnixNano())
-			skuStock.Pic = stock.Pic
-			skuStock.SpData = stock.SpData
-			err = wechatService.CreateProductSKUStock(&skuStock)
-			if err != nil {
-				global.GVA_LOG.Error("创建sku的库存数据失败!", zap.Error(err))
-				response.FailWithMessage("创建sku的库存数据失败", c)
-				return
-			}
-		}
-	}
 	response.OkWithMessage("创建成功", c)
 }
 
@@ -370,42 +277,11 @@ func (e *HomeApi) GetProductByID(c *gin.Context) {
 		return
 	}
 
-	attributeList, err := wechatService.GetProductAttributeListById(product.ProductAttributeCategoryId)
-	if err != nil {
-		global.GVA_LOG.Error("获取产品属性失败!", zap.Error(err))
-		response.FailWithMessage("获取产品属性失败", c)
-		return
-	}
-	attributeValue, err := wechatService.GetProductAttributeValueByProductId(reqId.ID)
-	if err != nil {
-		global.GVA_LOG.Error("获取商品参数值失败!", zap.Error(err))
-		response.FailWithMessage("获取商品参数值失败", c)
-		return
-	}
-	fullReductionList, err := wechatService.GetProductFullReductionByProductId(reqId.ID)
-	if err != nil {
-		global.GVA_LOG.Error("获取商品满减优惠失败!", zap.Error(err))
-		response.FailWithMessage("获取商品满减优惠失败", c)
-		return
-	}
-	skuStockList, err := wechatService.GetProductSKUStockByProductId(reqId.ID, "")
-	if err != nil {
-		global.GVA_LOG.Error("获取商品sku库存失败!", zap.Error(err))
-		response.FailWithMessage("获取sku库存失败", c)
-		return
-	}
-	var productRes wechatRes.ProductDetailResponse
-	productRes.Product = product
-	productRes.ProductAttributeList = attributeList
-	productRes.ProductAttributeValueList = attributeValue
-	productRes.ProductFullReductionList = fullReductionList
-	productRes.SkuStockList = skuStockList
-
-	response.OkWithData(productRes, c)
+	response.OkWithData(product, c)
 }
 
 func (e *HomeApi) GetProductList(c *gin.Context) {
-	var pageInfo request.ProductSearchInfo
+	var pageInfo wechatRequest.ProductSearchInfo
 	err := c.ShouldBindQuery(&pageInfo)
 	if err != nil {
 		response.FailWithMessage(err.Error(), c)
@@ -457,6 +333,23 @@ func (e *HomeApi) GetProductListByOnlyID(c *gin.Context) {
 		PageSize: pageInfo.PageSize,
 	}, "获取成功", c)
 }
+func (e *HomeApi) DeleteProducts(c *gin.Context) {
+	var idsInfo request.IdsReq
+	err := c.ShouldBindJSON(&idsInfo)
+	if err != nil {
+		response.FailWithMessage(err.Error(), c)
+		return
+	}
+
+	err = wechatService.DeleteProducts(idsInfo.Ids)
+	if err != nil {
+		global.GVA_LOG.Error("获取失败!", zap.Error(err))
+		response.FailWithMessage("获取失败"+err.Error(), c)
+		return
+	}
+
+	response.OkWithMessage("删除成功", c)
+}
 
 func (e *HomeApi) GetProductListByOnlyIDWithSort(c *gin.Context) {
 	var pageInfo request.SortSearchInfo
@@ -484,35 +377,33 @@ func (e *HomeApi) GetProductListByOnlyIDWithSort(c *gin.Context) {
 		PageSize: pageInfo.PageSize,
 	}, "获取成功", c)
 }
+func (e *HomeApi) UpdateProduct(c *gin.Context) {
+	var product wechat.Product
+	var err = c.ShouldBindJSON(&product)
+	if err != nil {
+		response.FailWithMessage("Json Parse Error!!", c)
+		return
+	}
 
-// UpdateProducts 更新商品
-func (e *HomeApi) UpdateProducts(c *gin.Context) {
-	var product wechatRequest.ProductUpdateRequest
-	var ids, err = c.GetQueryArray("ids[]")
-	if !err {
-		response.FailWithMessage("Json Parse Error!!", c)
+	err3 := wechatService.UpdateHomeProduct(&product)
+	if err3 != nil {
+		global.GVA_LOG.Error("更新失败!", zap.Error(err3))
+		response.FailWithMessage("更新失败", c)
 		return
 	}
-	var key, err1 = c.GetQuery("key")
-	if !err1 {
-		response.FailWithMessage("Json Parse Error!!", c)
-		return
-	}
-	var value, err2 = c.GetQuery("value")
-	if !err2 {
-		response.FailWithMessage("Json Parse Error!!", c)
-		return
-	}
-	var productIds []int
-	for _, id := range ids {
-		productId, _ := strconv.Atoi(id)
-		productIds = append(productIds, productId)
-	}
-	product.Products = productIds
-	product.Key = key
-	product.Value, _ = strconv.Atoi(value)
+	response.OkWithMessage("更新成功", c)
+}
 
-	err3 := wechatService.UpdateHomeProducts(&product)
+// UpdateProductForKeyword 更新商品
+func (e *HomeApi) UpdateProductForKeyword(c *gin.Context) {
+	var product wechatRequest.UpdateIdsKeywordRequest
+	var err = c.ShouldBindJSON(&product)
+	if err != nil {
+		response.FailWithMessage("Json Parse Error!!", c)
+		return
+	}
+
+	err3 := wechatService.UpdateProductForKeyword(&product)
 	if err3 != nil {
 		global.GVA_LOG.Error("更新失败!", zap.Error(err3))
 		response.FailWithMessage("更新失败", c)
@@ -569,7 +460,7 @@ func (e *HomeApi) GetProductBrandByID(c *gin.Context) {
 
 // GetProductBrandList 获取商品品牌列表
 func (e *HomeApi) GetProductBrandList(c *gin.Context) {
-	var pageInfo request.PageInfo
+	var pageInfo wechatRequest.BrandSearchInfo
 	err := c.ShouldBindQuery(&pageInfo)
 	if err != nil {
 		response.FailWithMessage(err.Error(), c)
@@ -581,7 +472,7 @@ func (e *HomeApi) GetProductBrandList(c *gin.Context) {
 	if pageInfo.PageSize == 0 {
 		pageInfo.PageSize = 100
 	}
-	categoryList, total, err := wechatService.GetProductBrandList(pageInfo)
+	brandList, total, err := wechatService.GetProductBrandList(pageInfo)
 	if err != nil {
 		global.GVA_LOG.Error("获取失败!", zap.Error(err))
 		response.FailWithMessage("获取失败"+err.Error(), c)
@@ -589,7 +480,7 @@ func (e *HomeApi) GetProductBrandList(c *gin.Context) {
 	}
 
 	response.OkWithDetailed(response.PageResult{
-		List:     categoryList,
+		List:     brandList,
 		Total:    total,
 		Page:     pageInfo.Page,
 		PageSize: pageInfo.PageSize,
@@ -597,7 +488,7 @@ func (e *HomeApi) GetProductBrandList(c *gin.Context) {
 }
 
 func (e *HomeApi) CreateProductBrand(c *gin.Context) {
-	var brand wechat.HomeBrand
+	var brand wechat.Brand
 
 	err := c.ShouldBindJSON(&brand)
 	if err != nil {
@@ -615,7 +506,7 @@ func (e *HomeApi) CreateProductBrand(c *gin.Context) {
 }
 
 func (e *HomeApi) UpdateProductBrand(c *gin.Context) {
-	var brand wechat.HomeBrand
+	var brand wechat.Brand
 	err := c.ShouldBindJSON(&brand)
 	if err != nil {
 		response.FailWithMessage(err.Error(), c)
@@ -623,6 +514,22 @@ func (e *HomeApi) UpdateProductBrand(c *gin.Context) {
 	}
 	//home.SysUserAuthorityID = utils.GetUserAuthorityId(c)
 	err = wechatService.UpdateHomeBrand(&brand)
+	if err != nil {
+		global.GVA_LOG.Error("更新失败!", zap.Error(err))
+		response.FailWithMessage("更新失败", c)
+		return
+	}
+	response.OkWithMessage("更新成功", c)
+}
+
+func (e *HomeApi) UpdateProductBrandOnlineStat(c *gin.Context) {
+	var brand wechatRequest.UpdateIdsKeywordRequest
+	err := c.ShouldBindJSON(&brand)
+	if err != nil {
+		response.FailWithMessage(err.Error(), c)
+		return
+	}
+	err = wechatService.UpdateHomeBrandByIdForKeyword(&brand)
 	if err != nil {
 		global.GVA_LOG.Error("更新失败!", zap.Error(err))
 		response.FailWithMessage("更新失败", c)
@@ -653,25 +560,23 @@ func (e *HomeApi) DeleteHomeProductBrand(c *gin.Context) {
 	response.OkWithMessage("删除成功", c)
 }
 
-// CreateHotProduct 创建首页推荐专题商品
-func (e *HomeApi) CreateHotProduct(c *gin.Context) {
-	var hotProducts wechatRequest.AddHotProductRequest
-
-	err := c.ShouldBindJSON(&hotProducts)
+// CreateRecommendProduct 创建推荐商品
+func (e *HomeApi) CreateRecommendProducts(c *gin.Context) {
+	var recommendProducts wechatRequest.AddRecommendProductRequest
+	err := c.ShouldBindJSON(&recommendProducts)
 	if err != nil {
 		response.FailWithMessage(err.Error(), c)
 		return
 	}
 
-	hots := hotProducts.Products
-	//var recommendData wechatRes.HomeRecommendResponse
+	hots := recommendProducts.Products
 	for _, hotProduct := range hots {
-		product := wechat.HomeHotProduct{}
+		product := wechat.RecommendProduct{}
 		product.ProductId = hotProduct.ProductId
 		product.ProductName = hotProduct.ProductName
 		product.RecommendStatus = 0
 		product.Sort = 0
-		err = wechatService.CreateHotProductBrand(&product)
+		err = wechatService.CreateRecommendProduct(&product)
 		if err != nil {
 			global.GVA_LOG.Error("创建失败!", zap.Error(err))
 			response.FailWithMessage("创建失败", c)
@@ -681,16 +586,16 @@ func (e *HomeApi) CreateHotProduct(c *gin.Context) {
 	response.OkWithMessage("创建成功", c)
 }
 
-// UpdateHotProducts 更新猜你喜欢商品
-func (e *HomeApi) UpdateHotProducts(c *gin.Context) {
-	var product wechatRequest.ProductUpdateRequest
+// UpdateRecommendProducts 更新人气推荐商品
+func (e *HomeApi) UpdateRecommendProducts(c *gin.Context) {
+	var product wechatRequest.UpdateIdsKeywordRequest
 	err := c.ShouldBindJSON(&product)
 	if err != nil {
 		response.FailWithMessage(err.Error(), c)
 		return
 	}
 
-	err3 := wechatService.UpdateHotProducts(&product)
+	err3 := wechatService.UpdateRecommendProducts(&product)
 	if err3 != nil {
 		global.GVA_LOG.Error("更新失败!", zap.Error(err3))
 		response.FailWithMessage("更新失败", c)
@@ -700,50 +605,21 @@ func (e *HomeApi) UpdateHotProducts(c *gin.Context) {
 }
 
 // DeleteHotProducts 删除猜你喜欢商品
-func (e *HomeApi) DeleteHotProducts(c *gin.Context) {
-	var product wechatRequest.ProductDeleteRequest
-	err := c.ShouldBindJSON(&product)
+func (e *HomeApi) DeleteRecommendProducts(c *gin.Context) {
+	var idsReq request.IdsReq
+	err := c.ShouldBindJSON(&idsReq)
 	if err != nil {
 		response.FailWithMessage(err.Error(), c)
 		return
 	}
 
-	err3 := wechatService.DeleteHotProducts(&product)
+	err3 := wechatService.DeleteRecommendProducts(idsReq.Ids)
 	if err3 != nil {
 		global.GVA_LOG.Error("更新失败!", zap.Error(err3))
 		response.FailWithMessage("更新失败", c)
 		return
 	}
 	response.OkWithMessage("更新成功", c)
-}
-
-// GetHotProductList 获取商品品牌列表
-func (e *HomeApi) GetHotProductList(c *gin.Context) {
-	var pageInfo request.PageInfo
-	err := c.ShouldBindQuery(&pageInfo)
-	if err != nil {
-		response.FailWithMessage(err.Error(), c)
-		return
-	}
-	if pageInfo.Page == 0 {
-		pageInfo.Page = 1
-	}
-	if pageInfo.PageSize == 0 {
-		pageInfo.PageSize = 100
-	}
-	hotList, total, err := wechatService.GetHotProductList(pageInfo)
-	if err != nil {
-		global.GVA_LOG.Error("获取失败!", zap.Error(err))
-		response.FailWithMessage("获取失败"+err.Error(), c)
-		return
-	}
-
-	response.OkWithDetailed(response.PageResult{
-		List:     hotList,
-		Total:    total,
-		Page:     pageInfo.Page,
-		PageSize: pageInfo.PageSize,
-	}, "获取成功", c)
 }
 
 // GetProductAttributeCategoryList 获取商品属性列表
@@ -777,7 +653,7 @@ func (e *HomeApi) GetProductAttributeCategoryList(c *gin.Context) {
 
 // CreateProductAttributeCategory 创建商品属性分类
 func (e *HomeApi) CreateProductAttributeCategory(c *gin.Context) {
-	var attribute wechat.HomeProductAttributeCategory
+	var attribute wechat.ProductAttributeCategory
 
 	err := c.ShouldBindJSON(&attribute)
 	if err != nil {
@@ -796,7 +672,7 @@ func (e *HomeApi) CreateProductAttributeCategory(c *gin.Context) {
 
 // UpdateProductAttributeCategory 更新商品属性分类
 func (e *HomeApi) UpdateProductAttributeCategory(c *gin.Context) {
-	var attribute wechat.HomeProductAttributeCategory
+	var attribute wechat.ProductAttributeCategory
 	err := c.ShouldBindJSON(&attribute)
 	if err != nil {
 		response.FailWithMessage(err.Error(), c)
@@ -836,7 +712,7 @@ func (e *HomeApi) DeleteProductAttributeCategory(c *gin.Context) {
 
 // CreateProductAttribute 创建商品属性参数
 func (e *HomeApi) CreateProductAttribute(c *gin.Context) {
-	var attribute wechat.HomeProductAttribute
+	var attribute wechat.ProductAttribute
 
 	err := c.ShouldBindJSON(&attribute)
 	if err != nil {
@@ -855,7 +731,7 @@ func (e *HomeApi) CreateProductAttribute(c *gin.Context) {
 
 // UpdateProductAttribute 更新商品属性参数
 func (e *HomeApi) UpdateProductAttribute(c *gin.Context) {
-	var attribute wechat.HomeProductAttribute
+	var attribute wechat.ProductAttribute
 	err := c.ShouldBindJSON(&attribute)
 	if err != nil {
 		response.FailWithMessage(err.Error(), c)
@@ -928,7 +804,7 @@ func (e *HomeApi) GetProductAttributeListByCategoryId(c *gin.Context) {
 
 // CreateProductCategory 创建商品分类
 func (e *HomeApi) CreateProductCategory(c *gin.Context) {
-	var category wechat.HomeProductCategory
+	var category wechat.ProductCategory
 	err := c.ShouldBindJSON(&category)
 	if err != nil {
 		response.FailWithMessage(err.Error(), c)
@@ -946,7 +822,7 @@ func (e *HomeApi) CreateProductCategory(c *gin.Context) {
 
 // UpdateProductCategory 更新商品分类
 func (e *HomeApi) UpdateProductCategory(c *gin.Context) {
-	var category wechat.HomeProductCategory
+	var category wechat.ProductCategory
 	err := c.ShouldBindJSON(&category)
 	if err != nil {
 		response.FailWithMessage(err.Error(), c)
@@ -1014,7 +890,7 @@ func (e *HomeApi) GetProductCategoryList(c *gin.Context) {
 }
 
 // GetProductCategoryTreeList 获取商品分类树
-func (e *HomeApi) GetProductCategoryTreeList(c *gin.Context) {
+func (e *HomeApi) GetProductAllCategory(c *gin.Context) {
 	categoryList, err := wechatService.GetAllProductCategoryList()
 	if err != nil {
 		global.GVA_LOG.Error("获取失败!", zap.Error(err))
@@ -1022,21 +898,7 @@ func (e *HomeApi) GetProductCategoryTreeList(c *gin.Context) {
 		return
 	}
 
-	var categoryTree []wechatRes.CategoryResponse
-	for _, category := range categoryList {
-		if category.ParentId == 0 {
-			categoryTreeItem := wechatRes.CategoryResponse{}
-			categoryTreeItem.Category = *category
-			for _, productCategory := range categoryList {
-				if category.ID == productCategory.ParentId {
-					categoryTreeItem.Children = append(categoryTreeItem.Children, *productCategory)
-				}
-			}
-			categoryTree = append(categoryTree, categoryTreeItem)
-		}
-
-	}
-	response.OkWithData(categoryTree, c)
+	response.OkWithData(categoryList, c)
 }
 
 func (e *HomeApi) GetSkuStockByProductID(c *gin.Context) {
@@ -1061,7 +923,7 @@ func (e *HomeApi) GetSkuStockByProductID(c *gin.Context) {
 }
 
 func (e *HomeApi) UpdateSKUStock(c *gin.Context) {
-	var stockList []wechat.SKUStock
+	var stockList []wechat.SkuStock
 	err := c.ShouldBindJSON(&stockList)
 	if err != nil {
 		response.FailWithMessage(err.Error(), c)

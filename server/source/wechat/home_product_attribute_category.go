@@ -23,7 +23,7 @@ func (i *initHomeProductAttributeCategory) MigrateTable(ctx context.Context) (co
 		return ctx, system.ErrMissingDBContext
 	}
 	return ctx, db.AutoMigrate(
-		&wechatModel.HomeProductAttributeCategory{},
+		&wechatModel.ProductAttributeCategory{},
 	)
 }
 
@@ -32,11 +32,11 @@ func (i *initHomeProductAttributeCategory) TableCreated(ctx context.Context) boo
 	if !ok {
 		return false
 	}
-	return db.Migrator().HasTable(&wechatModel.HomeProductAttributeCategory{})
+	return db.Migrator().HasTable(&wechatModel.ProductAttributeCategory{})
 }
 
 func (i initHomeProductAttributeCategory) InitializerName() string {
-	return wechatModel.HomeProductAttributeCategory{}.TableName()
+	return wechatModel.ProductAttributeCategory{}.TableName()
 }
 
 func (i *initHomeProductAttributeCategory) InitializeData(ctx context.Context) (next context.Context, err error) {
@@ -45,7 +45,7 @@ func (i *initHomeProductAttributeCategory) InitializeData(ctx context.Context) (
 		return ctx, system.ErrMissingDBContext
 	}
 
-	entities := []wechatModel.HomeProductAttributeCategory{
+	entities := []wechatModel.ProductAttributeCategory{
 		{
 			Name:           "服装-T恤",
 			AttributeCount: 2,
@@ -108,7 +108,7 @@ func (i *initHomeProductAttributeCategory) InitializeData(ctx context.Context) (
 		},
 	}
 	if err = db.Create(&entities).Error; err != nil {
-		return ctx, errors.Wrap(err, wechatModel.HomeProductAttributeCategory{}.TableName()+"表数据初始化失败!")
+		return ctx, errors.Wrap(err, wechatModel.ProductAttributeCategory{}.TableName()+"表数据初始化失败!")
 	}
 	next = context.WithValue(ctx, i.InitializerName(), entities)
 
@@ -120,7 +120,7 @@ func (i *initHomeProductAttributeCategory) DataInserted(ctx context.Context) boo
 	if !ok {
 		return false
 	}
-	if errors.Is(db.Where("name = ?", "配件").First(&wechatModel.HomeProductAttributeCategory{}).Error, gorm.ErrRecordNotFound) { // 判断是否存在数据
+	if errors.Is(db.Where("name = ?", "配件").First(&wechatModel.ProductAttributeCategory{}).Error, gorm.ErrRecordNotFound) { // 判断是否存在数据
 		return false
 	}
 	return true

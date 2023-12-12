@@ -16,17 +16,23 @@ func (e *WechatRouter) InitWechatRouter(Router *gin.RouterGroup, RouterPub *gin.
 	wechatRouterWithoutRecord := Router.Group("product")
 	homeApi := v1.ApiGroupApp.WechatApiGroup.HomeApi
 	{
-		wechatRouter.POST("content", homeApi.CreateHomeAdvertise)
-		wechatRouter.PUT("content", homeApi.UpdateHomeAdvertise)
-		wechatRouter.DELETE("content", homeApi.DeleteHomeAdvertise)
+		wechatRouter.POST("advertise", homeApi.CreateHomeAdvertise)
+		wechatRouter.PUT("advertise", homeApi.UpdateHomeAdvertise)
+		wechatRouter.DELETE("advertise", homeApi.DeleteHomeAdvertise)
+		wechatRouter.PUT("advertiseState", homeApi.UpdateHomeAdvertiseOnlineState)
 		wechatRouter.POST("create", homeApi.CreateProduct)
-		wechatRouter.PUT("update", homeApi.UpdateProducts)
+		wechatRouter.PUT("update", homeApi.UpdateProduct)
+		wechatRouter.PUT("updateKeyword", homeApi.UpdateProductForKeyword)
+
 		wechatRouter.POST("brand", homeApi.CreateProductBrand)
 		wechatRouter.PUT("brand", homeApi.UpdateProductBrand)
 		wechatRouter.DELETE("brand", homeApi.DeleteHomeProductBrand)
-		wechatRouter.POST("hotProduct", homeApi.CreateHotProduct)
-		wechatRouter.PUT("hotProduct", homeApi.UpdateHotProducts)
-		wechatRouter.DELETE("hotProduct", homeApi.DeleteHotProducts)
+		wechatRouter.PUT("brandState", homeApi.UpdateProductBrandOnlineStat)
+
+		wechatRouter.POST("recommendProduct", homeApi.CreateRecommendProducts)
+		wechatRouter.PUT("recommendProduct", homeApi.UpdateRecommendProducts)
+		wechatRouter.DELETE("recommendProduct", homeApi.DeleteRecommendProducts)
+
 		wechatRouter.POST("attributeCategory", homeApi.CreateProductAttributeCategory)
 		wechatRouter.PUT("attributeCategory", homeApi.UpdateProductAttributeCategory)
 		wechatRouter.DELETE("attributeCategory", homeApi.DeleteProductAttributeCategory)
@@ -45,21 +51,22 @@ func (e *WechatRouter) InitWechatRouter(Router *gin.RouterGroup, RouterPub *gin.
 		wechatRouterWithoutRecord.DELETE("cart/clear", homeApi.ClearProductCart)
 		wechatRouterWithoutRecord.GET("cart/list", homeApi.GetProductCartList)
 		wechatRouterWithoutRecord.DELETE("carts", homeApi.DeleteProductCartByIds)
+		wechatRouterWithoutRecord.DELETE("deletes", homeApi.DeleteProducts)
 	}
 	{
-		homePublicRouterWithoutRecord.GET("content", homeApi.GetAllHomeAdvertise)
+		homePublicRouterWithoutRecord.GET("content", homeApi.GetAllWechatContent)
 		homePublicRouterWithoutRecord.GET("advertiseList", homeApi.GetHomeAdvertiseList)
 		homePublicRouterWithoutRecord.GET("recommendProductList", homeApi.GetRecommendProductList) // 获取推荐商品列表
 		homePublicRouterWithoutRecord.GET("list", homeApi.GetProductList)                          // 获取商品列表
 		homePublicRouterWithoutRecord.GET("brand", homeApi.GetProductBrandList)
-		homePublicRouterWithoutRecord.GET("hotProduct", homeApi.GetHotProductList)
+
 		homePublicRouterWithoutRecord.GET("brandDetail", homeApi.GetProductBrandByID)
 		homePublicRouterWithoutRecord.GET("productDetail", homeApi.GetProductByID)
 		homePublicRouterWithoutRecord.GET("attributeCategory", homeApi.GetProductAttributeCategoryList)
 		homePublicRouterWithoutRecord.GET("attribute", homeApi.GetProductAttributeListByCategoryId)
 		homePublicRouterWithoutRecord.GET("productCategory", homeApi.GetProductCategoryList)
-		homePublicRouterWithoutRecord.GET("productList", homeApi.GetProductListByOnlyIDWithSort)  // 获取商品列表
-		homePublicRouterWithoutRecord.GET("categoryTreeList", homeApi.GetProductCategoryTreeList) // 获取商品分类列表
+		homePublicRouterWithoutRecord.GET("productList", homeApi.GetProductListByOnlyIDWithSort) // 获取商品列表
+		homePublicRouterWithoutRecord.GET("allCategory", homeApi.GetProductAllCategory)          // 获取商品分类列表
 		homePublicRouterWithoutRecord.GET("sku", homeApi.GetSkuStockByProductID)
 	}
 }

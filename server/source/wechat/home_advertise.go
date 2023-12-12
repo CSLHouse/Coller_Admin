@@ -23,7 +23,7 @@ func (i *initHome) MigrateTable(ctx context.Context) (context.Context, error) {
 		return ctx, system.ErrMissingDBContext
 	}
 	return ctx, db.AutoMigrate(
-		&wechatModel.HomeAdvertise{},
+		&wechatModel.Advertise{},
 	)
 }
 
@@ -32,11 +32,11 @@ func (i *initHome) TableCreated(ctx context.Context) bool {
 	if !ok {
 		return false
 	}
-	return db.Migrator().HasTable(&wechatModel.HomeAdvertise{})
+	return db.Migrator().HasTable(&wechatModel.Advertise{})
 }
 
 func (i initHome) InitializerName() string {
-	return wechatModel.HomeAdvertise{}.TableName()
+	return wechatModel.Advertise{}.TableName()
 }
 
 func (i *initHome) InitializeData(ctx context.Context) (next context.Context, err error) {
@@ -45,7 +45,7 @@ func (i *initHome) InitializeData(ctx context.Context) (next context.Context, er
 		return ctx, system.ErrMissingDBContext
 	}
 
-	entities := []wechatModel.HomeAdvertise{
+	entities := []wechatModel.Advertise{
 		{
 			Name:       "小米推荐广告",
 			Type:       1,
@@ -113,7 +113,7 @@ func (i *initHome) InitializeData(ctx context.Context) (next context.Context, er
 		},
 	}
 	if err = db.Create(&entities).Error; err != nil {
-		return ctx, errors.Wrap(err, wechatModel.HomeAdvertise{}.TableName()+"表数据初始化失败!")
+		return ctx, errors.Wrap(err, wechatModel.Advertise{}.TableName()+"表数据初始化失败!")
 	}
 	next = context.WithValue(ctx, i.InitializerName(), entities)
 
@@ -125,7 +125,7 @@ func (i *initHome) DataInserted(ctx context.Context) bool {
 	if !ok {
 		return false
 	}
-	if errors.Is(db.Where("name = ?", "夏季大热促销").First(&wechatModel.HomeAdvertise{}).Error, gorm.ErrRecordNotFound) { // 判断是否存在数据
+	if errors.Is(db.Where("name = ?", "夏季大热促销").First(&wechatModel.Advertise{}).Error, gorm.ErrRecordNotFound) { // 判断是否存在数据
 		return false
 	}
 	return true

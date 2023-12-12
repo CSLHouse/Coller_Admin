@@ -34,11 +34,11 @@ func (b *FileUploadAndDownloadApi) UploadFile(c *gin.Context) {
 		return
 	}
 	userId := utils.GetUserID(c)
-	if fileUploadAndDownloadService.CheckFile(header.Filename, userId) {
-		global.GVA_LOG.Error("有同名文件!", zap.Error(err))
-		response.Failed("有同名文件", c)
-		return
-	}
+	//if fileUploadAndDownloadService.CheckFile(header.Filename, userId) {
+	//	global.GVA_LOG.Error("有同名文件!", zap.Error(err))
+	//	response.Failed("有同名文件", c)
+	//	return
+	//}
 	file, err = fileUploadAndDownloadService.UploadFile(header, noSave, userId) // 文件上传后拿到文件路径
 	if err != nil {
 		global.GVA_LOG.Error("修改数据库链接失败!", zap.Error(err))

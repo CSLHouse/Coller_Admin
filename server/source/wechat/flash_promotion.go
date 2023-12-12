@@ -23,7 +23,7 @@ func (i *initFlashPromotion) MigrateTable(ctx context.Context) (context.Context,
 		return ctx, system.ErrMissingDBContext
 	}
 	return ctx, db.AutoMigrate(
-		&wechatModel.HomeFlashPromotion{},
+		&wechatModel.FlashPromotion{},
 	)
 }
 
@@ -32,11 +32,11 @@ func (i *initFlashPromotion) TableCreated(ctx context.Context) bool {
 	if !ok {
 		return false
 	}
-	return db.Migrator().HasTable(&wechatModel.HomeFlashPromotion{})
+	return db.Migrator().HasTable(&wechatModel.FlashPromotion{})
 }
 
 func (i initFlashPromotion) InitializerName() string {
-	return wechatModel.HomeFlashPromotion{}.TableName()
+	return wechatModel.FlashPromotion{}.TableName()
 }
 
 func (i *initFlashPromotion) InitializeData(ctx context.Context) (next context.Context, err error) {
@@ -45,7 +45,7 @@ func (i *initFlashPromotion) InitializeData(ctx context.Context) (next context.C
 		return ctx, system.ErrMissingDBContext
 	}
 
-	entities := []wechatModel.HomeFlashPromotion{
+	entities := []wechatModel.FlashPromotion{
 		{
 			Title:     "双11特卖活动",
 			StartDate: "2022-11-09",
@@ -54,7 +54,7 @@ func (i *initFlashPromotion) InitializeData(ctx context.Context) (next context.C
 		},
 	}
 	if err = db.Create(&entities).Error; err != nil {
-		return ctx, errors.Wrap(err, wechatModel.HomeFlashPromotion{}.TableName()+"表数据初始化失败!")
+		return ctx, errors.Wrap(err, wechatModel.FlashPromotion{}.TableName()+"表数据初始化失败!")
 	}
 	next = context.WithValue(ctx, i.InitializerName(), entities)
 
@@ -66,7 +66,7 @@ func (i *initFlashPromotion) DataInserted(ctx context.Context) bool {
 	if !ok {
 		return false
 	}
-	if errors.Is(db.Where("title = ?", "双11特卖活动").First(&wechatModel.HomeFlashPromotion{}).Error, gorm.ErrRecordNotFound) { // 判断是否存在数据
+	if errors.Is(db.Where("title = ?", "双11特卖活动").First(&wechatModel.FlashPromotion{}).Error, gorm.ErrRecordNotFound) { // 判断是否存在数据
 		return false
 	}
 	return true

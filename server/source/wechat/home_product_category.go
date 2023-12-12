@@ -23,7 +23,7 @@ func (i *initHomeProductCategory) MigrateTable(ctx context.Context) (context.Con
 		return ctx, system.ErrMissingDBContext
 	}
 	return ctx, db.AutoMigrate(
-		&wechatModel.HomeProductCategory{},
+		&wechatModel.ProductCategory{},
 	)
 }
 
@@ -32,11 +32,11 @@ func (i *initHomeProductCategory) TableCreated(ctx context.Context) bool {
 	if !ok {
 		return false
 	}
-	return db.Migrator().HasTable(&wechatModel.HomeProductCategory{})
+	return db.Migrator().HasTable(&wechatModel.ProductCategory{})
 }
 
 func (i initHomeProductCategory) InitializerName() string {
-	return wechatModel.HomeProductCategory{}.TableName()
+	return wechatModel.ProductCategory{}.TableName()
 }
 
 func (i *initHomeProductCategory) InitializeData(ctx context.Context) (next context.Context, err error) {
@@ -45,7 +45,7 @@ func (i *initHomeProductCategory) InitializeData(ctx context.Context) (next cont
 		return ctx, system.ErrMissingDBContext
 	}
 
-	entities := []wechatModel.HomeProductCategory{
+	entities := []wechatModel.ProductCategory{
 		{
 			ParentId:     0,
 			Name:         "服装",
@@ -373,7 +373,7 @@ func (i *initHomeProductCategory) InitializeData(ctx context.Context) (next cont
 		},
 	}
 	if err = db.Create(&entities).Error; err != nil {
-		return ctx, errors.Wrap(err, wechatModel.HomeProductCategory{}.TableName()+"表数据初始化失败!")
+		return ctx, errors.Wrap(err, wechatModel.ProductCategory{}.TableName()+"表数据初始化失败!")
 	}
 	next = context.WithValue(ctx, i.InitializerName(), entities)
 
@@ -385,7 +385,7 @@ func (i *initHomeProductCategory) DataInserted(ctx context.Context) bool {
 	if !ok {
 		return false
 	}
-	if errors.Is(db.Where("name = ?", "笔记本").First(&wechatModel.HomeProductCategory{}).Error, gorm.ErrRecordNotFound) { // 判断是否存在数据
+	if errors.Is(db.Where("name = ?", "笔记本").First(&wechatModel.ProductCategory{}).Error, gorm.ErrRecordNotFound) { // 判断是否存在数据
 		return false
 	}
 	return true

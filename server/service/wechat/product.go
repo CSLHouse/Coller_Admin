@@ -9,6 +9,7 @@ import (
 	"go.uber.org/zap"
 	"gorm.io/gorm"
 	"strings"
+	"time"
 )
 
 type HomeService struct{}
@@ -16,10 +17,10 @@ type HomeService struct{}
 //@author: [piexlmax](https://github.com/piexlmax)
 //@function: CreateHomeAdvertise
 //@description: 创建套餐
-//@param: e model.HomeAdvertise
+//@param: e model.Advertise
 //@return: err error
 
-func (exa *HomeService) CreateHomeAdvertise(e wechat.HomeAdvertise) (err error) {
+func (exa *HomeService) CreateHomeAdvertise(e wechat.Advertise) (err error) {
 	err = global.GVA_DB.Create(&e).Error
 	return err
 }
@@ -27,33 +28,35 @@ func (exa *HomeService) CreateHomeAdvertise(e wechat.HomeAdvertise) (err error) 
 //@author: [piexlmax](https://github.com/piexlmax)
 //@function: DeleteHomeAdvertise
 //@description: 删除套餐
-//@param: e model.HomeAdvertise
+//@param: e model.Advertise
 //@return: err error
 
-func (exa *HomeService) DeleteHomeAdvertise(e wechat.HomeAdvertise) (err error) {
-	err = global.GVA_DB.Delete(&e).Error
+func (exa *HomeService) DeleteHomeAdvertise(id int) (err error) {
+	var brand wechat.Advertise
+	err = global.GVA_DB.Where("id = ?", id).Delete(&brand).Error
+
 	return err
 }
 
 //@author: [piexlmax](https://github.com/piexlmax)
 //@function: UpdateHomeAdvertise
 //@description: 更新套餐
-//@param: e *model.HomeAdvertise
+//@param: e *model.Advertise
 //@return: err error
 
-func (exa *HomeService) UpdateHomeAdvertise(e *wechat.HomeAdvertise) (err error) {
+func (exa *HomeService) UpdateHomeAdvertise(e *wechat.Advertise) (err error) {
 	err = global.GVA_DB.Save(e).Error
 	return err
 }
 
-//@author: [piexlmax](https://github.com/piexlmax)
-//@function: GetHomeAdvertise
-//@description: 获取套餐信息
-//@param: id uint
-//@return: customer model.HomeAdvertise, err error
+func (exa *HomeService) UpdateHomeAdvertiseByIdForKeyword(e *wechatRequest.UpdateIdsKeywordRequest) (err error) {
+	db := global.GVA_DB.Model(&wechat.Advertise{})
+	db.Where("id IN ?", e.Ids).Updates(map[string]interface{}{e.Key: e.Value})
+	return err
+}
 
-func (exa *HomeService) GetHomeAdvertise(id int) (customer wechat.HomeAdvertise, err error) {
-	err = global.GVA_DB.Where("combo_id = ?", id).First(&customer).Error
+func (exa *HomeService) GetHomeAdvertiseById(id int) (advertise wechat.Advertise, err error) {
+	err = global.GVA_DB.Where("id = ?", id).First(&advertise).Error
 	return
 }
 
@@ -63,154 +66,145 @@ func (exa *HomeService) GetHomeAdvertise(id int) (customer wechat.HomeAdvertise,
 //@param: sysUserAuthorityID string, info request.PageInfo
 //@return: list interface{}, total int64, err error
 
-func (exa *HomeService) GetHomeAdvertiseInfoList(info request.PageInfo) (list interface{}, err error) {
+func (exa *HomeService) GetHomeAdvertiseInfoList(info request.PageInfo) (list []wechat.Advertise, total int64, err error) {
 	limit := info.PageSize
 	offset := info.PageSize * (info.Page - 1)
-	db := global.GVA_DB.Model(&wechat.HomeAdvertise{})
+
+	db := global.GVA_DB.Model(&wechat.Advertise{})
+	err = db.Count(&total).Error
 	if err != nil {
-		return
+		return list, total, err
+	} else {
+		err = db.Limit(limit).Offset(offset).Find(&list).Error
 	}
-
-	var ComboList []wechat.HomeAdvertise
-	err = db.Limit(limit).Offset(offset).Find(&ComboList).Error
-	return ComboList, err
+	return list, total, err
 }
 
-func (exa *HomeService) GetAllHomeAdvertiseInfoList() (list interface{}, err error) {
-	db := global.GVA_DB.Model(&wechat.HomeAdvertise{})
-	//var a system.SysAuthority
-	//a.AuthorityId = sysUserAuthorityID
-	//auth, err := systemService.AuthorityServiceApp.GetAuthorityInfo(a)
-	//if err != nil {
-	//	return
-	//}
-	//var dataId []uint
-	//for _, v := range auth.DataAuthorityId {
-	//	dataId = append(dataId, v.AuthorityId)
-	//}
-	var advertiseList []wechat.HomeAdvertise
-	err = db.Find(&advertiseList).Error
-	return advertiseList, err
+func (exa *HomeService) GetOnlineHomeAdvertiseInfoList() (list []wechat.Advertise, err error) {
+	db := global.GVA_DB.Model(&wechat.Advertise{})
+	err = db.Where("state = 1").Order("sort desc").Find(&list).Error
+	return list, err
 }
 
-func (exa *HomeService) GetAllHomeBrandInfoList() (list interface{}, err error) {
-	db := global.GVA_DB.Model(&wechat.HomeBrand{})
-	//var a system.SysAuthority
-	//a.AuthorityId = sysUserAuthorityID
-	//auth, err := systemService.AuthorityServiceApp.GetAuthorityInfo(a)
-	//if err != nil {
-	//	return
-	//}
-	//var dataId []uint
-	//for _, v := range auth.DataAuthorityId {
-	//	dataId = append(dataId, v.AuthorityId)
-	//}
-	var brandList []wechat.HomeBrand
-	err = db.Find(&brandList).Error
-	return brandList, err
+func (exa *HomeService) GetOnlineHomeBrandInfoList() (list []wechat.Brand, err error) {
+	db := global.GVA_DB.Model(&wechat.Brand{})
+	err = db.Where("show_status = 1").Order("sort desc").Find(&list).Error
+	return list, err
 }
 
-func (exa *HomeService) GetAllHomeFlashPromotionInfoList() (list interface{}, err error) {
-	db := global.GVA_DB.Model(&wechat.HomeFlashPromotion{})
-	//var a system.SysAuthority
-	//a.AuthorityId = sysUserAuthorityID
-	//auth, err := systemService.AuthorityServiceApp.GetAuthorityInfo(a)
-	//if err != nil {
-	//	return
-	//}
-	//var dataId []uint
-	//for _, v := range auth.DataAuthorityId {
-	//	dataId = append(dataId, v.AuthorityId)
-	//}
-	var flashPromotionList []wechat.HomeFlashPromotion
-	err = db.Find(&flashPromotionList).Error
-	return flashPromotionList, err
+func (exa *HomeService) GetOnlineHomeFlashPromotionInfoList() (list []wechat.FlashPromotion, err error) {
+	db := global.GVA_DB.Model(&wechat.FlashPromotion{})
+	err = db.Where("status = 1").Find(&list).Error
+	return list, err
 }
 
-func (exa *HomeService) CreateNewProduct(e *wechat.HomeNewProduct) (err error) {
+func (exa *HomeService) CreateNewProduct(e *wechat.NewProduct) (err error) {
 	err = global.GVA_DB.Create(&e).Error
 	return err
 }
 
-func (exa *HomeService) GetAllNewProductInfoList() (list interface{}, err error) {
-	db := global.GVA_DB.Model(&wechat.HomeNewProduct{})
-	//var a system.SysAuthority
-	//a.AuthorityId = sysUserAuthorityID
-	//auth, err := systemService.AuthorityServiceApp.GetAuthorityInfo(a)
-	//if err != nil {
-	//	return
-	//}
-	//var dataId []uint
-	//for _, v := range auth.DataAuthorityId {
-	//	dataId = append(dataId, v.AuthorityId)
-	//}
-	var newProduct []wechat.HomeNewProduct
-	err = db.Find(&newProduct).Error
-	return newProduct, err
+func (exa *HomeService) GetOnlineNewProductInfoList() (list []wechat.NewProduct, err error) {
+	db := global.GVA_DB.Model(&wechat.NewProduct{})
+	err = db.Where("recommend_status = 1").Order("sort desc").Find(&list).Error
+	return list, err
 }
 
-func (exa *HomeService) GetAllHomeHotProductListInfoList() (list interface{}, err error) {
-	db := global.GVA_DB.Model(&wechat.HomeHotProduct{})
-	//var a system.SysAuthority
-	//a.AuthorityId = sysUserAuthorityID
-	//auth, err := systemService.AuthorityServiceApp.GetAuthorityInfo(a)
-	//if err != nil {
-	//	return
-	//}
-	//var dataId []uint
-	//for _, v := range auth.DataAuthorityId {
-	//	dataId = append(dataId, v.AuthorityId)
-	//}
-	var hotProductList []wechat.HomeHotProduct
-	err = db.Find(&hotProductList).Error
-	return hotProductList, err
-}
-
-func (exa *HomeService) CreateRecommendProduct(e *wechat.HomeRecommendProduct) (err error) {
+func (exa *HomeService) CreateRecommendProduct(e *wechat.RecommendProduct) (err error) {
 	err = global.GVA_DB.Create(&e).Error
 	return err
 }
+func (exa *HomeService) UpdateRecommendProducts(e *wechatRequest.UpdateIdsKeywordRequest) (err error) {
+	db := global.GVA_DB.Model(&wechat.RecommendProduct{})
+	db.Where("id IN ?", e.Ids).Updates(map[string]interface{}{e.Key: e.Value})
+	return err
+}
 
-func (exa *HomeService) GetRecommendProductList(pageInfo request.PageInfo) (recommendProductList []wechat.HomeRecommendProduct, err error) {
+func (exa *HomeService) DeleteRecommendProducts(ids []int) (err error) {
+	var product wechat.RecommendProduct
+	err = global.GVA_DB.Where("id in ?", ids).Delete(&product).Error
+	return err
+}
+
+func (exa *HomeService) GetOnlineRecommendProductListInfoList(pageInfo request.PageInfo) (recommendProductList []wechat.RecommendProduct, err error) {
 	limit := pageInfo.PageSize
 	offset := pageInfo.PageSize * (pageInfo.Page - 1)
 
-	db := global.GVA_DB.Model(&wechat.HomeRecommendProduct{})
-	//var a system.SysAuthority
-	//a.AuthorityId = sysUserAuthorityID
-	//auth, err := systemService.AuthorityServiceApp.GetAuthorityInfo(a)
-	//if err != nil {
-	//	return
-	//}
-	//var dataId []uint
-	//for _, v := range auth.DataAuthorityId {
-	//	dataId = append(dataId, v.AuthorityId)
-	//}
-	err = db.Limit(limit).Offset(offset).Preload("Product").Find(&recommendProductList).Error
+	db := global.GVA_DB.Model(&wechat.RecommendProduct{})
+
+	err = db.Limit(limit).Offset(offset).Where("recommend_status = 1").Order("sort desc").Preload("Product").Find(&recommendProductList).Error
 	return recommendProductList, err
 }
 
-func (exa *HomeService) CreateHomeProduct(e *wechat.HomeProduct) (err error) {
-	err = global.GVA_DB.Create(&e).Error
+//func (exa *HomeService) GetOnlineRecommendProductListInfoList() (list []wechat.RecommendProduct, err error) {
+//	db := global.GVA_DB.Model(&wechat.RecommendProduct{})
+//	err = db.Where("recommend_status = 1").Preload("Product").Find(&list).Error
+//	return list, err
+//}
+
+func (exa *HomeService) CreateHomeProduct(e *wechat.Product) (err error) {
+	// TODO: 会员价格
+	// 创建产品参数信
+	for _, attribute := range e.ProductAttributeValueList {
+		if len(attribute.Value) > 0 {
+			err = exa.CreateProductAttributeValue(attribute)
+			if err != nil {
+				return err
+			}
+		}
+	}
+	//产品满减
+	for _, fullReduction := range e.ProductFullReductionList {
+		if fullReduction.FullPrice > 0 && fullReduction.ReducePrice > 0 {
+			err = exa.CreateProductFullReduction(fullReduction)
+			if err != nil {
+				return err
+			}
+		}
+	}
+	// 产品阶梯价格
+	for _, ladder := range e.ProductLadderList {
+		if ladder.Count > 0 && ladder.Discount > 0 && ladder.Price > 0 {
+			err = exa.CreateProductLadder(ladder)
+			if err != nil {
+				return err
+			}
+		}
+	}
+	// sku的库存
+	for _, stock := range e.SkuStockList {
+		if stock.Price > 0 && stock.PromotionPrice > 0 {
+			stock.SkuCode = fmt.Sprintf("%d", time.Now().UnixNano())
+			err = exa.CreateProductSKUStock(stock)
+			if err != nil {
+				return err
+			}
+		}
+	}
+	err = global.GVA_DB.Create(e).Error
 	return err
 }
 
-func (exa *HomeService) UpdateHomeProducts(e *wechatRequest.ProductUpdateRequest) (err error) {
-	db := global.GVA_DB.Model(&wechat.HomeProduct{})
-	db.Where("id IN ?", e.Products).Updates(map[string]interface{}{e.Key: e.Value})
+func (exa *HomeService) UpdateHomeProduct(e *wechat.Product) (err error) {
+	err = global.GVA_DB.Save(e).Error
+	return err
+}
+
+func (exa *HomeService) UpdateProductForKeyword(e *wechatRequest.UpdateIdsKeywordRequest) (err error) {
+	db := global.GVA_DB.Model(&wechat.Product{})
+	db.Where("id IN ?", e.Ids).Updates(map[string]interface{}{e.Key: e.Value})
 	return err
 }
 
 // 获取查询数据库的命令
-func (exa *HomeService) getProductSearchCmd(searchInfo request.ProductSearchInfo) string {
+func (exa *HomeService) getProductSearchCmd(searchInfo wechatRequest.ProductSearchInfo) string {
 	var cmdName string
 	var cmdSN string
 	var cmdCategoryName string
 	var cmdBrand string
 	var cmdPublishStatus string
 	var cmdVerifyStatus string
-	if len(searchInfo.Name) > 0 {
-		cmdName += fmt.Sprintf("name like '%%%s%%'", searchInfo.Name)
+	if len(searchInfo.Keyword) > 0 {
+		cmdName += fmt.Sprintf("name like '%%%s%%'", searchInfo.Keyword)
 	}
 	if searchInfo.BrandId > 0 {
 		cmdSN += fmt.Sprintf("brand_id = %d", searchInfo.BrandId)
@@ -218,17 +212,17 @@ func (exa *HomeService) getProductSearchCmd(searchInfo request.ProductSearchInfo
 	if len(searchInfo.ProductSN) > 0 {
 		cmdSN += fmt.Sprintf("product_sn like '%%%s%%'", strings.TrimSpace(searchInfo.ProductSN))
 	}
-	if len(searchInfo.ProductCategoryName) > 0 {
-		cmdCategoryName += fmt.Sprintf("product_category_name like '%%%s%%'", strings.TrimSpace(searchInfo.ProductCategoryName))
+	if len(searchInfo.ProductCategoryId) > 0 {
+		cmdCategoryName += fmt.Sprintf("product_category_id like '%%%s%%'", strings.TrimSpace(searchInfo.ProductCategoryId))
 	}
 	if len(searchInfo.BrandName) > 0 {
 		cmdBrand += fmt.Sprintf("brand_name like '%%%s%%'", strings.TrimSpace(searchInfo.BrandName))
 	}
 	if searchInfo.PublishStatus > 0 {
-		cmdPublishStatus += fmt.Sprintf("publish_status = %d", searchInfo.PublishStatus)
+		cmdPublishStatus += fmt.Sprintf("publish_status = %d", searchInfo.PublishStatus-100)
 	}
 	if searchInfo.VerifyStatus > 0 {
-		cmdVerifyStatus += fmt.Sprintf("verify_status = %d", searchInfo.VerifyStatus)
+		cmdVerifyStatus += fmt.Sprintf("verify_status = %d", searchInfo.VerifyStatus-100)
 	}
 
 	cmdSearch := ""
@@ -247,35 +241,38 @@ func (exa *HomeService) getProductSearchCmd(searchInfo request.ProductSearchInfo
 	return cmdSearch
 }
 
-func (exa *HomeService) GetProductByID(id int) (product wechat.HomeProduct, err error) {
-	err = global.GVA_DB.Where("id = ?", id).First(&product).Error
+func (exa *HomeService) GetProductByID(id int) (product wechat.Product, err error) {
+	err = global.GVA_DB.Where("id = ?", id).
+		Preload("ProductLadderList").
+		Preload("ProductFullReductionList").
+		Preload("SkuStockList").
+		Preload("ProductAttributeValueList").
+		Preload("ProductAttributeList").First(&product).Error
 	return product, err
 }
 
-func (exa *HomeService) GetProductList(searchInfo request.ProductSearchInfo) (list interface{}, total int64, err error) {
+func (exa *HomeService) GetProductList(searchInfo wechatRequest.ProductSearchInfo) (list []wechat.Product, total int64, err error) {
 	limit := searchInfo.PageSize
 	offset := searchInfo.PageSize * (searchInfo.Page - 1)
 
-	var productList []wechat.HomeProduct
-	homeServiceApp := new(HomeService)
-	cmd := homeServiceApp.getProductSearchCmd(searchInfo)
+	cmd := exa.getProductSearchCmd(searchInfo)
 
-	db := global.GVA_DB.Model(&wechat.HomeProduct{})
+	db := global.GVA_DB.Model(&wechat.Product{})
 	err = db.Where(cmd).Count(&total).Error
 	if err != nil {
-		return productList, total, err
+		return list, total, err
 	} else {
-		err = db.Debug().Limit(limit).Offset(offset).Debug().Where(cmd).Find(&productList).Error
+		err = db.Debug().Limit(limit).Offset(offset).Debug().Where(cmd).Find(&list).Error
 	}
 
-	return productList, total, err
+	return list, total, err
 }
 
-func (exa *HomeService) GetProductListByOnlyID(searchInfo *request.KeySearchInfo) (productList []wechat.HomeProduct, total int64, err error) {
+func (exa *HomeService) GetProductListByOnlyID(searchInfo *request.KeySearchInfo) (productList []wechat.Product, total int64, err error) {
 	limit := searchInfo.PageSize
 	offset := searchInfo.PageSize * (searchInfo.Page - 1)
 
-	db := global.GVA_DB.Model(&wechat.HomeProduct{})
+	db := global.GVA_DB.Model(&wechat.Product{})
 	cmd := fmt.Sprintf("%s = %d", searchInfo.Key, searchInfo.ID)
 	err = db.Where(cmd).Count(&total).Error
 	if err != nil {
@@ -286,11 +283,17 @@ func (exa *HomeService) GetProductListByOnlyID(searchInfo *request.KeySearchInfo
 	return productList, total, err
 }
 
-func (exa *HomeService) GetProductListByOnlyIDWithSort(searchInfo *request.SortSearchInfo) (productList []wechat.HomeProduct, total int64, err error) {
+func (exa *HomeService) DeleteProducts(ids []int) (err error) {
+	var product wechat.Product
+	err = global.GVA_DB.Where("id in ?", ids).Delete(&product).Error
+	return err
+}
+
+func (exa *HomeService) GetProductListByOnlyIDWithSort(searchInfo *request.SortSearchInfo) (productList []wechat.Product, total int64, err error) {
 	limit := searchInfo.PageSize
 	offset := searchInfo.PageSize * (searchInfo.Page - 1)
 
-	db := global.GVA_DB.Model(&wechat.HomeProduct{})
+	db := global.GVA_DB.Model(&wechat.Product{})
 
 	cmd := fmt.Sprintf("%s = %d", searchInfo.Key, searchInfo.ID)
 	var orderCmd string
@@ -316,90 +319,90 @@ func (exa *HomeService) GetProductListByOnlyIDWithSort(searchInfo *request.SortS
 	return productList, total, err
 }
 
-func (exa *HomeService) GetProductBrand(id int) (brand wechat.HomeBrand, err error) {
+func (exa *HomeService) GetProductBrand(id int) (brand wechat.Brand, err error) {
 	err = global.GVA_DB.Where("id = ?", id).First(&brand).Error
 	return
 }
 
-func (exa *HomeService) GetProductBrandList(searchInfo request.PageInfo) (list interface{}, total int64, err error) {
+// 获取查询数据库的命令
+func (exa *HomeService) getBrandSearchCmd(searchInfo wechatRequest.BrandSearchInfo) string {
+	var cmdName string
+	var cmdStatus string
+
+	if len(searchInfo.Name) > 0 {
+		cmdName += fmt.Sprintf("name like '%%%s%%'", searchInfo.Name)
+	}
+	if searchInfo.ShowStatus > 0 {
+		cmdStatus += fmt.Sprintf("show_status = %d", searchInfo.ShowStatus-100)
+	}
+
+	cmdSearch := ""
+	cmds := [2]string{cmdName, cmdStatus}
+	isFirst := true
+	for _, cmd := range cmds {
+		if len(cmd) > 0 {
+			if isFirst {
+				cmdSearch += cmd
+				isFirst = false
+			} else {
+				cmdSearch += " and " + cmd
+			}
+		}
+	}
+	return cmdSearch
+}
+
+func (exa *HomeService) GetProductBrandList(searchInfo wechatRequest.BrandSearchInfo) (list []wechat.Brand, total int64, err error) {
 	limit := searchInfo.PageSize
 	offset := searchInfo.PageSize * (searchInfo.Page - 1)
 
-	var productList []wechat.HomeBrand
+	cmd := exa.getBrandSearchCmd(searchInfo)
 
-	db := global.GVA_DB.Model(&wechat.HomeBrand{})
-	err = db.Count(&total).Error
+	db := global.GVA_DB.Model(&wechat.Brand{})
+	err = db.Where(cmd).Count(&total).Error
 	if err != nil {
-		return productList, total, err
+		return list, total, err
 	} else {
-		err = db.Limit(limit).Offset(offset).Find(&productList).Error
+		err = db.Debug().Limit(limit).Offset(offset).Debug().Where(cmd).Find(&list).Error
 	}
 
-	return productList, total, err
+	return list, total, err
 }
 
-func (exa *HomeService) CreateHomeProductBrand(e *wechat.HomeBrand) (err error) {
+func (exa *HomeService) CreateHomeProductBrand(e *wechat.Brand) (err error) {
 	err = global.GVA_DB.Create(&e).Error
 	return err
 }
 
-func (exa *HomeService) UpdateHomeBrand(e *wechat.HomeBrand) (err error) {
+func (exa *HomeService) UpdateHomeBrand(e *wechat.Brand) (err error) {
 	err = global.GVA_DB.Save(e).Error
 	return err
 }
 
+func (exa *HomeService) UpdateHomeBrandByIdForKeyword(e *wechatRequest.UpdateIdsKeywordRequest) (err error) {
+	db := global.GVA_DB.Model(&wechat.Brand{})
+	db.Where("id IN ?", e.Ids).Updates(map[string]interface{}{e.Key: e.Value})
+	return err
+}
+
 func (exa *HomeService) DeleteHomeProductBrand(id int) (err error) {
-	var brand wechat.HomeBrand
+	var brand wechat.Brand
 	err = global.GVA_DB.Where("id = ?", id).Delete(&brand).Error
 	return err
 }
 
-func (exa *HomeService) CreateHotProductBrand(e *wechat.HomeHotProduct) (err error) {
+func (exa *HomeService) CreateProductAttributeCategory(e *wechat.ProductAttributeCategory) (err error) {
 	err = global.GVA_DB.Create(&e).Error
 	return err
 }
 
-func (exa *HomeService) UpdateHotProducts(e *wechatRequest.ProductUpdateRequest) (err error) {
-	db := global.GVA_DB.Model(&wechat.HomeHotProduct{})
-	db.Debug().Where("id IN ?", e.Products).Updates(map[string]interface{}{e.Key: e.Value})
-	return err
-}
-
-func (exa *HomeService) DeleteHotProducts(e *wechatRequest.ProductDeleteRequest) (err error) {
-	db := global.GVA_DB.Model(&wechat.HomeHotProduct{})
-	db.Debug().Where("id IN ?", e.Products).Delete(&wechat.HomeHotProduct{})
-	return err
-}
-
-func (exa *HomeService) GetHotProductList(searchInfo request.PageInfo) (list interface{}, total int64, err error) {
-	limit := searchInfo.PageSize
-	offset := searchInfo.PageSize * (searchInfo.Page - 1)
-
-	var productList []wechat.HomeHotProduct
-
-	db := global.GVA_DB.Model(&wechat.HomeHotProduct{})
-	err = db.Count(&total).Error
-	if err != nil {
-		return productList, total, err
-	} else {
-		err = db.Limit(limit).Offset(offset).Find(&productList).Error
-	}
-
-	return productList, total, err
-}
-
-func (exa *HomeService) CreateProductAttributeCategory(e *wechat.HomeProductAttributeCategory) (err error) {
-	err = global.GVA_DB.Create(&e).Error
-	return err
-}
-
-func (exa *HomeService) UpdateProductAttributeCategory(e *wechat.HomeProductAttributeCategory) (err error) {
+func (exa *HomeService) UpdateProductAttributeCategory(e *wechat.ProductAttributeCategory) (err error) {
 	err = global.GVA_DB.Save(e).Error
 	return err
 }
 
 func (exa *HomeService) DeleteProductAttributeCategory(id int) (err error) {
-	var attribute wechat.HomeProductAttributeCategory
+	var attribute wechat.ProductAttributeCategory
 	err = global.GVA_DB.Where("id = ?", id).Delete(&attribute).Error
 	return err
 }
@@ -408,9 +411,9 @@ func (exa *HomeService) GetProductAttributeCategoryList(searchInfo request.PageI
 	limit := searchInfo.PageSize
 	offset := searchInfo.PageSize * (searchInfo.Page - 1)
 
-	var productList []wechat.HomeProductAttributeCategory
+	var productList []wechat.ProductAttributeCategory
 
-	db := global.GVA_DB.Model(&wechat.HomeProductAttributeCategory{})
+	db := global.GVA_DB.Model(&wechat.ProductAttributeCategory{})
 	err = db.Count(&total).Error
 	if err != nil {
 		return productList, total, err
@@ -421,67 +424,64 @@ func (exa *HomeService) GetProductAttributeCategoryList(searchInfo request.PageI
 	return productList, total, err
 }
 
-func (exa *HomeService) GetProductAttributeListById(id int) (list []wechat.HomeProductAttribute, err error) {
-	var attribute []wechat.HomeProductAttribute
-	db := global.GVA_DB.Model(&wechat.HomeProductAttribute{})
-	err = db.Where("product_attribute_category_id = ?", id).Find(&attribute).Error
-	return attribute, err
+func (exa *HomeService) GetProductAttributeListById(id int) (list []wechat.ProductAttribute, err error) {
+	db := global.GVA_DB.Model(&wechat.ProductAttribute{})
+	err = db.Where("product_attribute_category_id = ?", id).Find(&list).Error
+	return list, err
 }
 
-func (exa *HomeService) CreateProductAttribute(e *wechat.HomeProductAttribute) (err error) {
+func (exa *HomeService) CreateProductAttribute(e *wechat.ProductAttribute) (err error) {
 	err = global.GVA_DB.Create(&e).Error
 	return err
 }
 
-func (exa *HomeService) UpdateProductAttribute(e *wechat.HomeProductAttribute) (err error) {
+func (exa *HomeService) UpdateProductAttribute(e *wechat.ProductAttribute) (err error) {
 	err = global.GVA_DB.Save(e).Error
 	return err
 }
 
 func (exa *HomeService) DeleteProductAttribute(id int) (err error) {
-	var attribute wechat.HomeProductAttribute
+	var attribute wechat.ProductAttribute
 	err = global.GVA_DB.Where("id = ?", id).Delete(&attribute).Error
 	return err
 }
 
-func (exa *HomeService) GetProductAttributeList(searchInfo request.TagSearchInfo) (list interface{}, total int64, err error) {
+func (exa *HomeService) GetProductAttributeList(searchInfo request.TagSearchInfo) (list []wechat.ProductAttribute, total int64, err error) {
 	limit := searchInfo.PageSize
 	offset := searchInfo.PageSize * (searchInfo.Page - 1)
 
-	var productList []wechat.HomeProductAttribute
-
-	db := global.GVA_DB.Model(&wechat.HomeProductAttribute{})
+	db := global.GVA_DB.Model(&wechat.ProductAttribute{})
 	err = db.Where("product_attribute_category_id=? and type=?", searchInfo.Tag, searchInfo.State).Count(&total).Error
 	if err != nil {
-		return productList, total, err
+		return list, total, err
 	} else {
-		err = db.Limit(limit).Offset(offset).Debug().Where("product_attribute_category_id=? and type=?", searchInfo.Tag, searchInfo.State).Find(&productList).Error
+		err = db.Limit(limit).Offset(offset).Debug().Where("product_attribute_category_id=? and type=?", searchInfo.Tag, searchInfo.State).Find(&list).Error
 	}
 
-	return productList, total, err
+	return list, total, err
 }
 
-func (exa *HomeService) CreateProductCategory(e *wechat.HomeProductCategory) (err error) {
+func (exa *HomeService) CreateProductCategory(e *wechat.ProductCategory) (err error) {
 	err = global.GVA_DB.Create(&e).Error
 	return err
 }
 
-func (exa *HomeService) UpdateProductCategory(e *wechat.HomeProductCategory) (err error) {
+func (exa *HomeService) UpdateProductCategory(e *wechat.ProductCategory) (err error) {
 	err = global.GVA_DB.Save(e).Error
 	return err
 }
 
 func (exa *HomeService) DeleteProductCategory(id int) (err error) {
-	var category wechat.HomeProductCategory
+	var category wechat.ProductCategory
 	err = global.GVA_DB.Where("id = ?", id).Delete(&category).Error
 	return err
 }
 
-func (exa *HomeService) GetProductCategoryList(searchInfo request.TagSearchInfo) (productList []wechat.HomeProductCategory, total int64, err error) {
+func (exa *HomeService) GetProductCategoryList(searchInfo request.TagSearchInfo) (productList []wechat.ProductCategory, total int64, err error) {
 	limit := searchInfo.PageSize
 	offset := searchInfo.PageSize * (searchInfo.Page - 1)
 
-	db := global.GVA_DB.Model(&wechat.HomeProductCategory{})
+	db := global.GVA_DB.Model(&wechat.ProductCategory{})
 	err = db.Where("parent_id = ?", searchInfo.Tag).Count(&total).Error
 	if err != nil {
 		return productList, total, err
@@ -492,14 +492,14 @@ func (exa *HomeService) GetProductCategoryList(searchInfo request.TagSearchInfo)
 	return productList, total, err
 }
 
-func (exa *HomeService) GetAllProductCategoryList() (productList []*wechat.HomeProductCategory, err error) {
-	db := global.GVA_DB.Model(&wechat.HomeProductCategory{})
+func (exa *HomeService) GetAllProductCategoryList() (productList []*wechat.ProductCategory, err error) {
+	db := global.GVA_DB.Model(&wechat.ProductCategory{})
 	err = db.Find(&productList).Error
 	return productList, err
 }
 
-func (exa *HomeService) GetProductAttributeValueByProductId(id int) (list []wechat.HomeProductAttributeValue, err error) {
-	db := global.GVA_DB.Model(&wechat.HomeProductAttributeValue{})
+func (exa *HomeService) GetProductAttributeValueByProductId(id int) (list []wechat.ProductAttributeValue, err error) {
+	db := global.GVA_DB.Model(&wechat.ProductAttributeValue{})
 	err = db.Where("product_id = ?", id).Find(&list).Error
 	return list, err
 }
@@ -509,7 +509,7 @@ func (exa *HomeService) CreateProductMemberPrice(e *wechat.MemberPrice) (err err
 	return err
 }
 
-func (exa *HomeService) CreateProductAttributeValue(e *wechat.HomeProductAttributeValue) (err error) {
+func (exa *HomeService) CreateProductAttributeValue(e *wechat.ProductAttributeValue) (err error) {
 	err = global.GVA_DB.Create(&e).Error
 	return err
 }
@@ -530,13 +530,13 @@ func (exa *HomeService) CreateProductLadder(e *wechat.ProductLadder) (err error)
 	return err
 }
 
-func (exa *HomeService) CreateProductSKUStock(e *wechat.SKUStock) (err error) {
+func (exa *HomeService) CreateProductSKUStock(e *wechat.SkuStock) (err error) {
 	err = global.GVA_DB.Create(&e).Error
 	return err
 }
 
-func (exa *HomeService) GetProductSKUStockByProductId(id int, keyword string) (list []wechat.SKUStock, err error) {
-	db := global.GVA_DB.Model(&wechat.SKUStock{})
+func (exa *HomeService) GetProductSKUStockByProductId(id int, keyword string) (list []wechat.SkuStock, err error) {
+	db := global.GVA_DB.Model(&wechat.SkuStock{})
 	cmd := fmt.Sprintf("product_id = %d", id)
 	if len(keyword) > 0 {
 		cmd += fmt.Sprintf("and sku_code = %s", keyword)
@@ -545,13 +545,13 @@ func (exa *HomeService) GetProductSKUStockByProductId(id int, keyword string) (l
 	return list, err
 }
 
-func (exa *HomeService) GetProductSKUStockById(id int) (stock wechat.SKUStock, err error) {
-	db := global.GVA_DB.Model(&wechat.SKUStock{})
+func (exa *HomeService) GetProductSKUStockById(id int) (stock wechat.SkuStock, err error) {
+	db := global.GVA_DB.Model(&wechat.SkuStock{})
 	err = db.Where("id = ?", id).First(&stock).Error
 	return stock, err
 }
 
-func (exa *HomeService) UpdateSKUStock(e *wechat.SKUStock) (err error) {
+func (exa *HomeService) UpdateSKUStock(e *wechat.SkuStock) (err error) {
 	err = global.GVA_DB.Save(e).Error
 	return err
 }

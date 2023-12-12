@@ -24,7 +24,7 @@ type Qiniu struct{}
 //@param: file *multipart.FileHeader
 //@return: string, string, error
 
-func (*Qiniu) UploadFile(file *multipart.FileHeader) (string, string, error) {
+func (*Qiniu) UploadFile(file *multipart.FileHeader, userId int) (string, string, error) {
 	putPolicy := storage.PutPolicy{Scope: global.GVA_CONFIG.Qiniu.Bucket}
 	mac := qbox.NewMac(global.GVA_CONFIG.Qiniu.AccessKey, global.GVA_CONFIG.Qiniu.SecretKey)
 	upToken := putPolicy.UploadToken(mac)
@@ -66,6 +66,11 @@ func (*Qiniu) DeleteFile(key string) error {
 		global.GVA_LOG.Error("function bucketManager.Delete() failed", zap.Any("err", err.Error()))
 		return errors.New("function bucketManager.Delete() failed, err:" + err.Error())
 	}
+	return nil
+}
+
+func (*Qiniu) DeleteFiles(files []string) error {
+	// TODO: 待完善
 	return nil
 }
 
