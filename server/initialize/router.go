@@ -54,9 +54,9 @@ func Routers() *gin.Engine {
 		systemRouter.InitInitRouter(PublicGroup) // 自动初始化相关
 
 	}
-
+	PublicGroup.Use(middleware.LoadTls())
 	PrivateGroup := Router.Group(global.GVA_CONFIG.System.RouterPrefix)
-	PrivateGroup.Use(middleware.JWTAuth()).Use(middleware.CasbinHandler()).Use(middleware.CasbinHandler())
+	PrivateGroup.Use(middleware.JWTAuth()).Use(middleware.CasbinHandler()).Use(middleware.CasbinHandler()).Use(middleware.LoadTls())
 	{
 		systemRouter.InitApiRouter(PrivateGroup, PublicGroup) // 注册功能api路由
 		systemRouter.InitJwtRouter(PrivateGroup)              // jwt相关路由
