@@ -27,7 +27,8 @@ func RunWindowsServer() {
 
 	Router := initialize.Routers()
 	//Router.Static("/form-generator", "./resource/page") // 表单设计器
-
+	//port := fmt.Sprintf("%d", global.GVA_CONFIG.System.Addr)
+	//Router.RunTLS(port, "../cert/cs.coollerbaby.cn.pem", "../cert/cs.coollerbaby.cn.key")
 	address := fmt.Sprintf(":%d", global.GVA_CONFIG.System.Addr)
 	s := initServer(address, Router)
 	// 保证文本顺序输出
