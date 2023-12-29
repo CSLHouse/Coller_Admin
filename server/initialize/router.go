@@ -22,6 +22,7 @@ func Routers() *gin.Engine {
 	businessRouter := router.RouterGroupApp.Business
 	wechatRouter := router.RouterGroupApp.Wechat
 	payRouter := router.RouterGroupApp.Pay
+	productRouter := router.RouterGroupApp.Product
 	// 如果想要不使用nginx代理前端网页，可以修改 web/.env.production 下的
 	// VUE_APP_BASE_API = /
 	// VUE_APP_BASE_PATH = http://localhost
@@ -82,6 +83,7 @@ func Routers() *gin.Engine {
 		wechatRouter.InitAccountRouter(PrivateGroup)                // 小程序账号路由
 		wechatRouter.InitOrderRouter(PrivateGroup)                  // 订单路由
 		payRouter.InitPayRouter(PrivateGroup)
+		productRouter.InitFlashRouter(PrivateGroup, PublicGroup)
 	}
 
 	global.GVA_LOG.Info("router register success")

@@ -36,3 +36,10 @@ type BrandSearchInfo struct {
 	Page       int    `json:"page" form:"page"`         // 页码
 	PageSize   int    `json:"pageSize" form:"pageSize"` // 每页大小
 }
+
+type FlashProductRelationInfo struct {
+	FlashPromotionId        int `json:"flashPromotionId" form:"flashPromotionId" gorm:"comment:品牌名称"`
+	FlashPromotionSessionId int `json:"flashPromotionSessionId" form:"flashPromotionSessionId" gorm:"comment:推荐状态"`
+	Page                    int `json:"page" form:"page"`         // 页码
+	PageSize                int `json:"pageSize" form:"pageSize"` // 每页大小
+}

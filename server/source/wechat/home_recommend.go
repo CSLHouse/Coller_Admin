@@ -90,7 +90,7 @@ func (i *initRecommendProduct) DataInserted(ctx context.Context) bool {
 	if !ok {
 		return false
 	}
-	if errors.Is(db.Where("product_id = ?", 45).First(&wechatModel.RecommendProduct{}).Error, gorm.ErrRecordNotFound) { // 判断是否存在数据
+	if errors.Is(db.Where("product_id = ?", 51).First(&wechatModel.RecommendProduct{}).Error, gorm.ErrRecordNotFound) { // 判断是否存在数据
 		return false
 	}
 	return true

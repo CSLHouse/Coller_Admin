@@ -44,8 +44,8 @@ func (i *initUser) InitializeData(ctx context.Context) (next context.Context, er
 	if !ok {
 		return ctx, system.ErrMissingDBContext
 	}
-	password := utils.BcryptHash("123456")
-	adminPassword := utils.BcryptHash("123456")
+	password := utils.BcryptHash("cooller@123")
+	adminPassword := utils.BcryptHash("cooller@123")
 
 	entities := []sysModel.SysUser{
 		{
@@ -93,7 +93,7 @@ func (i *initUser) DataInserted(ctx context.Context) bool {
 		return false
 	}
 	var record sysModel.SysUser
-	if errors.Is(db.Where("user_name = ?", "a303176530").
+	if errors.Is(db.Where("user_name = ?", "admin").
 		Preload("Authorities").First(&record).Error, gorm.ErrRecordNotFound) { // 判断是否存在数据
 		return false
 	}

@@ -12,6 +12,7 @@ import (
 	"github.com/flipped-aurora/gin-vue-admin/server/utils"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
+	"time"
 )
 
 type HomeApi struct{}
@@ -148,6 +149,53 @@ func (e *HomeApi) GetHomeAdvertiseList(c *gin.Context) {
 	}, "获取成功", c)
 }
 
+func (e *HomeApi) FindValidFlashPromotion(promotionList []wechat.FlashPromotion) interface{} {
+	for _, promotion := range promotionList {
+		if promotion.Status > 0 {
+			t := time.Now().Unix()
+			startDate := promotion.StartDate.Unix()
+			endDate := promotion.EndDate.Unix()
+			if t > startDate && t < endDate {
+				return promotion
+			}
+		}
+	}
+	return nil
+}
+
+func (e *HomeApi) FindCurrentFlashPromotionSession(sessionList []wechat.FlashPromotionSession) (sessionRes wechat.FlashPromotionSession, err error) {
+	t := time.Now().Unix()
+	for _, session := range sessionList {
+		if session.Status > 0 {
+			startDate := session.StartTime.Unix()
+			endDate := session.EndTime.Unix()
+			if t > startDate && t < endDate {
+				return session, nil
+			}
+		}
+	}
+	return sessionRes, fmt.Errorf("not found!")
+}
+
+func (e *HomeApi) FindNextFlashPromotionSession(sessionList []wechat.FlashPromotionSession) (sessionRes wechat.FlashPromotionSession, err error) {
+	t := time.Now().Unix()
+	mini := 0
+	miniTime := int64(0)
+	for i, session := range sessionList {
+		if session.Status > 0 {
+			startDate := session.StartTime.Unix()
+			if t < startDate && miniTime < startDate {
+				mini = i
+				miniTime = startDate
+			}
+		}
+	}
+	if mini != 0 {
+		return sessionList[mini], nil
+	}
+	return sessionRes, fmt.Errorf("not found!")
+}
+
 func (e *HomeApi) GetAllWechatContent(c *gin.Context) {
 	homeList, err := wechatService.GetOnlineHomeAdvertiseInfoList()
 	if err != nil {
@@ -161,18 +209,52 @@ func (e *HomeApi) GetAllWechatContent(c *gin.Context) {
 		response.FailWithMessage("获取失败"+err.Error(), c)
 		return
 	}
-	homeFlashPromotion, err := wechatService.GetOnlineHomeFlashPromotionInfoList()
-	if err != nil {
-		global.GVA_LOG.Error("获取失败!", zap.Error(err))
-		response.FailWithMessage("获取失败"+err.Error(), c)
-		return
-	}
 
 	newProductList, err := wechatService.GetOnlineNewProductInfoList()
 	if err != nil {
 		global.GVA_LOG.Error("获取失败!", zap.Error(err))
 		response.FailWithMessage("获取失败"+err.Error(), c)
 		return
+	}
+
+	flashPromotionList, err := wechatService.GetOnlineHomeFlashPromotionInfoList()
+	if err != nil {
+		global.GVA_LOG.Error("获取失败!", zap.Error(err))
+		response.FailWithMessage("获取失败"+err.Error(), c)
+		return
+	}
+
+	flashPromotion := e.FindValidFlashPromotion(flashPromotionList)
+	var homeFlashPromotion wechatRes.HomeFlashResponse
+	if flashPromotion == nil {
+		global.GVA_LOG.Error("获取失败!", zap.Error(err))
+	} else {
+		flashSessionList, err := wechatService.GetFlashSessionList()
+		if err != nil {
+			global.GVA_LOG.Error("GetFlashSessionList获取失败!", zap.Error(err))
+		} else {
+			currentFlash, err := e.FindCurrentFlashPromotionSession(flashSessionList)
+			nextFlash, err1 := e.FindNextFlashPromotionSession(flashSessionList)
+			if err == nil {
+				homeFlashPromotion.StartTime = currentFlash.StartTime
+				homeFlashPromotion.EndTime = currentFlash.EndTime
+				sessionProductList, err := wechatService.GetFlashPromotionProductRelationListById(currentFlash.ID, flashPromotion.(wechat.FlashPromotion).ID)
+				if err != nil {
+					global.GVA_LOG.Error("GetFlashPromotionProductRelationListById获取失败!", zap.Error(err))
+				} else {
+					productList := make([]wechat.Product, 0)
+					for _, sessionProduct := range sessionProductList {
+						productList = append(productList, sessionProduct.Product)
+					}
+					homeFlashPromotion.ProductList = productList
+				}
+			}
+			if err1 == nil {
+				homeFlashPromotion.NextStartTime = nextFlash.StartTime
+				homeFlashPromotion.NextEndTime = nextFlash.EndTime
+			}
+		}
+
 	}
 	//hotProductList, err := wechatService.GetOnlineRecommendProductListInfoList()
 	//if err != nil {
@@ -183,9 +265,9 @@ func (e *HomeApi) GetAllWechatContent(c *gin.Context) {
 	response.OkWithDetailed(wechatRes.HomeContentResponse{
 		AdvertiseList:  homeList,
 		BrandList:      brandList,
-		FlashPromotion: homeFlashPromotion,
 		NewProductList: newProductList,
 		//HotProductList: hotProductList,
+		HomeFlashPromotion: homeFlashPromotion,
 	}, "获取成功", c)
 }
 

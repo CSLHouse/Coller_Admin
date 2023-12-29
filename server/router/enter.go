@@ -4,6 +4,7 @@ import (
 	"github.com/flipped-aurora/gin-vue-admin/server/router/business"
 	"github.com/flipped-aurora/gin-vue-admin/server/router/example"
 	"github.com/flipped-aurora/gin-vue-admin/server/router/pay"
+	"github.com/flipped-aurora/gin-vue-admin/server/router/product"
 	"github.com/flipped-aurora/gin-vue-admin/server/router/system"
 	"github.com/flipped-aurora/gin-vue-admin/server/router/wechat"
 )
@@ -13,7 +14,8 @@ type RouterGroup struct {
 	Example  example.RouterGroup
 	Business business.RouterGroup
 	Wechat   wechat.RouterGroup
-	Pay      pay.PayRouter
+	Pay      pay.RouterGroup
+	Product  product.RouterGroup
 }
 
 var RouterGroupApp = new(RouterGroup)

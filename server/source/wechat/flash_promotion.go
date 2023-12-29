@@ -6,6 +6,7 @@ import (
 	"github.com/flipped-aurora/gin-vue-admin/server/service/system"
 	"github.com/pkg/errors"
 	"gorm.io/gorm"
+	"time"
 )
 
 const initOrderFlashPromotion = initOrderBrand + 1
@@ -24,6 +25,8 @@ func (i *initFlashPromotion) MigrateTable(ctx context.Context) (context.Context,
 	}
 	return ctx, db.AutoMigrate(
 		&wechatModel.FlashPromotion{},
+		&wechatModel.FlashPromotionProductRelation{},
+		&wechatModel.FlashPromotionSession{},
 	)
 }
 
@@ -40,19 +43,23 @@ func (i initFlashPromotion) InitializerName() string {
 }
 
 func (i *initFlashPromotion) InitializeData(ctx context.Context) (next context.Context, err error) {
+
 	db, ok := ctx.Value("db").(*gorm.DB)
 	if !ok {
 		return ctx, system.ErrMissingDBContext
 	}
 
+	startTie, err := time.Parse("2006-01-02 15:04:05", "2023-12-09 00:00:00")
+	endTime, err := time.Parse("2006-01-02 15:04:05", "2024-02-18 00:00:00")
 	entities := []wechatModel.FlashPromotion{
 		{
 			Title:     "双11特卖活动",
-			StartDate: "2022-11-09",
-			EndDate:   "2023-12-31",
+			StartDate: startTie,
+			EndDate:   endTime,
 			Status:    1,
 		},
 	}
+
 	if err = db.Create(&entities).Error; err != nil {
 		return ctx, errors.Wrap(err, wechatModel.FlashPromotion{}.TableName()+"表数据初始化失败!")
 	}

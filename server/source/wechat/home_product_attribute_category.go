@@ -57,54 +57,9 @@ func (i *initHomeProductAttributeCategory) InitializeData(ctx context.Context) (
 			ParamCount:     4,
 		},
 		{
-			Name:           "手机数码-手机通讯",
-			AttributeCount: 2,
-			ParamCount:     4,
-		},
-		{
-			Name:           "配件",
-			AttributeCount: 0,
-			ParamCount:     0,
-		},
-		{
-			Name:           "居家",
-			AttributeCount: 0,
-			ParamCount:     0,
-		},
-		{
-			Name:           "洗护",
-			AttributeCount: 0,
-			ParamCount:     0,
-		},
-		{
-			Name:           "测试分类",
-			AttributeCount: 0,
-			ParamCount:     0,
-		},
-		{
 			Name:           "服装-鞋帽",
 			AttributeCount: 4,
 			ParamCount:     0,
-		},
-		{
-			Name:           "家用电器-电视",
-			AttributeCount: 2,
-			ParamCount:     4,
-		},
-		{
-			Name:           "电脑办公-笔记本",
-			AttributeCount: 2,
-			ParamCount:     3,
-		},
-		{
-			Name:           "家用电器-厨卫大电",
-			AttributeCount: 1,
-			ParamCount:     3,
-		},
-		{
-			Name:           "电脑办公-硬盘",
-			AttributeCount: 2,
-			ParamCount:     5,
 		},
 	}
 	if err = db.Create(&entities).Error; err != nil {

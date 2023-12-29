@@ -172,8 +172,7 @@ func (exa *VIPOrderService) CreateVIPStatistics(e *business.VIPStatistics) (err 
 	return err
 }
 
-func (exa *VIPOrderService) GetVIPStatisticsInfoList(userId int) (list interface{}, err error) {
-	var statistics business.VIPStatistics
-	err = global.GVA_DB.Where("sys_user_id = ? ", userId).First(&statistics).Error
-	return statistics, err
+func (exa *VIPOrderService) GetVIPStatisticsInfoList(userId int) (list []business.VIPStatistics, err error) {
+	err = global.GVA_DB.Where("sys_user_id = ? ", userId).First(&list).Error
+	return list, err
 }

@@ -2,6 +2,7 @@ package wechat
 
 import (
 	"github.com/flipped-aurora/gin-vue-admin/server/global"
+	"time"
 )
 
 // Advertise 首页轮播广告表
@@ -49,15 +50,48 @@ func (Brand) TableName() string {
 // FlashPromotion 限时购表
 type FlashPromotion struct {
 	global.GVA_MODEL
-	Title     string `json:"title" gorm:"not null;comment:名称;size:100"`
-	StartDate string `json:"startDate" form:"startDate" gorm:"comment:开始日期"`     // 套餐价格
-	EndDate   string `json:"endDate" form:"endDate" gorm:"comment:结束日期"`         // 天数/次数/金额
-	Status    int    `json:"status" form:"status" gorm:"comment:状态：0->下线；1->上线"` // 状态
+	Title     string    `json:"title" gorm:"not null;comment:名称;size:100"`
+	StartDate time.Time `json:"startDate" form:"startDate" gorm:"comment:开始日期"`     // 套餐价格
+	EndDate   time.Time `json:"endDate" form:"endDate" gorm:"comment:结束日期"`         // 天数/次数/金额
+	Status    int       `json:"status" form:"status" gorm:"comment:状态：0->下线；1->上线"` // 状态
 	//SysUserAuthorityID int   `json:"sys_user_authority_id" form:"sys_user_authority_id" gorm:"comment:管理角色ID"`
 }
 
 func (FlashPromotion) TableName() string {
-	return "sms_home_new_product"
+	return "sms_flash_promotion"
+}
+
+// FlashPromotionProductRelation 商品限时购与商品关系表
+type FlashPromotionProductRelation struct {
+	global.GVA_MODEL
+	FlashPromotionId        int     `json:"flashPromotionId" gorm:"not null;comment:编号;size:100"`
+	FlashPromotionSessionId int     `json:"flashPromotionSessionId" form:"flashPromotionSessionId" gorm:"comment:编号"`
+	ProductId               int     `json:"productId" form:"productId" gorm:"comment:结束日期"`
+	FlashPromotionPrice     float32 `json:"flashPromotionPrice" form:"flashPromotionPrice" gorm:"comment:限购价格"`
+	FlashPromotionCount     int     `json:"flashPromotionCount" form:"flashPromotionCount" gorm:"comment:限时购数量"`
+	FlashPromotionLimit     int     `json:"flashPromotionLimit" form:"flashPromotionLimit" gorm:"comment:每人限购数量"`
+	Sort                    int     `json:"sort" form:"sort" gorm:"comment:排序"`
+	Product                 Product `json:"product" form:"product" gorm:"foreignKey:ProductId;comment:限时购商品"`
+}
+
+func (FlashPromotionProductRelation) TableName() string {
+	return "sms_flash_promotion_product_relation"
+}
+
+// FlashPromotionSession 限时购场次表
+type FlashPromotionSession struct {
+	ID              int                              `json:"id" gorm:"primarykey"` // 主键ID
+	Name            string                           `json:"name" gorm:"not null;comment:场次名称;size:100"`
+	StartTime       time.Time                        `json:"startTime" form:"startTime" gorm:"comment:每日开始时间"`
+	EndTime         time.Time                        `json:"endTime" form:"endTime" gorm:"comment:每日结束时间"`
+	Status          int                              `json:"status" form:"status" gorm:"comment:启用状态：0->不启用；1->启用"` // 状态
+	CreateDate      time.Time                        `json:"createDate" form:"createDate" gorm:"comment:创建时间"`
+	ProductCount    int                              `json:"productCount" form:"productCount" gorm:"comment:商品数量"` // 状态
+	ProductRelation []*FlashPromotionProductRelation `json:"productRelation" form:"productRelation" gorm:"foreignKey:FlashPromotionSessionId;comment:限购商品列表"`
+}
+
+func (FlashPromotionSession) TableName() string {
+	return "sms_flash_promotion_session"
 }
 
 // NewProduct 新鲜好物表

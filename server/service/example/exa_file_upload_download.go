@@ -99,16 +99,15 @@ func (e *FileUploadAndDownloadService) EditFileName(file example.ExaFileUploadAn
 //@param: info request.PageInfo
 //@return: list interface{}, total int64, err error
 
-func (e *FileUploadAndDownloadService) GetFileRecordInfoList(info request.PageInfo, userId int) (list interface{}, total int64, err error) {
+func (e *FileUploadAndDownloadService) GetFileRecordInfoList(info request.PageInfo, userId int) (fileLists []example.ExaFileUploadAndDownload, total int64, err error) {
 	limit := info.PageSize
 	offset := info.PageSize * (info.Page - 1)
 	keyword := info.Keyword
 	db := global.GVA_DB.Model(&example.ExaFileUploadAndDownload{})
-	var fileLists []example.ExaFileUploadAndDownload
 	if len(keyword) > 0 {
 		db = db.Where("name LIKE ? and sys_user_id = ?", "%"+keyword+"%", userId)
 	}
-	err = db.Count(&total).Error
+	err = db.Where("sys_user_id = ?", userId).Count(&total).Error
 	if err != nil {
 		return
 	}

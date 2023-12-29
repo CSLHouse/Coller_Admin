@@ -103,3 +103,8 @@ type QuantityInfo struct {
 type OpenIdInfo struct {
 	OpenId string `json:"openId" form:"openId"`
 }
+
+type StatusUpdateInfo struct {
+	ID     int `json:"id" form:"id"`         // 主键ID
+	Status int `json:"status" form:"status"` // 数量
+}

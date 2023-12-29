@@ -4,6 +4,7 @@ import (
 	"github.com/flipped-aurora/gin-vue-admin/server/api/v1/business"
 	"github.com/flipped-aurora/gin-vue-admin/server/api/v1/example"
 	"github.com/flipped-aurora/gin-vue-admin/server/api/v1/pay"
+	"github.com/flipped-aurora/gin-vue-admin/server/api/v1/product"
 	"github.com/flipped-aurora/gin-vue-admin/server/api/v1/system"
 	"github.com/flipped-aurora/gin-vue-admin/server/api/v1/wechat"
 )
@@ -14,6 +15,7 @@ type ApiGroup struct {
 	BusinessApiGroup business.ApiGroup
 	WechatApiGroup   wechat.ApiGroup
 	PayApiGroup      pay.ApiGroup
+	FlashApiGroup    product.ApiGroup
 }
 
 var ApiGroupApp = new(ApiGroup)

@@ -596,3 +596,123 @@ func (exa *HomeService) ClearProductCartUserId(id int) (err error) {
 	err = global.GVA_DB.Where("user_id = ?", id).Delete(&cart).Error
 	return err
 }
+
+func (exa *HomeService) GetFlashPromotionList(searchInfo request.PageInfo) (list []wechat.FlashPromotion, total int64, err error) {
+	limit := searchInfo.PageSize
+	offset := searchInfo.PageSize * (searchInfo.Page - 1)
+
+	var cmdName string
+
+	if len(searchInfo.Keyword) > 0 {
+		cmdName += fmt.Sprintf("title like '%%%s%%'", searchInfo.Keyword)
+		db := global.GVA_DB.Model(&wechat.FlashPromotion{})
+		err = db.Where(cmdName).Count(&total).Error
+		if err != nil {
+			return list, total, err
+		} else {
+			err = db.Limit(limit).Offset(offset).Where(cmdName).Find(&list).Error
+		}
+	} else {
+		db := global.GVA_DB.Model(&wechat.FlashPromotion{})
+		err = db.Count(&total).Error
+		if err != nil {
+			return list, total, err
+		} else {
+			err = db.Limit(limit).Offset(offset).Find(&list).Error
+		}
+	}
+	return list, total, err
+}
+
+func (exa *HomeService) CreateFlashPromotion(e *wechat.FlashPromotion) (err error) {
+	err = global.GVA_DB.Create(&e).Error
+	return err
+}
+
+func (exa *HomeService) UpdateFlashPromotion(e *wechat.FlashPromotion) (err error) {
+	err = global.GVA_DB.Save(e).Error
+	return err
+}
+
+func (exa *HomeService) DeleteFlashPromotionById(id int) (err error) {
+	var flash wechat.FlashPromotion
+	err = global.GVA_DB.Where("id = ?", id).Delete(&flash).Error
+	return err
+}
+
+func (exa *HomeService) UpdateFlashPromotionStatus(id int, status int) (err error) {
+	db := global.GVA_DB.Model(&wechat.FlashPromotion{})
+	db.Debug().Where("id = ?", id).UpdateColumn("status", status)
+	return err
+}
+
+func (exa *HomeService) GetFlashPromotionProductRelationList(searchInfo wechatRequest.FlashProductRelationInfo) (list []wechat.FlashPromotionProductRelation, total int64, err error) {
+	limit := searchInfo.PageSize
+	offset := searchInfo.PageSize * (searchInfo.Page - 1)
+
+	db := global.GVA_DB.Model(&wechat.FlashPromotionProductRelation{})
+	err = db.Count(&total).Error
+	if err != nil {
+		return list, total, err
+	} else {
+		err = db.Limit(limit).Offset(offset).Where("flash_promotion_id = ? and flash_Promotion_session_id = ?", searchInfo.FlashPromotionId, searchInfo.FlashPromotionSessionId).Preload("Product").Find(&list).Error
+	}
+
+	return list, total, err
+}
+
+func (exa *HomeService) GetFlashPromotionProductRelationListById(flashPromotionId int, flashPromotionSessionId int) (list []wechat.FlashPromotionProductRelation, err error) {
+	db := global.GVA_DB.Model(&wechat.FlashPromotionProductRelation{})
+	err = db.Where("flash_promotion_id = ? and flash_promotion_session_id = ?", flashPromotionId, flashPromotionSessionId).Preload("Product").Find(&list).Error
+	return list, err
+}
+
+func (exa *HomeService) CreateFlashPromotionProductRelation(e []wechat.FlashPromotionProductRelation) (err error) {
+	err = global.GVA_DB.CreateInBatches(e, len(e)).Error
+	return err
+}
+
+func (exa *HomeService) UpdateFlashPromotionProductRelation(e *wechat.FlashPromotionProductRelation) (err error) {
+	err = global.GVA_DB.Debug().Save(e).Error
+	return err
+}
+
+func (exa *HomeService) DeleteFlashPromotionProductRelationById(id int) (err error) {
+	var flash wechat.FlashPromotionProductRelation
+	err = global.GVA_DB.Where("id = ?", id).Delete(&flash).Error
+	return err
+}
+
+func (exa *HomeService) GetFlashSessionList() (list []wechat.FlashPromotionSession, err error) {
+	db := global.GVA_DB.Model(&wechat.FlashPromotionSession{})
+	err = db.Find(&list).Error
+	return list, err
+}
+
+func (exa *HomeService) CreateFlashSession(e *wechat.FlashPromotionSession) (err error) {
+	err = global.GVA_DB.Create(&e).Error
+	return err
+}
+
+func (exa *HomeService) UpdateFlashSession(e *wechat.FlashPromotionSession) (err error) {
+	err = global.GVA_DB.Save(e).Error
+	return err
+}
+
+func (exa *HomeService) DeleteFlashSessionById(id int) (err error) {
+	var flash wechat.FlashPromotionSession
+	err = global.GVA_DB.Where("id = ?", id).Delete(&flash).Error
+	return err
+}
+
+func (exa *HomeService) UpdateFlashSessionStatus(id int, status int) (err error) {
+	db := global.GVA_DB.Model(&wechat.FlashPromotionSession{})
+	db.Where("id = ?", id).UpdateColumn("status", status)
+	return err
+}
+
+func (exa *HomeService) GetFlashSessionSelectList(id int) (list []*wechat.FlashPromotionSession, err error) {
+	db := global.GVA_DB.Model(&wechat.FlashPromotionSession{})
+	err = db.Preload("ProductRelation").Find(&list).Error
+	return list, err
+}
