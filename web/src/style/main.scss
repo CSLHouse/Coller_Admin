@@ -1204,3 +1204,40 @@ $mainHight: 100vh;
 .justify-content-flex-end {
     justify-content: flex-end;
 }
+
+//操作栏样式
+.operate-container {
+    margin-top: 20px;
+}
+
+.operate-container .btn-add {
+    float: right;
+}
+
+//表格栏样式
+.table-container {
+    margin-top: 20px;
+}
+
+//批量操作栏样式
+.batch-operate-container {
+    display: inline-block;
+    margin-top: 20px;
+}
+
+//分页栏样式
+.pagination-container {
+    display: inline-block;
+    float: right;
+}
+
+//添加、更新表单样式
+.form-container {
+    position: absolute;
+    left: 0;
+    right: 0;
+    width: 720px;
+    padding: 35px 35px 15px 35px;
+    margin: 20px auto;
+}
+  

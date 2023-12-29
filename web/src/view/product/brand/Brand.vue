@@ -23,7 +23,7 @@
           @selection-change="handleSelectionChange"
         >
           <el-table-column type="selection" width="40" />
-          <el-table-column align="left" label="编号" prop="ID" width="60"></el-table-column>
+          <el-table-column align="left" label="编号" prop="id" width="60"></el-table-column>
           <el-table-column align="left" label="商品名称" prop="name" width="120" />
           <el-table-column align="left" label="品牌首字母" prop="firstLetter" width="100" />
           <el-table-column align="left" label="排序" prop="sort" width="60" />
@@ -115,7 +115,7 @@
               /> -->
             </el-form-item>
             <el-form-item label="品牌故事">
-                <el-input v-model="productForm.brandStory" autocomplete="off" />
+                <el-input v-model="productForm.brandStory" type="textarea" autocomplete="off" />
             </el-form-item>
             <el-form-item label="排序">
                 <el-input v-model.number="productForm.sort" autocomplete="off" />
@@ -222,7 +222,7 @@
     //     item[stateOption.value.key] = stateOption.value.value
     //     updateList.push(item.id)
     // })
-    // const res = await updateProducts({ids: updateList, key: stateOption.value.dbKey, value: stateOption.value.value })
+    // const res = await updateProductKeyword({ids: updateList, key: stateOption.value.dbKey, value: stateOption.value.value })
     // if ('code' in res && res.code !== 0) {
     //     productData.value.forEach(element => {
     //         element[stateOption.value.key] = stateOption.value.value

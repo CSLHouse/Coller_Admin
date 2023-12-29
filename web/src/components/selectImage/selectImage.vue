@@ -181,6 +181,7 @@ const drawer = ref(false)
 const picList = ref([])
 
 const chooseImg = (url) => {
+  console.log("--------url:", url)
   if (props.multiple) {
     multipleValue.value.push(url)
     emits('update:modelValue', multipleValue.value)

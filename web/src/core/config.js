@@ -2,11 +2,10 @@
  * 网站配置文件
  */
 
-import { ref } from 'vue'
 
 const config = {
   appName: '酷儿乐',
-  appLogo: '/src/assets/logo.jpg',
+  appLogo: '/src/assets/logo.png',
   showViteLogo: true,
   comboTypeOptions: [
     { id: 1, label: 'Vip次卡' },
@@ -33,17 +32,7 @@ export const viteLogo = (env) => {
     const chalk = require('chalk')
     console.log(
       chalk.green(
-        `> 欢迎使用Gin-Vue-Admin，开源地址：https://github.com/flipped-aurora/gin-vue-admin`
-      )
-    )
-    console.log(
-      chalk.green(
         `> 当前版本:v2.5.6`
-      )
-    )
-    console.log(
-      chalk.green(
-        `> 插件市场:https://plugin.gin-vue-admin.com`
       )
     )
     console.log(

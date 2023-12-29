@@ -8,6 +8,14 @@ export const getProductList = (params) => {
     })
 }
 
+export const deleteProducts = (data) => {
+    return service({
+        url: '/product/deletes',
+        method: 'delete',
+        data,
+    })
+}
+
 export const getProductDetail = (params) => {
     return service({
         url: '/product/productDetail',
@@ -16,7 +24,15 @@ export const getProductDetail = (params) => {
     })
 }
 
-export const updateProducts = (data) => {
+export const updateProductKeyword = (data) => {
+    return service({
+        url: '/product/updateKeyword',
+        method: 'post',
+        data
+    })
+}
+
+export const updateProduct = (data) => {
     return service({
         url: '/product/update',
         method: 'put',
@@ -56,6 +72,14 @@ export const updateProductBrand = (data) => {
     })
 }
 
+export const updateBrandByIdForState = (data) => {
+    return service({
+        url: '/product/brandState',
+        method: 'put',
+        data
+    })
+}
+
 export const deleteProductBrand = (params) => {
     return service({
         url: '/product/brand',
@@ -76,7 +100,7 @@ export const getAdvertiseList = (params) => {
 // 创建首页轮播广告
 export const createAdvertise = (data) => {
     return service({
-      url: '/product/content',
+      url: '/product/advertise',
       method: 'post',
       data
     })
@@ -85,42 +109,59 @@ export const createAdvertise = (data) => {
 // 更新首页轮播广告
 export const updateAdvertise = (data) => {
     return service({
-        url: '/product/content',
+        url: '/product/advertise',
+        method: 'put',
+        data
+    })
+}
+
+export const deletedvertise = (params) => {
+    return service({
+        url: '/product/advertise',
+        method: 'delete',
+        params: params,
+    })
+}
+
+// 更新首页轮播广告状态
+export const updateAdvertiseByIdForState = (data) => {
+    return service({
+        url: '/product/advertiseState',
         method: 'put',
         data
     })
 }
 
 // 获取首页推荐专题表 猜你喜欢
-export const getHotProductList = (params) => {
+export const getRecommendProductList = (params) => {
     return service({
-        url: '/product/hotProduct',
+        url: '/product/recommendProduct',
         method: 'get',
         params
     })
 }
 
 // 获取首页推荐专题表 猜你喜欢
-export const addHotProductList = (data) => {
+export const addRecommendProductList = (data) => {
     return service({
-        url: '/product/hotProduct',
+        url: '/product/recommendProduct',
         method: 'post',
         data
     })
 }
 // 更新首页推荐专题表
-export const updateHotProduct = (data) => {
+export const updateRecommendProduct = (data) => {
     return service({
-        url: '/product/hotProduct',
+        url: '/product/recommendProduct',
         method: 'put',
         data
     })
 }
 
 // 删除首页推荐专题表
-export const deleteHotProduct = (data) => {
+export const deleteRecommendProduct = (data) => {
     return service({
-        url: '/product/hotProduct',
+        url: '/product/recommendProduct',
         method: 'delete',
         data
     })
@@ -207,6 +248,15 @@ export const getProductCategoryList = (params) => {
     })
 }
 
+// 获取商品分类列表
+export const getProductAllCategory = (params) => {
+    return service({
+        url: '/product/allCategory',
+        method: 'get',
+        params
+    })
+}
+
 // 创建商品分类列表
 export const createProductCategory= (data) => {
     return service({
@@ -251,3 +301,35 @@ export const updateProductSKUStock = (data) => {
         data
     })
 }
+
+export function updateDeleteStatus(params) {
+    return request({
+      url:'/product/update/deleteStatus',
+      method:'post',
+      params:params
+    })
+  }
+
+export function updateNewStatus(params) {
+    return request({
+      url:'/product/update/newStatus',
+      method:'post',
+      params:params
+    })
+  }
+
+export function updateRecommendStatus(params) {
+    return request({
+      url:'/product/update/recommendStatus',
+      method:'post',
+      params:params
+    })
+}
+
+export function updatePublishStatus(params) {
+    return request({
+      url:'/product/update/publishStatus',
+      method:'post',
+      params:params
+    })
+  }

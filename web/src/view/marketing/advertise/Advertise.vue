@@ -29,7 +29,7 @@
           @selection-change="handleSelectionChange"
         >
           <el-table-column type="selection" width="40" />
-          <el-table-column align="left" label="编号" prop="ID" width="60"></el-table-column>
+          <el-table-column align="left" label="编号" prop="id" width="60"></el-table-column>
           <el-table-column align="left" label="广告名称" prop="name" width="120" />
           <el-table-column align="left" label="广告位置" prop="type" width="100" />
           <el-table-column align="left" label="广告图片" prop="pic" width="100" >
@@ -43,7 +43,8 @@
                 <el-switch
                     v-model="scope.row.state"
                     :active-value="1"
-                    :inactive-value="0">
+                    :inactive-value="0"
+                    @change="handleChangeOnlineState(scope.row)">
                 </el-switch>
             </template>
           </el-table-column>
@@ -101,7 +102,6 @@
                     <el-date-picker
                         v-model="productForm.startTime"
                         type="datetime"
-                        :default-time="defaultTime"
                         placeholder="选择时间"
                     >
                     </el-date-picker>
@@ -112,7 +112,6 @@
                     <el-date-picker
                         v-model="productForm.endTime"
                         type="datetime"
-                        :default-time="defaultTime"
                         placeholder="选择时间"
                     >
                     </el-date-picker>
@@ -120,33 +119,24 @@
             </el-form-item>
             <el-form-item label="上线/下线">
                 <el-radio-group v-model="onlineState" class="ml-4" @change="HandleonlineRadioChanged">
-                    <el-radio label="0" size="large">下线</el-radio>
-                    <el-radio label="1" size="large">上线</el-radio>
+                    <el-radio :label="0" size="large">下线</el-radio>
+                    <el-radio :label="1" size="large">上线</el-radio>
                 </el-radio-group>
             </el-form-item>
             <el-form-item label="广告图片">
-                <el-upload
-                    v-model:file-list="fileList"
-                    list-type="picture"
-                    :limit=1
-                    :action="`${path}/fileUploadAndDownload/upload`"
-                    :headers="{ 'x-token': userStore.token }"
-                    :on-preview="handlePreview"
-                    :on-remove="handleRemove"
-                    :on-error="uploadError"
-                    :on-success="uploadLogoSuccess"
-                    :before-upload="beforeAvatarUpload">
-                    <el-button type="primary">点击上传</el-button>
-                    <template #tip>
-                        <div class="el-upload__tip">
-                            只能上传jpg/png文件，且不超过10MB
-                        </div>
-                    </template>
-                </el-upload>
+              <cooller-single-upload :listType="'picture'" v-model="productForm.pic" ></cooller-single-upload>
             </el-form-item>
             <el-form-item label="排序">
                 <el-input v-model.number="productForm.sort" autocomplete="off" />
             </el-form-item>
+            <el-alert type="info" show-icon :closable="false">
+              <p>
+                指向品牌详情：/subpages/brand/brandDetail?id=品牌ID，品牌ID到【商品】-【品牌管理】里面找；
+              </p>
+              <p>
+                指向商品详情：/subpages/product/product?id=商品ID，商品ID到【商品】-【商品列表】里面找；
+              </p>
+            </el-alert>
             <el-form-item label="广告链接">
                 <el-input v-model="productForm.url" autocomplete="off" />
             </el-form-item>
@@ -169,19 +159,14 @@
     getAdvertiseList,
     createAdvertise,
     updateAdvertise,
+    deletedvertise,
+    updateAdvertiseByIdForState
   } from '@/api/product'
   import { ref, reactive, onBeforeMount, watch } from 'vue'
   import { ElMessage } from 'element-plus'
-  import config from '@/core/config'
-  import { trim } from '@/utils/stringFun'
-  import { number } from 'echarts'
-  import { useRouter } from "vue-router";
   import { ProductStore } from '@/pinia/modules/product'  
-  import type { UploadProps, UploadUserFile, UploadInstance  } from 'element-plus'
-  import { useUserStore } from '@/pinia/modules/user'
-  import { getImageUrlName } from '@/utils/format'
+  import coollerSingleUpload from '@/components/upload/coollerSingleUpload.vue'
 
-  const userStore = useUserStore()
   const searchData = reactive({
     name: null,
     type: null,
@@ -191,14 +176,6 @@
   const onSearch = async() => {
     // TODO: 根据广告名称或到期时间搜索
     getTableData()
-  }
-  
-  const onCancel = () => {
-    getTableData()
-  }
-  
-  const onExport = () => {
-  
   }
   
   const page = ref(1)
@@ -245,8 +222,8 @@
   const stateOption = ref<stateItem>()
   const stateOptions = ref<stateItem[]>([])
   stateOptions.value = [
-    { id: 0, label: '显示品牌', key: "showStatus", dbKey: "show_status", value: 1 },
-    { id: 1, label: '隐藏品牌', key: "showStatus", dbKey: "show_status",  value: 0 },
+    { id: 0, label: '显示品牌', key: "state", dbKey: "state", value: 1 },
+    { id: 1, label: '隐藏品牌', key: "state", dbKey: "state",  value: 0 },
   ]
 
   const multipleSelection = ref()
@@ -255,18 +232,22 @@
   }
   var updateList:number[] = new Array() 
   const toggleSelection = async() => {
-    // if (!multipleSelection.value || multipleSelection.value.length < 1) return
-    // multipleSelection.value.forEach((item) => {
-    //     item[stateOption.value.key] = stateOption.value.value
-    //     updateList.push(item.ID)
-    // })
-    // const res = await updateProducts({ids: updateList, key: stateOption.value.dbKey, value: stateOption.value.value })
-    // if ('code' in res && res.code !== 0) {
-    //     productData.value.forEach(element => {
-    //         element[stateOption.value.key] = stateOption.value.value
-    //     });
-    // }
-    // updateList = []
+    if (!multipleSelection.value || multipleSelection.value.length < 1) return
+    multipleSelection.value.forEach((item) => {
+        item[stateOption.value.key] = stateOption.value.value
+        updateList.push(item.id)
+    })
+    const res = await updateAdvertiseByIdForState({ids: updateList, key: stateOption.value.dbKey, value: stateOption.value.value })
+    if ('code' in res && res.code !== 0) {
+        productData.value.forEach(element => {
+            element[stateOption.value.key] = stateOption.value.value
+        });
+        ElMessage({
+          type: 'success',
+          message: '更新成功!',
+        })
+    }
+    updateList = []
   }
   
   const type = ref('')
@@ -288,10 +269,10 @@
     dialogFormVisible.value = true
     type.value = 'update'
     productForm.value = row
-    onlineState.value = String(row.state)
-    let picName = getImageUrlName(row.pic)
-    fileList.value = []
-    fileList.value.push({name: String(picName), url: row.pic})
+    onlineState = row.state
+    // let picName = getImageUrlName(row.pic)
+    // fileList.value = []
+    // fileList.value.push({name: picName, url: row.pic})
   }
   const openDialog = () => {
     dialogFormVisible.value = true
@@ -300,6 +281,8 @@
 
   const enterDialog = async() => {
     let res
+    console.log("----enterDialog---", productForm.value)
+    
     switch (type.value) {
         case 'create':
             res = await createAdvertise(productForm.value)
@@ -313,6 +296,10 @@
     }
 
     if (res.code === 0) {
+        ElMessage({
+            type: 'success',
+            message: '操作成功'
+          })
         closeDialog()
         await productStore.BuildBrandData(true)
         getTableData()
@@ -322,33 +309,32 @@
     dialogFormVisible.value = false
   }
 
-  const fileList = ref<UploadUserFile[]>([])
-  const path = ref(import.meta.env.VITE_BASE_API)
-  const uploadError = () => {
-    ElMessage({
-        type: 'error',
-        message: '图片上传失败'
-    })
-  }
-  const uploadLogoSuccess = (res) => {
-    const { data } = res
-    if (data.file) {
-        productForm.value.pic = data.file.url
-        console.log("-----logo.url-----", data.file.url)
+  const deleteProduct = async(row) => {
+    console.log("=====row:", row)
+    const res = await deletedvertise({id: row.id})
+    if ('code' in res && res.code === 0) {
+      ElMessage({
+        type: 'success',
+        message: '删除成功!',
+      })
+      getTableData()
     }
   }
-  
-  const handleRemove: UploadProps['onRemove'] = (uploadFile, uploadFiles) => {
-    console.log(uploadFile, uploadFiles)
-  }
-  const handlePreview: UploadProps['onPreview'] = (file) => {
-    console.log(file)
-  }
-  const onlineState = ref("1")
+  let onlineState = 1
   const HandleonlineRadioChanged = () => {
-    productForm.value.type = Number(onlineState.value)
+    productForm.value.state = onlineState
   }
   
+  const handleChangeOnlineState = async(row) => {
+    console.log("--------row:", row)
+    const res = await updateAdvertiseByIdForState({ids: [row.id], key: 'state', value: row.state})
+    if ('code' in res && res.code === 0) {
+      ElMessage({
+        type: 'success',
+        message: '更新成功!',
+      })
+    }
+  }
   </script>
   
   <style scoped>

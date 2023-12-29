@@ -118,10 +118,10 @@
   <script setup lang="ts">
   import {
     getProductList,
-    getHotProductList,
-    addHotProductList,
-    updateHotProduct,
-    deleteHotProduct,
+    getRecommendProductList,
+    addRecommendProductList,
+    updateRecommendProduct,
+    deleteRecommendProduct,
   } from '@/api/product'
   import { ref, reactive, onBeforeMount, watch } from 'vue'
   import { ElMessage } from 'element-plus'
@@ -169,7 +169,7 @@
   const productStore = ProductStore()
   // 查询
   const getTableData = async() => {
-    const res = await getHotProductList({ productName: searchData.productName,
+    const res = await getRecommendProductList({ productName: searchData.productName,
          recommendStatus:searchData.recommendStatus,
         page: pageHot.value, pageSize: pageSizeHot.value })
     if ('code' in res && res.code === 0) {
@@ -208,14 +208,14 @@
         updateList.push(item.id)
     })
     if (stateOption.value.id < 2) {
-        const res = await updateHotProduct({products: updateList, key: stateOption.value.dbKey, value: stateOption.value.value })
+        const res = await updateRecommendProduct({products: updateList, key: stateOption.value.dbKey, value: stateOption.value.value })
         if ('code' in res && res.code == 0) {
             hotProductData.value.forEach(element => {
                 element[stateOption.value.key] = stateOption.value.value
             });
         }
     } else if (stateOption.value.id == 2) {
-        const res = await deleteHotProduct({products: updateList })
+        const res = await deleteRecommendProduct({products: updateList })
         if ('code' in res && res.code == 0) {
             getTableData()
         }
@@ -298,7 +298,7 @@
         updateProductList.push(product)
     })
     
-    const res = await addHotProductList({products: updateProductList })
+    const res = await addRecommendProductList({products: updateProductList })
     if ('code' in res && res.code == 0) {
         getTableData()
         closeDialog()

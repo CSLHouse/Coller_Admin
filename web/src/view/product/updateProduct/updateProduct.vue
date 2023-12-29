@@ -58,7 +58,7 @@
                     <a style=" margin-left: 10px;">克</a>
                 </el-form-item>
                 <el-form-item label="排序" >
-                    <el-input v-model="productForm.sort" autocomplete="off" />
+                    <el-input v-model.number="productForm.sort" autocomplete="off" />
                 </el-form-item>
             </div>
             <div v-if="active==1">
@@ -101,9 +101,9 @@
                 </el-form-item>
                 <el-form-item label="服务保证" >
                     <el-checkbox-group v-model="checkList" @change="HandleServiceIdsRadioChanged">
-                        <el-checkbox label="无忧退货" />
-                        <el-checkbox label="快速退款" />
-                        <el-checkbox label="免费包邮" />
+                        <el-checkbox :label="1" >无忧退货</el-checkbox>
+                        <el-checkbox :label="2" >快速退款</el-checkbox>
+                        <el-checkbox :label="3" >免费包邮</el-checkbox>
                     </el-checkbox-group>
                 </el-form-item>
                 <el-form-item label="详细页标题">
@@ -128,7 +128,6 @@
                         <el-radio-button label="5" size="large">限时购</el-radio-button>
                     </el-radio-group>
                     <el-row>
-                        
                     </el-row>
                     <div v-if="promotionTypeState == 1">
                         <el-form
@@ -141,7 +140,7 @@
                             >
                             <el-form-item label="开始时间" prop="gift" style="margin-top:10px;">
                                 <el-date-picker
-                                    v-model="productForm.promotionStartTime"
+                                    v-model="productForm.promotionStartDate"
                                     type="datetime"
                                     placeholder="选择开始时间"
                                     value-format="YYYY-MM-DD h:m:s"
@@ -149,7 +148,7 @@
                             </el-form-item>
                             <el-form-item label="结束时间" prop="gift" style="margin-top:10px;">
                                 <el-date-picker
-                                    v-model="productForm.promotionEndTime"
+                                    v-model="productForm.promotionEndDate"
                                     type="datetime"
                                     placeholder="选择结束时间"
                                     value-format="YYYY-MM-DD h:m:s"
@@ -164,7 +163,7 @@
                         <el-form
                             ref="ruleFormRef"
                             :model="item"
-                            v-for="(item, index) in memberPriceList"
+                            v-for="(item, index) in productForm.memberPriceList"
                             :key="index"
                             status-icon
                             label-width="120px"
@@ -187,7 +186,7 @@
                         </el-form>
                     </div>
                     <div v-if="promotionTypeState == 3">
-                        <el-table :data="productLadderList" style="width: 600px;margin-top: 10px;">
+                        <el-table :data="productForm.productLadderList" style="width: 600px;margin-top: 10px;">
                             <el-table-column label="数量" >
                                 <template #default="scope">
                                     <div style="display: flex; align-items: center">
@@ -211,7 +210,7 @@
                         </el-table>
                     </div>
                     <div v-if="promotionTypeState == 4">
-                        <el-table :data="productFullReductionList" style="width: 600px;margin-top: 10px;">
+                        <el-table :data="productForm.productFullReductionList" style="width: 600px;margin-top: 10px;">
                             <el-table-column label="满" >
                                 <template #default="scope">
                                     <div style="display: flex; align-items: center">
@@ -264,17 +263,41 @@
                         </el-form>
                     </el-card>
                     <div >
-                        <el-table :data="skuTableData" style="width: 840px;margin:10px 0 10px 0;"  border 
+                        <el-table :data="skuTableData" style="width: 860px;margin:10px 0 10px 0;"  border 
                             :cell-style="{ textAlign: 'center' }" :header-cell-style="{ 'text-align': 'center' }" >
                             <el-table-column v-for="(item, index) in skuColumsData" :key="index" :prop="item.prop" :label="item.label" :width="item.width" >
                                 <template #default="scope">
-                                    <div v-if="item.operation">
-                                        <el-button link type="primary" size="small" @click.prevent="handleDeleteRow(scope.$index)">删除</el-button>
-                                    </div>
-                                    <div v-if="item.canEdit">
-                                        <el-input-number v-model="scope.row[item.prop]" :precision="2" size="small"></el-input-number>
-                                    </div>
-                                    <el-text v-else>{{scope.row[item.prop]}}</el-text>
+                                    <el-text>{{scope.row[item.prop]}}</el-text>
+                                </template>
+                            </el-table-column>
+                            <el-table-column label="销售价格" width="140" align="center">
+                                <template #default="scope">
+                                    <el-input-number size="small" v-model="scope.row.price" :precision="2"></el-input-number>
+                                </template>
+                            </el-table-column>
+                            <el-table-column label="促销价格" width="140" align="center">
+                                <template #default="scope">
+                                    <el-input-number size="small" v-model="scope.row.promotionPrice" :precision="2"></el-input-number>
+                                </template>
+                            </el-table-column>
+                            <el-table-column label="商品库存" width="140" align="center">
+                                <template #default="scope">
+                                    <el-input-number size="small" v-model="scope.row.stock" :precision="2"></el-input-number>
+                                </template>
+                            </el-table-column>
+                            <el-table-column label="库存预警值" width="140" align="center">
+                                <template #default="scope">
+                                    <el-input-number size="small" v-model="scope.row.lowStock" :precision="2"></el-input-number>
+                                </template>
+                            </el-table-column>
+                            <el-table-column label="属性图片" width="140" align="center">
+                                <template #default="scope">
+                                    <cooller-single-upload  v-model="scope.row.pic" ></cooller-single-upload>
+                                </template>
+                            </el-table-column>
+                            <el-table-column label="操作" width="100" align="center">
+                                <template #default="scope">
+                                    <el-button link type="primary" size="small" @click.prevent="handleDeleteRow(scope.$index)">删除</el-button>
                                 </template>
                             </el-table-column>
                         </el-table>
@@ -307,10 +330,17 @@
                     </el-card>
                 </el-form-item>
                 <el-form-item label="商品相册">
-                    <el-input v-model="productForm.unit" type="text" autocomplete="off" />
+                    <cooller-image :fileList="selectProductPics"  @change="handleUploadSuccess"></cooller-image>
                 </el-form-item>
-                <el-form-item label="商品详情">
-                    <el-input v-model="productForm.detailHTML" type="textarea" autocomplete="off" />
+                <el-form-item label="商品详情" prop="name">
+                    <el-tabs v-model="activeHtmlName" type="card">
+                        <el-tab-pane  label="电脑端详情" name="pc">
+                            <TEditor ref="editor" :width="595" :height="300" v-model="productForm.detailHTML"></TEditor>
+                        </el-tab-pane>
+                        <el-tab-pane label="移动端详情" name="mobile">
+                            <TEditor :width="595" :height="300" v-model="productForm.detailMobileHTML"></TEditor>
+                        </el-tab-pane>
+                    </el-tabs>
                 </el-form-item>
             </div>
             <div v-if="active==3">
@@ -335,17 +365,19 @@
             </el-col>
         </el-row>
     </el-card>
-    
-        
   </template>
   
   <script lang="ts" setup>
-  import { createProduct, getProductAttributeList, getProductDetail } from '@/api/product'
-  import { reactive, ref, onBeforeMount, watch } from 'vue'
+  import { updateProduct, getProductAttributeList, getProductDetail } from '@/api/product'
+  import { reactive, ref, onBeforeMount, watch, computed } from 'vue'
   import { FormInstance, FormRules, ElMessage } from 'element-plus'
   import { ProductStore } from '@/pinia/modules/product'  
   import { useRoute } from 'vue-router'
+  import coollerSingleUpload from '@/components/upload/coollerSingleUpload.vue'
+  import CoollerImage from '@/components/upload/coollerImage.vue'
+  import TEditor from '@/components/TEditor.vue'
 
+  const activeHtmlName = ref('pc')
   const route = useRoute()
   const titleList = ["填写商品信息", "填写商品促销", "填写商品属性", "选择商品关联"]
   const active = ref(0)
@@ -363,59 +395,22 @@
   const productAttributeOption = ref<elementItem>()
   const productAttributeOptions = ref<elementItem[]>([])
   const productCategoryOptions = ref([])
-//   const parseProductAttributeCategory = (productAttributeCategoryList) => {
-//     let productAttributeMap = {}
-//     productAttributeCategoryList.forEach((item) => {
-//         let splitted = item.name.split("-")
-//         if ( !productAttributeMap[splitted[0]]) {
-//             if (splitted.length > 1) {
-//                 productAttributeMap[splitted[0]] = [{"id": item.id, "data": splitted[1]}]
-//             } else {
-//                 productAttributeMap[splitted[0]] = {"id": item.id, "data": splitted[0]}
-//             }
-//         } else {
-//             if (splitted.length > 1) {
-//                 productAttributeMap[splitted[0]].push({"id": item.id, "data": splitted[1]})
-//             }
-//         }
-//     })
-//     for (let key in productAttributeMap) {
-//         let productAttribute = {}
-//         productAttribute["label"] = key
-//         productAttribute["value"] = productAttributeMap[key].id
-//         if (Array.isArray(productAttributeMap[key])) {
-//             productAttribute["children"] = []
-//             productAttributeMap[key].forEach((item) => {
-//                 let productAttributeItem = {}
-//                 productAttributeItem["label"] = item.data
-//                 productAttributeItem["value"] = item.id
-//                 productAttribute["children"].push(productAttributeItem)
-//             })
-//         }
-//         productCategoryOptions.value.push(productAttribute)
-//     }
-//     console.log("----productCategoryOptions---", productCategoryOptions.value)
-//   }
-  const getProductAttributeData = async() => {
-    await productStore.BuildProductAttributeData(true)
+  const getProductCategoryData = async() => {
+    await productStore.BuildProductCategoryData()
     productCategoryOptions.value = productStore.ProductCategoryOptions
-    console.log("--productCategoryOptions-", productCategoryOptions.value )
-
-    let productAttributeCategoryList = productStore.ProductAttributeCategoryList
     
+    await productStore.BuildProductAttributeData()
+    let productAttributeCategoryList = productStore.ProductAttributeCategoryList
     productAttributeOptions.value = productAttributeCategoryList.map((item) => {
         return {key: item.id, value: item.name}
     })
-    // parseProductAttributeCategory(productAttributeCategoryList)
   }
 
   const productType = ref()
   const handleProductTypeChange = (value) => {
-    console.log("-productType--", productType.value)
     productForm.value.productAttributeCategoryId = productType.value.at(-1)
   }
   watch(() => productAttributeOption.value, () => {
-    console.log("---productAttributeOption--", productAttributeOption.value)
     productForm.value.productAttributeCategoryId = productAttributeOption.value.key
   })
   
@@ -471,10 +466,10 @@
     productCategoryName: 'productCategoryName',
     
     productSN: 'mi2023',
-    promotionEndTime: "",
+    promotionEndDate: "",
     promotionPerLimit: 0,
     promotionPrice: null,
-    promotionStartTime: "",
+    promotionStartDate: "",
     promotionType: 0,
     publishStatus: 0,
     recommandStatus: 0,
@@ -489,24 +484,22 @@
     usePointLimit: 0,
     verifyStatus: 0,
     weight: 0,
+    productAttributeValueList: [],
+    memberPriceList: [],
+    productFullReductionList: [],
+    productLadderList: []
+    
   })
-  const memberPriceList =  ref([
+  productForm.value.memberPriceList = [
         {memberLevelId: 1, memberLevelName: "黄金会员", memberPrice: null},
         {memberLevelId: 2, memberLevelName: "白金会员", memberPrice: null},
-        {memberLevelId: 3, memberLevelName: "钻石会员", memberPrice: null}])
-  const productAttributeValueList = ref([])
-  // 满减
-  const productFullReductionList  = ref([
-    {
-        fullPrice: 0,
-        reducePrice: 0,
-    }
-  ])
+        {memberLevelId: 3, memberLevelName: "钻石会员", memberPrice: null}]
+
   const handleFullDiscountDelete = (index: number, row) =>{
-    productFullReductionList.value.splice(index, 1)
+    productForm.value.productFullReductionList.splice(index, 1)
   }
   const handleFullDiscountAdd = (index: number, row) =>{
-    productFullReductionList.value.push({
+    productForm.value.productFullReductionList.push({
         fullPrice: 0,
         reducePrice: 0,
     })
@@ -516,19 +509,12 @@
     count: 0,
     price: 0,
   }
-  // 阶梯价格
-  const productLadderList  = ref([
-    {
-        count: 0,
-        discount: 0,
-        price: 0,
-    }
-  ])
+ 
   const handleLadderDelete = (index: number, row: LadderPrice) =>{
-    productLadderList.value.splice(index, 1)
+    productForm.value.productLadderList.splice(index, 1)
   }
   const handleLadderAdd = (index: number, row: LadderPrice) =>{
-    productLadderList.value.push({
+    productForm.value.productLadderList.push({
         count: 0,
         discount: 0,
         price: 0,
@@ -540,14 +526,113 @@
         const res = await getProductDetail(query)
         console.log("--onBeforeMount--", res.data)
         if ("code" in res && res.code === 0) {
-          productForm.value =  res.data.product
+          productForm.value =  res.data
           console.log("--onBeforeMount--", productForm.value)
+          let serviceList = productForm.value.serviceIds.split(',')
+          checkList.value = []
+          for (let i = 0; i < serviceList.length; i++) {
+            let element = serviceList[i].trim()
+            if (element) {
+                checkList.value.push(Number(element))
+            }
+          }
+          promotionTypeState.value = productForm.value.promotionType
+
+          // 初始化商品规格 库存数据
+          skuTableData.value = productForm.value.skuStockList
+          for (let i = 0; i < skuTableData.value.length; i++) {
+            let element = skuTableData.value[i]
+            let spData = JSON.parse(element.spData)
+            for (let j = 0; j < spData.length; j++) {
+                let spItem = spData[j]
+                element[spItem.key] = spItem.value
+            }
+          }
         }
     }
   }
+
+  const initStandardData = async() => {
+    const standardRes = await getProductAttributeList({ tag: productForm.value.productAttributeCategoryId, page: 1, pageSize: 100, state: 0 })
+    if ("code" in standardRes && standardRes.code === 0) {
+        standardRes.data.list.forEach((element)=>{
+            let input_arrary = []
+            element.inputList.split(",").forEach((item)=>{
+                let input = item.trim()
+                if (input) {
+                    input_arrary.push(input)
+                }
+            })
+            element.inputArray = input_arrary
+            skuColumsData.value.push({label: element.name, prop: element.name, width: "80px"})
+        })
+        standardTable.value = standardRes.data.list
+        let spDataList = productForm.value.skuStockList
+        for (let i = 0; i < standardTable.value.length; i++) {
+            let element = standardTable.value[i]
+            let selectSet = new Set()
+            for (let j = 0; j < spDataList.length; j++) {
+                let item = spDataList[j]
+                let spData = JSON.parse(item.spData) 
+                for (let index = 0; index < spData.length; index++) {
+                    let skuItem = spData[index]
+                    if (element.name == skuItem.key) {
+                        selectSet.add(skuItem.value)
+                    }
+                }
+            }
+            element['selectList'] = Array.from(selectSet)
+        }
+    }
+
+    // 初始化商品规格 商品参数
+    const parameterRes = await getProductAttributeList({ tag: productForm.value.productAttributeCategoryId, page: 1, pageSize: 100, state: 1 })
+    if ("code" in parameterRes && parameterRes.code === 0) {
+        parameterRes.data.list.forEach((element)=>{
+            let input_arrary = []
+            element.inputList.split(",").forEach((item)=>{
+                if (item !== "") {
+                    input_arrary.push(item)
+                }
+                
+            })
+            if (input_arrary.length > 0) {
+                element.inputOption = ""
+                element.inputOptions = ref<elementItem[]>([])
+                let input_options = []
+                for (let index = 0; index < input_arrary.length; index++) {
+                    let option = {}
+                    option['key'] = index
+                    option['value'] = input_arrary[index]
+                    input_options.push(option)
+                }
+                element.inputOptions.value = input_options
+            }
+            element.inputArray = input_arrary
+        })
+        parameterTable.value = parameterRes.data.list
+        let parameterValueList = productForm.value.productAttributeValueList
+        for (let i = 0; i < parameterTable.value.length; i++) {
+            let element = parameterTable.value[i]
+            for (let j = 0; j < parameterValueList.length; j++) {
+                let item = parameterValueList[j]
+                if (element.id == item.productAttributeId) {
+                    if (element.inputArray.length < 1) {
+                        element.inputList = item.value
+                    } else {
+                        element.inputOption = item.value
+                    }  
+                }
+            }
+        }
+    }
+
+  }
   onBeforeMount(async() => {
+    let inputList = ""
+    console.log("----", inputList.split(","))
     await getProductById(route.query)
-    await getProductAttributeData()
+    await getProductCategoryData()
     await getProductBrandData()
     productType.value = []
     for (let index = 0; index < productCategoryOptions.value.length; index++) {
@@ -555,14 +640,14 @@
         if ("children" in element) {
             for (let index = 0; index < element.children.length; index++) {
                 const item = element.children[index];
-                if (item.label == productForm.value.productCategoryName) {
+                if (item.value == productForm.value.productCategoryId) {
                     productType.value.push(element.value)
                     productType.value.push(item.value)
                 }
                 break
             }
         } else {
-            if ("label" in element && element.label == productForm.value.productCategoryName) {
+            if ("value" in element && element.value == productForm.value.productCategoryId) {
                 productType.value.push(element.value)
                 break
             }
@@ -583,6 +668,9 @@
             break
         }
     }
+
+    // 处理规格参数
+    initStandardData()
   })
 
   watch(() => productForm.value.productCategoryName, () => {
@@ -610,7 +698,7 @@
                 }
             })
             attributeMap['value'] = attriValue
-            productAttributeValueList.value.push(attributeMap)
+            productForm.value.productAttributeValueList.push(attributeMap)
         }
     })
     // 商品参数
@@ -626,7 +714,7 @@
         let parameterValue = {}
         parameterValue['productAttributeId'] = item.id
         parameterValue['value'] = inputValue
-        productAttributeValueList.value.push(parameterValue)
+        productForm.value.productAttributeValueList.push(parameterValue)
     })
     // 库存
     skuTableData.value.forEach((item) => {
@@ -642,14 +730,7 @@
     let res
     formEl.validate(async(valid) => {
       if (valid) {
-        res = await createProduct({
-            "product": productForm.value,
-            "memberPriceList": memberPriceList.value,
-            "productAttributeValueList": productAttributeValueList.value,
-            "productFullReductionList": productFullReductionList.value,
-            "productLadderList": productLadderList.value,
-            "skuStockList": skuTableData.value
-        })
+        res = await updateProduct(productForm.value)
         if (res.code === 0) {
           ElMessage({
             type: 'success',
@@ -683,7 +764,7 @@
     formEl.resetFields()
     resetData()
   }
-  const checkList = ref([])
+  const checkList = ref([2, 3])
   const HandleServiceIdsRadioChanged = () => {
     let serviceIdsStr = ""
     let count = 0
@@ -892,4 +973,64 @@
   const handleDeleteRow = async (index) => {
     skuTableData.value.slice(index, 1)
   }
+
+  const handleUploadSuccess = async(urls) => {
+    if (urls[0] == null || urls.length === 0) {
+        productForm.value.pic = null;
+        productForm.value.albumPics = null;
+    } else {
+        productForm.value.pic = urls[0].url;
+        productForm.value.albumPics = '';
+        if (urls.length > 1) {
+            for (let i = 1; i < urls.length; i++) {
+                productForm.value.albumPics += urls[i].url;
+                if (i !== urls.length - 1) {
+                    productForm.value.albumPics += ',';
+                }
+            }
+        }
+    }
+  }
+
+    const selectProductPics = computed(() => {
+        let pics = [];
+        if(productForm.value.pic === undefined||productForm.value.pic == null||productForm.value.pic === ''){
+            return pics;
+        }
+        pics.push(productForm.value.pic);
+        if(productForm.value.albumPics === undefined||productForm.value.albumPics == null||productForm.value.albumPics === ''){
+            return pics;
+        }
+        let albumPics = productForm.value.albumPics.split(',');
+        for(let i=0; i<albumPics.length; i++){
+            if (albumPics[i].trim()) {
+                pics.push(albumPics[i]);
+            }
+            
+        }
+        return pics;
+    })
+
+  const selectStandardPic = computed(() => {
+    let pics = [];
+    if(productForm.value.pic === undefined||productForm.value.pic == null||productForm.value.pic === ''){
+        return pics;
+    }
+    pics.push(productForm.value.pic);
+    if(productForm.value.albumPics === undefined||productForm.value.albumPics == null||productForm.value.albumPics === ''){
+        return pics;
+        }
+        let albumPics = productForm.value.albumPics.split(',');
+        for(let i=0; i<albumPics.length; i++){
+        if (albumPics[i].trim())
+        pics.push(albumPics[i]);
+        }
+        return pics;
+  })
   </script>
+
+<script lang="ts">
+export default {
+  name: 'updateProduct',
+}
+</script>
