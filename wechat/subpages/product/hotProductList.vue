@@ -1,24 +1,29 @@
 <template>
 	<view class="content">
-		<image src="/static/recommend_brand_banner.png" class="banner-image"></image>
-		<view class="section-tit">相关品牌</view>
+		<image src="/static/hot_product_banner.png" class="banner-image"></image>
+		<view class="section-tit">相关商品</view>
 		<view class="goods-list">
-			<view v-for="(item, index) in brandList" :key="index" class="goods-item" @click="navToDetailPage(item)">
+			<view v-for="(item, index) in productList" :key="index" class="goods-item" @click="navToDetailPage(item)">
 				<view class="image-wrapper">
-					<image :src="item.logo" mode="aspectFit"></image>
+					<image :src="item.pic" mode="aspectFit"></image>
 				</view>
 				<text class="title clamp">{{item.name}}</text>
-				<text class="title2">商品数量：{{item.productCount}}</text>
+				<text class="title2">{{item.subTitle}}</text>
+				<view class="price-box">
+					<text class="price">{{item.price}}</text>
+					<text>已售 {{item.sale}}</text>
+				</view>
 			</view>
 		</view>
 		<uni-load-more :status="loadingType"></uni-load-more>
+
 	</view>
 </template>
 
 <script>
 	import {
-		fetchBrandRecommendList
-	} from '@/api/brand.js';
+		fetchHotProductList
+	} from '@/api/home.js';
 	import uniLoadMore from '@/components/uni-load-more/uni-load-more.vue';
 	export default {
 		components: {
@@ -27,7 +32,7 @@
 		data() {
 			return {
 				loadingType: 'more', //加载更多状态
-				brandList: [],
+				productList: [],
 				searchParam: {
 					page: 1,
 					pageSize: 6
@@ -62,10 +67,10 @@
 
 				if (type === 'refresh') {
 					this.searchParam.page=1;
-					this.brandList = [];
+					this.productList = [];
 				}
-				fetchBrandRecommendList(this.searchParam).then(response => {
-					let prandList = response.data;
+				fetchHotProductList(this.searchParam).then(response => {
+					let productList = response.data;
 					if (response.data.length === 0) {
 						//没有更多了
 						this.loadingType = 'nomore';
@@ -77,7 +82,7 @@
 						} else {
 							this.loadingType = 'more';
 						}
-						this.brandList = this.brandList.concat(prandList);
+						this.productList = this.productList.concat(productList);
 					}
 					if (type === 'refresh') {
 						if (loading == 1) {
@@ -92,7 +97,7 @@
 			navToDetailPage(item) {
 				let id = item.id;
 				uni.navigateTo({
-					url: `/pages/brand/brandDetail?id=${id}`
+					url: `/subpages/product/product?id=${id}`
 				})
 			},
 			stopPrevent() {}
@@ -137,7 +142,7 @@
 
 		.image-wrapper {
 			width: 100%;
-			height: 150upx;
+			height: 330upx;
 			border-radius: 3px;
 			overflow: hidden;
 			background-color: #fff;
@@ -178,6 +183,11 @@
 			font-size: $font-lg;
 			color: $uni-color-primary;
 			line-height: 1;
+
+			&:before {
+				content: '￥';
+				font-size: 26upx;
+			}
 		}
 	}
 </style>

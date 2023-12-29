@@ -1,5 +1,14 @@
 <template>
 	<view class="content b-t">
+		<view v-if="!hasLogin || empty===true" class="empty">
+			<view v-if="hasLogin" class="empty-tips">
+				空空如也
+			</view>
+			<view v-else class="empty-tips">
+				空空如也
+				<view class="navigator" @click="navToLogin">去登陆></view>
+			</view>
+		</view>
 		<view class="list b-b" v-for="(item, index) in cardList" :key="index" @click="showDitail(item)">
 			<view class="wrapper">
 				<view class="address-box">
@@ -46,6 +55,7 @@
 				cardList: [],
 				isShowDitail: false,
 				selectRow: {},
+				empty: false,
 			}
 		},
 		onLoad(option) {
@@ -58,11 +68,9 @@
 			async loadData() {
 				let _this = this
 				if (_this.hasLogin) {
-					GetMemberCardList({onlyId: "15101668083"}).then(response => {
+					GetMemberCardList({onlyId: _this.$store.state.userInfo.telephone}).then(response => {
 						this.cardList = response.data;
 					});
-				} else {
-					uni.showToast({ title: '请先登录', duration: 2000 })
 				}
 			},
 			//查看详情
@@ -73,7 +81,21 @@
 			closePop() {
 				this.isShowDitail = false
 			},
-		}
+			navToLogin() {
+				uni.reLaunch  ({
+					url: '/pages/user/user'
+				})
+			},
+		},
+		watch: {
+			//显示空白页
+			cardList(e) {
+				let empty = e.length === 0 ? true : false;
+				if (this.empty !== empty) {
+					this.empty = empty;
+				}
+			}
+		},
 	}
 </script>
 
@@ -81,7 +103,39 @@
 	page {
 		padding-bottom: 120upx;
 	}
-
+	
+	/* 空白页 */
+	.empty {
+		position: fixed;
+		left: 0;
+		top: 0;
+		width: 100%;
+		height: 100vh;
+		padding-bottom: 100upx;
+		display: flex;
+		justify-content: center;
+		flex-direction: column;
+		align-items: center;
+		background: #fff;
+	
+		image {
+			width: 240upx;
+			height: 160upx;
+			margin-bottom: 30upx;
+		}
+	
+		.empty-tips {
+			display: flex;
+			font-size: $font-sm+2upx;
+			color: $font-color-disabled;
+	
+			.navigator {
+				color: $uni-color-primary;
+				margin-left: 16upx;
+			}
+		}
+	}
+	
 	.content {
 		position: relative;
 	}

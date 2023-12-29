@@ -1,5 +1,5 @@
 {
-    "name" : "mall-app-web",
+    "name" : "cooller-app",
     "appid" : "__UNI__EC193C1",
     "description" : "",
     "versionName" : "1.0.0",
@@ -62,9 +62,10 @@
             "urlCheck" : true
         },
         "permission" : {},
-		"optimization": {
-			"subPackages":true //是否启用分包优化
-		}
+        "optimization" : {
+            "subPackages" : true //是否启用分包优化
+        },
+        "lazyCodeLoading" : "requiredComponents"
     },
     "h5" : {
         "devServer" : {

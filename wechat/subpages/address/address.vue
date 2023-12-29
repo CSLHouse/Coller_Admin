@@ -57,11 +57,11 @@
 			addAddress(type, item) {
 				if (type == 'edit') {
 					uni.navigateTo({
-						url: `/pages/address/addressManage?type=${type}&id=${item.ID}`
+						url: `/subpages/address/addressManage?type=${type}&id=${item.ID}`
 					})
 				} else {
 					uni.navigateTo({
-						url: `/pages/address/addressManage?type=${type}`
+						url: `/subpages/address/addressManage?type=${type}`
 					})
 				}
 			},

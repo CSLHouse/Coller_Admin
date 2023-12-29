@@ -77,11 +77,7 @@
 						this.login(userinfo.customer);
 					}
 				}).catch(errors => {
-					uni.showModal({
-						title:'提示',
-						content:'网络错误',
-						showCancel:false
-					})
+					console.error("[App:getToken]Not Found openId:", _this.$store.state.openId)
 				});
 			}
 		},

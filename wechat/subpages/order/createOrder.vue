@@ -1,7 +1,7 @@
 <template>
 	<view>
 		<!-- 地址 -->
-		<navigator url="/pages/address/address?source=1" class="address-section">
+		<navigator url="/subpages/address/address?source=1" class="address-section">
 			<div v-if="!currentAddress.id">
 				<view class="order-content">
 					<text class="yticon icon-shouhuodizhi"></text>
@@ -288,12 +288,12 @@
 							// 	success: function(res) {
 							// 		if (res.confirm) {
 							// 			uni.redirectTo({
-							// 				url: `/pages/money/pay?orderId=${orderId}&payment=${payment}`
+							// 				url: `/subpages/money/pay?orderId=${orderId}&payment=${payment}`
 							// 			})
 							// 		} else if (res.cancel) {
 							// 			console.log("cancel")
 							// 			uni.redirectTo({
-							// 				url: '/pages/order/order?state=0'
+							// 				url: '/subpages/order/order?state=0'
 							// 			})
 							// 		}
 							// 	}

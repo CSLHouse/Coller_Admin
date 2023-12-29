@@ -1,14 +1,18 @@
 <template>
 	<view class="content">
 		<!-- 空白页 -->
-		<empty v-if="brandList==null||brandList.length === 0"></empty>
+		<empty v-if="productList==null||productList.length === 0"></empty>
 		<view class="hot-section">
-			<view v-for="(item, index) in brandList" :key="index" class="guess-item" @click="navToDetailPage(item)">
+			<view v-for="(item, index) in productList" :key="index" class="guess-item" @click="navToDetailPage(item)">
 				<view class="image-wrapper">
-					<image :src="item.brandLogo" mode="aspectFit"></image>
+					<image :src="item.productPic" mode="aspectFill"></image>
 				</view>
 				<view class="txt">
-					<text class="title clamp">{{item.brandName}}</text>
+					<text class="title clamp">{{item.productName}}</text>
+					<text class="title2">{{item.productSubTitle}}</text>
+					<view class="hor-txt">
+						<text class="price">￥{{item.productPrice}}</text>
+					</view>
 				</view>
 			</view>
 		</view>
@@ -23,9 +27,9 @@
 		formatDate
 	} from '@/utils/date';
 	import {
-		fetchBrandAttentionList,
-		clearBrandAttention
-	} from '@/api/memberBrandAttention.js';
+		fetchProductCollectionList,
+		clearProductCollection
+	} from '@/api/memberProductCollection.js';
 	export default {
 		components: {
 			uniLoadMore,
@@ -34,7 +38,7 @@
 		data() {
 			return {
 				loadingType: 'more',
-				brandList: [],
+				productList: [],
 				searchParam: {
 					page: 1,
 					pageSize: 6
@@ -63,7 +67,7 @@
 				    content: '是否要清空所有浏览记录？',
 				    success: function (res) {
 				        if (res.confirm) {
-				            clearBrandAttention().then(response=>{
+				            clearProductCollection().then(response=>{
 								thisObj.loadData('refresh');
 							});
 				        }
@@ -96,9 +100,9 @@
 
 				if (type === 'refresh') {
 					this.searchParam.page = 1;
-					this.brandList = [];
+					this.productList = [];
 				}
-				fetchBrandAttentionList(this.searchParam).then(response => {
+				fetchProductCollectionList(this.searchParam).then(response => {
 					let dataList = response.data.list;
 					if (dataList.length === 0) {
 						//没有更多了
@@ -111,7 +115,7 @@
 						} else {
 							this.loadingType = 'more';
 						}
-						this.brandList = this.brandList.concat(dataList);
+						this.productList = this.productList.concat(dataList);
 					}
 					if (type === 'refresh') {
 						if (loading == 1) {
@@ -124,9 +128,9 @@
 			},
 			//详情
 			navToDetailPage(item) {
-				let id = item.brandId;
+				let id = item.productId;
 				uni.navigateTo({
-					url: `/pages/brand/brandDetail?id=${id}`
+					url: `/subpages/product/product?id=${id}`
 				})
 			},
 			stopPrevent() {}
@@ -143,24 +147,22 @@
 	.hot-section {
 		display: flex;
 		flex-wrap: wrap;
+		padding: 0 30upx;
 		margin-top: 16upx;
+		background: #fff;
 
 		.guess-item {
 			display: flex;
 			flex-direction: row;
 			width: 100%;
-			padding: 0 30upx;
-			margin-bottom: 16upx;
-			background-color: #fff;
-			align-items: center;
+			padding-bottom: 40upx;
 		}
 
 		.image-wrapper {
 			width: 30%;
-			height: 170upx;
+			height: 250upx;
 			border-radius: 3px;
 			overflow: hidden;
-			background: #fff;
 
 			image {
 				width: 100%;
@@ -194,9 +196,8 @@
 		.txt {
 			width: 70%;
 			display: flex;
-			flex-direction: row;
+			flex-direction: column;
 			padding-left: 40upx;
-			align-items: center;
 		}
 		.hor-txt{
 			display: flex;

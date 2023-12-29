@@ -225,7 +225,7 @@
 			navToDetailPage(item) {
 				let id = item.id;
 				uni.navigateTo({
-					url: `/pages/product/product?id=${id}`
+					url: `/subpages/product/product?id=${id}`
 				})
 			},
 			stopPrevent() {}

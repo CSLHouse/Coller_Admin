@@ -27,18 +27,21 @@
 		</view>
 
 		<!--  分享 -->
-		<!-- <view class="share-section" @click="share">
+		<view class="share-section" >
 			<view class="share-icon">
 				<text class="yticon icon-xingxing"></text>
 				返
 			</view>
-			<text class="tit">该商品分享可领49减10红包</text>
-			<text class="yticon icon-bangzhu1"></text>
-			<view class="share-btn">
+			<text class="tit">该商品分享可领取10积分</text>
+			<!-- <view class="share-btn">
 				立即分享
 				<text class="yticon icon-you"></text>
-			</view>
-		</view> -->
+			</view> -->
+			<button class="share-btn" open-type="share" @click="share" >
+				<image src="/static/temp/share_wechat.png" mode="aspectFit" style="width: 20px; height: 20px; margin-right: 5px;"></image>
+				立即分享
+			</button>
+		</view>
 
 		<view class="c-list">
 			<view class="c-row b-b" @click="toggleSpec">
@@ -68,16 +71,16 @@
 					<text v-for="item in promotionTipList" :key="item">{{item}}</text>
 				</view>
 			</view>
-			<view class="c-row b-b">
+			<!-- <view class="c-row b-b">
 				<text class="tit">服务</text>
 				<view class="bz-list con">
 					<text v-for="item in serviceList" :key="item">{{item}} ·</text>
 				</view>
-			</view>
+			</view> -->
 		</view>
 
 		<!-- 评价 -->
-		<view class="eva-section">
+		<!-- <view class="eva-section">
 			<view class="e-header">
 				<text class="tit">评价</text>
 				<text>(86)</text>
@@ -95,7 +98,7 @@
 					</view>
 				</view>
 			</view>
-		</view>
+		</view> -->
 
 		<!-- 品牌信息 -->
 		<view class="brand-info">
@@ -130,16 +133,15 @@
 				<text class="yticon icon-bangzhu1"></text>
 				<text>客服</text>
 			</view>
-			<navigator url="/pages/cart/cart" open-type="switchTab" class="p-b-btn">
+			<!-- <navigator url="/subpages/cart/cart" open-type="navigate" class="p-b-btn">
 				<text class="yticon icon-gouwuche"></text>
 				<text>购物车</text>
 			</navigator>
 			
-
 			<view class="action-btn-group">
 				<button type="primary" class=" action-btn no-border buy-now-btn" @click="buy">立即购买</button>
 				<button type="primary" class=" action-btn no-border add-cart-btn" @click="addToCart">加入购物车</button>
-			</view>
+			</view> -->
 		</view>
 
 
@@ -211,7 +213,8 @@
 			</view>
 		</view>
 		<!-- 分享 -->
-		<share ref="share" :contentHeight="580" :shareList="shareList"></share>
+		<!-- <share ref="share" :contentHeight="580" :shareList="shareList"></share> -->
+		
 		<view v-if='!isCloseModel'>
 			<div class="modal-mask" @click="closePop">
 			</div>
@@ -432,10 +435,10 @@
 					});
 				});
 			},
-			//分享
-			// share() {
-			// 	this.$refs.share.toggleMask();
-			// },
+			// 分享
+			share() {
+				// this.$refs.share.toggleMask();
+			},
 			//收藏
 			toFavorite() {
 				this.isCloseModel = false
@@ -737,7 +740,7 @@
 			navToBrandDetail(){
 				let id = this.brandId;
 				uni.navigateTo({
-					url: `/pages/brand/brandDetail?id=${id}`
+					url: `/subpages/brand/brandDetail?id=${id}`
 				})
 			},
 			closePop() {
@@ -763,7 +766,6 @@
 				});
 			},
 		},
-
 	}
 </script>
 
@@ -927,12 +929,19 @@
 			text-align: right;
 			font-size: $font-sm;
 			color: $uni-color-primary;
+			display: flex;
+			align-items: center;
+			justify-content: flex-end;
+			margin-left: auto;
 		}
-
+		.share-btn::after {
+			border: none;
+		}
 		.icon-you {
 			font-size: $font-sm;
 			margin-left: 4upx;
 			color: $uni-color-primary;
+			align-items: center;
 		}
 	}
 

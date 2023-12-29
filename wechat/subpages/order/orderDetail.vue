@@ -225,7 +225,7 @@
 						"success":function(res){
 							payOrderSuccess({ orderId: parseInt(this.orderId), payType: this.payType }).then(response => {
 								uni.redirectTo({
-									url: '/pages/money/paySuccess'
+									url: '/subpages/money/paySuccess'
 								})
 							});
 						},
@@ -239,7 +239,7 @@
 				}
 				
 				// uni.redirectTo({
-				// 	url: `/pages/money/pay?orderId=${orderId}`
+				// 	url: `/subpages/money/pay?orderId=${orderId}`
 				// });
 			},
 			//确认收货

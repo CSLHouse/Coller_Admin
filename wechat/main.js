@@ -1,6 +1,7 @@
 import Vue from 'vue'
 import store from './store'
 import App from './App'
+import share from './utils/share.js'
 
 const msg = (title, duration=1500, mask=false, icon='none')=>{
 	//统一提示方便全局修改
@@ -28,6 +29,7 @@ Vue.config.productionTip = false
 Vue.prototype.$fire = new Vue();
 Vue.prototype.$store = store;
 Vue.prototype.$api = {msg, prePage};
+Vue.mixin(share)
 
 App.mpType = 'app'
 

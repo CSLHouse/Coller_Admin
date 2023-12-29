@@ -1,19 +1,14 @@
 <template>
 	<view class="content">
 		<!-- 空白页 -->
-		<empty v-if="productList==null||productList.length === 0"></empty>
+		<empty v-if="brandList==null||brandList.length === 0"></empty>
 		<view class="hot-section">
-			<view v-for="(item, index) in productList" :key="index" class="guess-item" @click="navToDetailPage(item)">
+			<view v-for="(item, index) in brandList" :key="index" class="guess-item" @click="navToDetailPage(item)">
 				<view class="image-wrapper">
-					<image :src="item.productPic" mode="aspectFill"></image>
+					<image :src="item.brandLogo" mode="aspectFit"></image>
 				</view>
 				<view class="txt">
-					<text class="title clamp">{{item.productName}}</text>
-					<text class="title2">{{item.productSubTitle}}</text>
-					<view class="hor-txt">
-						<text class="price">￥{{item.productPrice}}</text>
-						<text class="time">{{item.createTime | formatDateTime}}</text>
-					</view>
+					<text class="title clamp">{{item.brandName}}</text>
 				</view>
 			</view>
 		</view>
@@ -28,9 +23,9 @@
 		formatDate
 	} from '@/utils/date';
 	import {
-		fetchReadHistoryList,
-		clearReadHistory
-	} from '@/api/memberReadHistory.js';
+		fetchBrandAttentionList,
+		clearBrandAttention
+	} from '@/api/memberBrandAttention.js';
 	export default {
 		components: {
 			uniLoadMore,
@@ -39,7 +34,7 @@
 		data() {
 			return {
 				loadingType: 'more',
-				productList: [],
+				brandList: [],
 				searchParam: {
 					page: 1,
 					pageSize: 6
@@ -68,7 +63,7 @@
 				    content: '是否要清空所有浏览记录？',
 				    success: function (res) {
 				        if (res.confirm) {
-				            clearReadHistory().then(response=>{
+				            clearBrandAttention().then(response=>{
 								thisObj.loadData('refresh');
 							});
 				        }
@@ -101,9 +96,9 @@
 
 				if (type === 'refresh') {
 					this.searchParam.page = 1;
-					this.productList = [];
+					this.brandList = [];
 				}
-				fetchReadHistoryList(this.searchParam).then(response => {
+				fetchBrandAttentionList(this.searchParam).then(response => {
 					let dataList = response.data.list;
 					if (dataList.length === 0) {
 						//没有更多了
@@ -116,7 +111,7 @@
 						} else {
 							this.loadingType = 'more';
 						}
-						this.productList = this.productList.concat(dataList);
+						this.brandList = this.brandList.concat(dataList);
 					}
 					if (type === 'refresh') {
 						if (loading == 1) {
@@ -129,9 +124,9 @@
 			},
 			//详情
 			navToDetailPage(item) {
-				let id = item.productId;
+				let id = item.brandId;
 				uni.navigateTo({
-					url: `/pages/product/product?id=${id}`
+					url: `/subpages/brand/brandDetail?id=${id}`
 				})
 			},
 			stopPrevent() {}
@@ -148,22 +143,24 @@
 	.hot-section {
 		display: flex;
 		flex-wrap: wrap;
-		padding: 0 30upx;
 		margin-top: 16upx;
-		background: #fff;
 
 		.guess-item {
 			display: flex;
 			flex-direction: row;
 			width: 100%;
-			padding-bottom: 40upx;
+			padding: 0 30upx;
+			margin-bottom: 16upx;
+			background-color: #fff;
+			align-items: center;
 		}
 
 		.image-wrapper {
 			width: 30%;
-			height: 250upx;
+			height: 170upx;
 			border-radius: 3px;
 			overflow: hidden;
+			background: #fff;
 
 			image {
 				width: 100%;
@@ -197,8 +194,9 @@
 		.txt {
 			width: 70%;
 			display: flex;
-			flex-direction: column;
+			flex-direction: row;
 			padding-left: 40upx;
+			align-items: center;
 		}
 		.hor-txt{
 			display: flex;

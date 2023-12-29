@@ -66,7 +66,7 @@
 		</view>
 
 		<!-- 秒杀专区 -->
-		<!-- <view class="f-header m-t" v-if="homeFlashPromotion!==null">
+		<view class="f-header m-t" v-if="homeFlashPromotion!==null">
 			<image src="/static/icon_flash_promotion.png"></image>
 			<view class="tit-box">
 				<text class="tit">秒杀专区</text>
@@ -83,7 +83,7 @@
 				</view>
 			</view>
 			<text class="yticon icon-you" v-show="false"></text>
-		</view> -->
+		</view>
 
 		<view class="guess-section">
 			<view v-for="(item, index) in homeFlashPromotion.productList" :key="index" class="guess-item" @click="navToDetailPage(item)">
@@ -194,7 +194,8 @@
 	} from 'vuex';
 	import {
 		fetchContent,
-		fetchRecommendProductList
+		fetchRecommendProductList,
+		recordShareCount
 	} from '@/api/home.js';
 	import { getWXPhoneNumber, wxRefreshLogin, WXResetNickName } from '@/api/member.js';
 	import {
@@ -228,8 +229,12 @@
 				nickName: '',
 			};
 		},
-		onLoad() {
-			this.loadData();
+		onLoad(options) {
+			console.log("=====options===", options)
+			if (options.refCode && options.refCode.length > 0) {
+				recordShareCount({openId: options.refCode})
+			}
+			this.loadData(options);
 		},
 		onShow() {
 		},
@@ -380,7 +385,7 @@
 					this.swiperLength = this.advertiseList.length;
 					this.brandList = response.data.brandList;
 					this.homeFlashPromotion = response.data.homeFlashPromotion;
-					
+					console.log("------homeFlashPromotion:", this.homeFlashPromotion)
 					this.newProductList = response.data.newProductList;
 					// this.hotProductList = response.data.hotProductList;
 					fetchRecommendProductList(this.recommendParams).then(response => {
@@ -394,39 +399,38 @@
 			navToDetailPage(item) {
 				let id = item.id;
 				uni.navigateTo({
-					url: `/pages/product/product?id=${id}`
+					url: `/subpages/product/product?id=${id}`
 				})
 			},
 			//广告详情页
 			navToAdvertisePage(item) {
-				let id = item.id;
 				uni.navigateTo({
-					url: item.url
+					url: '' + item.url
 				})
 			},
 			//品牌详情页
 			navToBrandDetailPage(item) {
 				let id = item.id;
 				uni.navigateTo({
-					url: `/pages/brand/brandDetail?id=${id}`
+					url: `/subpages/brand/brandDetail?id=${id}`
 				})
 			},
 			//推荐品牌列表页
 			navToRecommendBrandPage() {
 				uni.navigateTo({
-					url: `/pages/brand/list`
+					url: `/subpages/brand/list`
 				})
 			},
 			//新鲜好物列表页
 			navToNewProudctListPage() {
 				uni.navigateTo({
-					url: `/pages/product/newProductList`
+					url: `/subpages/product/newProductList`
 				})
 			},
 			//人气推荐列表页
 			// navToHotProudctListPage() {
 			// 	uni.navigateTo({
-			// 		url: `/pages/product/hotProductList`
+			// 		url: `/subpages/product/hotProductList`
 			// 	})
 			// },
 		},
@@ -450,7 +454,7 @@
 				});
 				// #endif
 				uni.navigateTo({
-					url: '/pages/notice/notice'
+					url: '/subpages/notice/notice'
 				})
 			}
 		}

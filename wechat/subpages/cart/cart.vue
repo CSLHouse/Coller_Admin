@@ -127,7 +127,7 @@
 				this[key][index].productPic = '/static/errorImage.jpg';
 			},
 			navToLogin() {
-				uni.navigateTo({
+				uni.reLaunch  ({
 					url: '/pages/user/user'
 				})
 			},
@@ -213,7 +213,7 @@
 					return;
 				}
 				uni.navigateTo({
-					url: `/pages/order/createOrder?cartIds=${JSON.stringify(cartIds)}`
+					url: `/subpages/order/createOrder?cartIds=${JSON.stringify(cartIds)}`
 				})
 			}
 		}

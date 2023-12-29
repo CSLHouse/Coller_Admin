@@ -53,7 +53,7 @@
 			},
 			navToList(sid) {
 				uni.navigateTo({
-					url: `/pages/product/list?fid=${this.currentId}&sid=${sid}`
+					url: `/subpages/product/list?fid=${this.currentId}&sid=${sid}`
 				})
 			}
 		}

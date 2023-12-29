@@ -1,6 +1,6 @@
 <template>
 	<view class="content">
-		<image src="/static/hot_product_banner.png" class="banner-image"></image>
+		<image src="/static/new_product_banner.png" class="banner-image"></image>
 		<view class="section-tit">相关商品</view>
 		<view class="goods-list">
 			<view v-for="(item, index) in productList" :key="index" class="goods-item" @click="navToDetailPage(item)">
@@ -22,7 +22,7 @@
 
 <script>
 	import {
-		fetchHotProductList
+		fetchNewProductList
 	} from '@/api/home.js';
 	import uniLoadMore from '@/components/uni-load-more/uni-load-more.vue';
 	export default {
@@ -69,7 +69,7 @@
 					this.searchParam.page=1;
 					this.productList = [];
 				}
-				fetchHotProductList(this.searchParam).then(response => {
+				fetchNewProductList(this.searchParam).then(response => {
 					let productList = response.data;
 					if (response.data.length === 0) {
 						//没有更多了
@@ -97,7 +97,7 @@
 			navToDetailPage(item) {
 				let id = item.id;
 				uni.navigateTo({
-					url: `/pages/product/product?id=${id}`
+					url: `/subpages/product/product?id=${id}`
 				})
 			},
 			stopPrevent() {}

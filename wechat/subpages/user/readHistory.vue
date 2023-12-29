@@ -12,6 +12,7 @@
 					<text class="title2">{{item.productSubTitle}}</text>
 					<view class="hor-txt">
 						<text class="price">￥{{item.productPrice}}</text>
+						<text class="time">{{item.createTime | formatDateTime}}</text>
 					</view>
 				</view>
 			</view>
@@ -27,9 +28,9 @@
 		formatDate
 	} from '@/utils/date';
 	import {
-		fetchProductCollectionList,
-		clearProductCollection
-	} from '@/api/memberProductCollection.js';
+		fetchReadHistoryList,
+		clearReadHistory
+	} from '@/api/memberReadHistory.js';
 	export default {
 		components: {
 			uniLoadMore,
@@ -67,7 +68,7 @@
 				    content: '是否要清空所有浏览记录？',
 				    success: function (res) {
 				        if (res.confirm) {
-				            clearProductCollection().then(response=>{
+				            clearReadHistory().then(response=>{
 								thisObj.loadData('refresh');
 							});
 				        }
@@ -102,7 +103,7 @@
 					this.searchParam.page = 1;
 					this.productList = [];
 				}
-				fetchProductCollectionList(this.searchParam).then(response => {
+				fetchReadHistoryList(this.searchParam).then(response => {
 					let dataList = response.data.list;
 					if (dataList.length === 0) {
 						//没有更多了
@@ -130,7 +131,7 @@
 			navToDetailPage(item) {
 				let id = item.productId;
 				uni.navigateTo({
-					url: `/pages/product/product?id=${id}`
+					url: `/subpages/product/product?id=${id}`
 				})
 			},
 			stopPrevent() {}

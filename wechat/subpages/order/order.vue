@@ -257,7 +257,7 @@
 			//支付订单
 			payOrder(orderId){
 				uni.redirectTo({
-					url: `/pages/order/orderDetail?orderId=${orderId}`
+					url: `/subpages/order/orderDetail?orderId=${orderId}`
 				});
 			},
 			//确认收货
@@ -284,7 +284,7 @@
 			//查看订单详情
 			showOrderDetail(orderId){
 				uni.navigateTo({
-					url: `/pages/order/orderDetail?orderId=${orderId}`
+					url: `/subpages/order/orderDetail?orderId=${orderId}`
 				})
 			},
 			//计算商品总数量

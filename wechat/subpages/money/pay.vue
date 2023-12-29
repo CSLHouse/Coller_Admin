@@ -76,7 +76,7 @@
 							// console.log("---支付成功：", res)
 							payOrderSuccess({ orderId: parseInt(_this.orderId), payType: _this.payType }).then(response => {
 								uni.redirectTo({
-									url: '/pages/money/paySuccess'
+									url: '/subpages/money/paySuccess'
 								})
 							});
 						},
