@@ -1,4 +1,5 @@
-<template> 
+<template></template>
+<!-- <template> 
   <div class="detail-container">
     <div>
       <el-steps :active="formatStepStatus(order.status)" finish-status="success" align-center>
@@ -711,4 +712,4 @@
   }
 </style>
 
-
+ -->
