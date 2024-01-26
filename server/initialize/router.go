@@ -16,6 +16,7 @@ import (
 
 func Routers() *gin.Engine {
 	Router := gin.Default()
+	Router.LoadHTMLGlob("./resource/*.html")
 	InstallPlugin(Router) // 安装插件
 	systemRouter := router.RouterGroupApp.System
 	exampleRouter := router.RouterGroupApp.Example
@@ -82,8 +83,9 @@ func Routers() *gin.Engine {
 		wechatRouter.InitWechatRouter(PrivateGroup, PublicGroup)    // 小程序首页路由
 		wechatRouter.InitAccountRouter(PrivateGroup)                // 小程序账号路由
 		wechatRouter.InitOrderRouter(PrivateGroup)                  // 订单路由
-		payRouter.InitPayRouter(PrivateGroup)
+		payRouter.InitPayRouter(PrivateGroup, PublicGroup)
 		productRouter.InitFlashRouter(PrivateGroup, PublicGroup)
+		businessRouter.InitQrCodeRouter(PrivateGroup, PublicGroup)
 	}
 
 	global.GVA_LOG.Info("router register success")

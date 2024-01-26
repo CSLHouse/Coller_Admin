@@ -123,6 +123,22 @@ func (RecommendProduct) TableName() string {
 	return "sms_home_recommend_product"
 }
 
+// GroupBuyProduct 精品商品团购列表
+type GroupBuyProduct struct {
+	global.GVA_MODEL
+	ProductId int     `json:"productId" gorm:"not null;comment:物品序号"`
+	Price     float32 `json:"price" form:"price" gorm:"comment:商品价格"` // 状态
+	Percent   int     `json:"percent" form:"percent" gorm:"comment:团购进度条"`
+	Sort      int     `json:"sort" form:"sort" gorm:"comment:排序"`
+	Status    int     `json:"status" gorm:"not null；comment:显示状态：0->不显示；1->显示;size:1"`
+	Product   Product `json:"product" gorm:"foreignKey:ProductId;"`
+	//Type      int     `json:"type" gorm:"not null；comment:推荐类型；0->主推荐；1->附加推荐;size:1"`
+}
+
+func (GroupBuyProduct) TableName() string {
+	return "sms_group_buy"
+}
+
 // Product 商品信息
 type Product struct {
 	global.GVA_MODEL
@@ -161,19 +177,20 @@ type Product struct {
 	DetailDesc                 string                   `json:"detailDesc" form:"detailDesc" gorm:"comment:详情描述"`
 	DetailHTML                 string                   `json:"detailHTML" form:"detailHTML" gorm:"type:text;comment:产品详情网页内容"`
 	DetailMobileHTML           string                   `json:"detailMobileHTML" form:"detailMobileHTML" gorm:"type:text;comment:移动端网页详情"`
-	PromotionStartDate         string                   `json:"promotionStartDate" form:"promotionStartDate" gorm:"type:text;comment:促销开始日期"`
-	PromotionEndDate           string                   `json:"promotionEndDate" form:"promotionEndDate" gorm:"comment:促销结束日期"`
+	PromotionStartDate         time.Time                `json:"promotionStartDate" form:"promotionStartDate" gorm:"comment:促销开始日期"`
+	PromotionEndDate           time.Time                `json:"promotionEndDate" form:"promotionEndDate" gorm:"comment:促销结束日期"`
 	PromotionPerLimit          int                      `json:"promotionPerLimit" form:"promotionPerLimit" gorm:"comment:活动限购数量"`
 	PromotionType              int                      `json:"promotionType" form:"promotionType" gorm:"comment:促销类型：0->没有促销使用原价;1->使用促销价；2->使用会员价；3->使用阶梯价格；4->使用满减价格；5->限时购"`
 	BrandName                  string                   `json:"brandName" form:"brandName" gorm:"comment:品牌名称"`
 	ProductCategoryName        string                   `json:"productCategoryName" form:"productCategoryName" gorm:"comment:商品分类名称"`
-	Brand                      Brand                    `json:"brand"`
+	Brand                      Brand                    `json:"brand" gorm:"foreignKey:BrandId"`
 	ProductLadderList          []*ProductLadder         `json:"productLadderList" gorm:"foreignKey:ProductId"`
 	ProductFullReductionList   []*ProductFullReduction  `json:"productFullReduction" gorm:"foreignKey:ProductId"`
 	SkuStockList               []*SkuStock              `json:"skuStockList" gorm:"foreignKey:ProductId"`
 	ProductAttributeValueList  []*ProductAttributeValue `json:"productAttributeValueList" gorm:"foreignKey:ProductId"`
 	ProductAttributeList       []*ProductAttribute      `json:"productAttributeList" gorm:"foreignKey:ProductAttributeCategoryId;references:ProductAttributeCategoryId"`
 	//SysUserAuthorityID int   `json:"sys_user_authority_id" form:"sys_user_authority_id" gorm:"comment:管理角色ID"`
+	SelfPickup int `json:"selfPickup" form:"selfPickup" gorm:"comment:仅限自提：0->是；1->不是"`
 }
 
 func (Product) TableName() string {
@@ -309,8 +326,6 @@ type CartItem struct {
 	ProductBrand      string  `json:"productBrand" gorm:"null;default null;comment:品牌;"`
 	ProductSn         string  `json:"productSn" gorm:"null;default null;"`
 	ProductAttr       string  `json:"productAttr" gorm:"null;default null;comment:商品销售属性:[{\"key\":\"颜色\",\"value\":\"颜色\"},{\"key\":\"容量\",\"value\":\"4G\"}];"`
-	// TODO: AuthorityId可删除
-	AuthorityId int `json:"authorityId" gorm:"default:888;comment:用户角色ID"` // 用户角色ID
 }
 
 func (CartItem) TableName() string {

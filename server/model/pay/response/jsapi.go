@@ -27,11 +27,11 @@ type PrepayWithRequestPaymentResponse struct {
 }
 
 type GenerateOrderResponse struct {
-	OrderId int                              `json:"orderId"`
-	Payment PrepayWithRequestPaymentResponse `json:"payment"`
+	OrderId int                               `json:"orderId"`
+	Payment *PrepayWithRequestPaymentResponse `json:"payment"`
 }
 
 type GenerateOrderDetailResponse struct {
-	Order   wechat.Order                     `json:"order"`
-	Payment PrepayWithRequestPaymentResponse `json:"payment"`
+	Order   wechat.Order                      `json:"order"`
+	Payment *PrepayWithRequestPaymentResponse `json:"payment"`
 }

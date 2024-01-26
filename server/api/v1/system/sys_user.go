@@ -89,6 +89,7 @@ func (b *BaseApi) TokenNext(c *gin.Context, user system.SysUser) {
 		NickName:    user.NickName,
 		UserName:    user.UserName,
 		AuthorityId: user.AuthorityId,
+		Telephone:   user.Phone,
 	})
 	token, err := j.CreateToken(claims)
 	if err != nil {
@@ -552,7 +553,7 @@ func (b *BaseApi) CreateWXUserInfo(c *gin.Context) {
 	response.OkWithDetailed(wxUser, "更新成功", c)
 }
 
-// TokenNext 登录以后签发jwt
+// WXTokenNext 登录以后签发jwt
 func (b *BaseApi) WXTokenNext(c *gin.Context, customer business.Customer) {
 	j := &utils.JWT{SigningKey: []byte(global.GVA_CONFIG.JWT.SigningKey)} // 唯一签名
 	claims := j.CreateClaims(systemReq.BaseClaims{
@@ -561,6 +562,7 @@ func (b *BaseApi) WXTokenNext(c *gin.Context, customer business.Customer) {
 		NickName:    customer.NickName,
 		UserName:    customer.UserName,
 		AuthorityId: customer.AuthorityId,
+		Telephone:   customer.Telephone,
 	})
 	token, err := j.CreateToken(claims)
 	if err != nil {

@@ -1,6 +1,8 @@
 package request
 
-import wechatModel "github.com/flipped-aurora/gin-vue-admin/server/model/wechat"
+import (
+	wechatModel "github.com/flipped-aurora/gin-vue-admin/server/model/wechat"
+)
 
 type UpdateIdsKeywordRequest struct {
 	Ids   []int  `json:"ids" gorm:"not null;comment:物品序号"`

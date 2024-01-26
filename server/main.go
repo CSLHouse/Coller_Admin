@@ -1,11 +1,12 @@
 package main
 
 import (
-	"go.uber.org/zap"
-
+	"fmt"
+	"github.com/flipped-aurora/gin-vue-admin/server/api/v1/business"
 	"github.com/flipped-aurora/gin-vue-admin/server/core"
 	"github.com/flipped-aurora/gin-vue-admin/server/global"
 	"github.com/flipped-aurora/gin-vue-admin/server/initialize"
+	"go.uber.org/zap"
 )
 
 //go:generate go env -w GO111MODULE=on
@@ -27,7 +28,19 @@ func main() {
 	zap.ReplaceGlobals(global.GVA_LOG)
 	global.GVA_DB = initialize.Gorm() // gorm连接数据库
 	initialize.Timer()
+	_, err := global.GVA_Timer.AddTaskByFunc("CheckQrCode", "@every 168h", func() {
+		business.CheckQrCodeExpired()
+	})
+	if err != nil {
+		fmt.Println("add timer error:", err)
+	}
 	initialize.DBList()
+
+	//tm := timer.NewTimer()
+	//tm.ScheduleFunc(30*time.Minute, func() {
+	//	business.CheckQrCodeExpired()
+	//})
+	//tm.Run()
 	if global.GVA_DB != nil {
 		initialize.RegisterTables() // 初始化表
 		// 程序结束前关闭数据库链接

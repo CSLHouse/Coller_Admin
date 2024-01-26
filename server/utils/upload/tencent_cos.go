@@ -66,3 +66,7 @@ func NewClient() *cos.Client {
 	})
 	return client
 }
+
+func (*TencentCOS) UploadFileWithLocationPath(localPath string, fileName string, userId int) (string, string, error) {
+	return "", "", fmt.Errorf("")
+}

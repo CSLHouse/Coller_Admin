@@ -100,3 +100,7 @@ func newSession() *session.Session {
 	})
 	return sess
 }
+
+func (*AwsS3) UploadFileWithLocationPath(localPath string, fileName string, userId int) (string, string, error) {
+	return "", "", fmt.Errorf("")
+}

@@ -1,6 +1,7 @@
 package upload
 
 import (
+	"fmt"
 	"mime/multipart"
 
 	"github.com/flipped-aurora/gin-vue-admin/server/global"
@@ -69,4 +70,8 @@ func (o *Obs) DeleteFile(key string) error {
 func (o *Obs) DeleteFiles(files []string) error {
 	//TODO: 待完善
 	return nil
+}
+
+func (*Obs) UploadFileWithLocationPath(localPath string, fileName string, userId int) (string, string, error) {
+	return "", "", fmt.Errorf("")
 }

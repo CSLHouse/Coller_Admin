@@ -55,10 +55,12 @@ func WithWechatPayAuthCipher(
 func WithWechatPayAutoAuthCipher() client.ClientOption {
 	mgr := downloader2.MgrInstance()
 	if !mgr.HasDownloader(context.Background(), consts.MachID) {
+		// 使用 utils 提供的函数从本地文件中加载商户私钥，商户私钥会用来生成请求的签名
 		privateKey, err := utils.LoadPrivateKeyWithPath("./cert/apiclient_key.pem")
 		if err != nil {
 			log.Print("load merchant private key error")
 		}
+		// 使用商户私钥等初始化 client，并使它具有自动定时获取微信支付平台证书的能力
 		err = mgr.RegisterDownloaderWithPrivateKey(
 			context.Background(), privateKey, consts.MchCertificateSerialNumber, consts.MachID, consts.MchAPIv3Key,
 		)

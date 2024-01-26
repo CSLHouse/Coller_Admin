@@ -149,51 +149,78 @@ func (e *HomeApi) GetHomeAdvertiseList(c *gin.Context) {
 	}, "获取成功", c)
 }
 
-func (e *HomeApi) FindValidFlashPromotion(promotionList []wechat.FlashPromotion) interface{} {
+// FindValidFlashPromotion 获取有效的秒杀活动
+func FindValidFlashPromotion() (promotionValidList []*wechat.FlashPromotion) {
+	promotionList, err := wechatService.GetOnlineHomeFlashPromotionInfoList()
+	if err != nil {
+		global.GVA_LOG.Error("获取失败!", zap.Error(err))
+		return promotionValidList
+	}
 	for _, promotion := range promotionList {
 		if promotion.Status > 0 {
-			t := time.Now().Unix()
-			startDate := promotion.StartDate.Unix()
-			endDate := promotion.EndDate.Unix()
-			if t > startDate && t < endDate {
-				return promotion
+			now := time.Now()
+			if now.After(promotion.StartDate) && now.Before(promotion.EndDate) {
+				promotionValidList = append(promotionValidList, promotion)
+				return promotionValidList
 			}
 		}
 	}
-	return nil
+	return promotionValidList
 }
 
-func (e *HomeApi) FindCurrentFlashPromotionSession(sessionList []wechat.FlashPromotionSession) (sessionRes wechat.FlashPromotionSession, err error) {
-	t := time.Now().Unix()
-	for _, session := range sessionList {
-		if session.Status > 0 {
-			startDate := session.StartTime.Unix()
-			endDate := session.EndTime.Unix()
-			if t > startDate && t < endDate {
-				return session, nil
+func FindCurrentFlashPromotionSession() (sessionRes wechat.FlashPromotionSession, err error) {
+	flashSessionList, err := wechatService.GetFlashSessionList()
+	if err != nil || len(flashSessionList) < 1 {
+		global.GVA_LOG.Error("GetFlashSessionList获取失败!", zap.Error(err))
+		return sessionRes, fmt.Errorf("Not found FlashPromotionSession!")
+	} else {
+		now := time.Now()
+		year, month, day := now.Date()
+		for _, session := range flashSessionList {
+			if session.Status > 0 {
+				startTime := time.Date(year, month, day, session.StartTime.Hour(), session.StartTime.Minute(), session.StartTime.Second(), 0, time.Local)
+				EndTime := time.Date(year, month, day, session.EndTime.Hour(), session.EndTime.Minute(), session.EndTime.Second(), 0, time.Local)
+				if now.After(startTime) && now.Before(EndTime) {
+					return session, nil
+				}
 			}
 		}
+		return sessionRes, fmt.Errorf("Not found!")
 	}
-	return sessionRes, fmt.Errorf("not found!")
 }
 
-func (e *HomeApi) FindNextFlashPromotionSession(sessionList []wechat.FlashPromotionSession) (sessionRes wechat.FlashPromotionSession, err error) {
-	t := time.Now().Unix()
-	mini := 0
-	miniTime := int64(0)
-	for i, session := range sessionList {
-		if session.Status > 0 {
-			startDate := session.StartTime.Unix()
-			if t < startDate && miniTime < startDate {
-				mini = i
-				miniTime = startDate
+func (e *HomeApi) FindNextFlashPromotionSession() (sessionRes wechat.FlashPromotionSession, err error) {
+	flashSessionList, err := wechatService.GetFlashSessionList()
+	if err != nil || len(flashSessionList) < 1 {
+		return sessionRes, fmt.Errorf("Not found FlashPromotionSession!")
+	} else {
+		now := time.Now()
+		year, month, day := now.Date()
+		nextIndex := 0
+		mini := 0
+		isFind := false
+		nextTime := now.AddDate(0, 0, 1)
+		miniTime := now.AddDate(0, 0, 1)
+		for i, session := range flashSessionList {
+			if session.Status > 0 {
+				startTime := time.Date(year, month, day, session.StartTime.Hour(), session.StartTime.Minute(), session.StartTime.Second(), 0, time.Local)
+				if now.Before(startTime) && nextTime.After(now) && nextTime.After(startTime) {
+					nextIndex = i
+					nextTime = startTime
+					isFind = true
+				}
+				if miniTime.After(startTime) {
+					mini = i
+					miniTime = startTime
+				}
 			}
 		}
+		if !isFind {
+			return flashSessionList[mini], nil
+		} else {
+			return flashSessionList[nextIndex], nil
+		}
 	}
-	if mini != 0 {
-		return sessionList[mini], nil
-	}
-	return sessionRes, fmt.Errorf("not found!")
 }
 
 func (e *HomeApi) GetAllWechatContent(c *gin.Context) {
@@ -210,64 +237,75 @@ func (e *HomeApi) GetAllWechatContent(c *gin.Context) {
 		return
 	}
 
-	newProductList, err := wechatService.GetOnlineNewProductInfoList()
-	if err != nil {
-		global.GVA_LOG.Error("获取失败!", zap.Error(err))
-		response.FailWithMessage("获取失败"+err.Error(), c)
-		return
-	}
+	//newProductList, err := wechatService.GetOnlineNewProductInfoList()
+	//if err != nil {
+	//	global.GVA_LOG.Error("获取失败!", zap.Error(err))
+	//	response.FailWithMessage("获取失败"+err.Error(), c)
+	//	return
+	//}
 
-	flashPromotionList, err := wechatService.GetOnlineHomeFlashPromotionInfoList()
-	if err != nil {
-		global.GVA_LOG.Error("获取失败!", zap.Error(err))
-		response.FailWithMessage("获取失败"+err.Error(), c)
-		return
-	}
-
-	flashPromotion := e.FindValidFlashPromotion(flashPromotionList)
 	var homeFlashPromotion wechatRes.HomeFlashResponse
-	if flashPromotion == nil {
-		global.GVA_LOG.Error("获取失败!", zap.Error(err))
-	} else {
-		flashSessionList, err := wechatService.GetFlashSessionList()
-		if err != nil {
-			global.GVA_LOG.Error("GetFlashSessionList获取失败!", zap.Error(err))
-		} else {
-			currentFlash, err := e.FindCurrentFlashPromotionSession(flashSessionList)
-			nextFlash, err1 := e.FindNextFlashPromotionSession(flashSessionList)
-			if err == nil {
-				homeFlashPromotion.StartTime = currentFlash.StartTime
-				homeFlashPromotion.EndTime = currentFlash.EndTime
-				sessionProductList, err := wechatService.GetFlashPromotionProductRelationListById(currentFlash.ID, flashPromotion.(wechat.FlashPromotion).ID)
+	promotionValidList := FindValidFlashPromotion()
+	if len(promotionValidList) > 0 {
+		currentFlash, err := FindCurrentFlashPromotionSession()
+		if err == nil {
+			homeFlashPromotion.StartTime = currentFlash.StartTime
+			homeFlashPromotion.EndTime = currentFlash.EndTime
+			for _, flashPromotion := range promotionValidList {
+				sessionProductList, err := wechatService.GetFlashPromotionProductRelationListById(flashPromotion.ID, currentFlash.ID)
 				if err != nil {
 					global.GVA_LOG.Error("GetFlashPromotionProductRelationListById获取失败!", zap.Error(err))
 				} else {
 					productList := make([]wechat.Product, 0)
 					for _, sessionProduct := range sessionProductList {
-						productList = append(productList, sessionProduct.Product)
+						product, _, _ := CalculateProductPromotionPrice(sessionProduct.Product, sessionProductList)
+						productList = append(productList, product)
 					}
 					homeFlashPromotion.ProductList = productList
 				}
 			}
-			if err1 == nil {
-				homeFlashPromotion.NextStartTime = nextFlash.StartTime
-				homeFlashPromotion.NextEndTime = nextFlash.EndTime
-			}
 		}
-
+		nextFlash, err1 := e.FindNextFlashPromotionSession()
+		if err1 == nil {
+			homeFlashPromotion.NextStartTime = nextFlash.StartTime
+			homeFlashPromotion.NextEndTime = nextFlash.EndTime
+		}
 	}
+
 	//hotProductList, err := wechatService.GetOnlineRecommendProductListInfoList()
 	//if err != nil {
 	//	global.GVA_LOG.Error("获取失败!", zap.Error(err))
 	//	response.FailWithMessage("获取失败"+err.Error(), c)
 	//	return
 	//}
+
+	//groupBuyList, err := wechatService.GetGroupBuyProductList()
+	//if err != nil {
+	//	global.GVA_LOG.Error("获取失败!", zap.Error(err))
+	//	response.FailWithMessage("获取失败"+err.Error(), c)
+	//	return
+	//}
+	//var groupBuy wechatRes.GroupBuyResp
+	//for _, item := range groupBuyList {
+	//	var groupBuyProduct wechatRes.SampleProductInfo
+	//	groupBuyProduct.ID = item.ID
+	//	groupBuyProduct.ProductId = item.ProductId
+	//	groupBuyProduct.Name = item.Product.Name
+	//	groupBuyProduct.Price = item.Price
+	//	groupBuyProduct.OriginalPrice = item.Product.OriginalPrice
+	//	groupBuyProduct.AlbumPics = item.Product.AlbumPics
+	//	groupBuyProduct.Pic = item.Product.Pic
+	//	groupBuyProduct.Sales = item.Product.Sale
+	//	groupBuyProduct.Percent = item.Percent
+	//	groupBuy.Groups = append(groupBuy.Groups, groupBuyProduct)
+	//}
 	response.OkWithDetailed(wechatRes.HomeContentResponse{
-		AdvertiseList:  homeList,
-		BrandList:      brandList,
-		NewProductList: newProductList,
+		AdvertiseList: homeList,
+		BrandList:     brandList,
+		//NewProductList: newProductList,
 		//HotProductList: hotProductList,
 		HomeFlashPromotion: homeFlashPromotion,
+		//GroupBuy:           groupBuy,
 	}, "获取成功", c)
 }
 
@@ -353,6 +391,7 @@ func (e *HomeApi) GetProductByID(c *gin.Context) {
 		return
 	}
 	product, err := wechatService.GetProductByID(reqId.ID)
+	product, _, _ = CalculateProductPromotionPrice(product, nil)
 	if err != nil {
 		global.GVA_LOG.Error("获取商品失败!", zap.Error(err))
 		response.FailWithMessage("获取商品失败", c)
@@ -642,7 +681,7 @@ func (e *HomeApi) DeleteHomeProductBrand(c *gin.Context) {
 	response.OkWithMessage("删除成功", c)
 }
 
-// CreateRecommendProduct 创建推荐商品
+// CreateRecommendProducts 创建推荐商品
 func (e *HomeApi) CreateRecommendProducts(c *gin.Context) {
 	var recommendProducts wechatRequest.AddRecommendProductRequest
 	err := c.ShouldBindJSON(&recommendProducts)
@@ -686,7 +725,7 @@ func (e *HomeApi) UpdateRecommendProducts(c *gin.Context) {
 	response.OkWithMessage("更新成功", c)
 }
 
-// DeleteHotProducts 删除猜你喜欢商品
+// DeleteRecommendProducts 删除猜你喜欢商品
 func (e *HomeApi) DeleteRecommendProducts(c *gin.Context) {
 	var idsReq request.IdsReq
 	err := c.ShouldBindJSON(&idsReq)
@@ -1033,6 +1072,77 @@ func (e *HomeApi) GetProductCartList(c *gin.Context) {
 	response.OkWithData(cartList, c)
 }
 
+// GetFlashPromotionProductList 获取当前活动中的商品关联表
+func GetFlashPromotionProductList() (list []wechat.FlashPromotionProductRelation) {
+	promotionValidList := FindValidFlashPromotion()
+	if len(promotionValidList) > 0 {
+		currentFlash, err := FindCurrentFlashPromotionSession()
+		if err == nil {
+			for _, flashPromotion := range promotionValidList {
+				sessionProductList, err := wechatService.GetFlashPromotionProductRelationListById(flashPromotion.ID, currentFlash.ID)
+				if err != nil {
+					global.GVA_LOG.Error("GetFlashPromotionProductRelationListById获取失败!", zap.Error(err))
+				} else {
+					list = append(list, sessionProductList...)
+					return list
+				}
+			}
+		}
+	}
+	return list
+}
+
+func CalculateProductPromotionPrice(product wechat.Product, list []wechat.FlashPromotionProductRelation) (p wechat.Product, promotionMessage string, reduceAmount float32) {
+	promotion := product.PromotionType
+	// TODO: 各个优惠计算
+	if promotion == 0 {
+		promotionMessage = "无优惠"
+	} else if promotion == 1 {
+		promotionMessage = "特惠促销"
+		now := time.Now().Unix()
+		startTime := product.PromotionStartDate.Unix()
+		endTime := product.PromotionEndDate.Unix()
+		if now >= startTime && now <= endTime {
+			product.Price = product.PromotionPrice
+		}
+	} else if promotion == 2 {
+		promotionMessage = "会员优惠"
+	} else if promotion == 3 {
+		promotionMessage = "阶梯价格"
+	} else if promotion == 4 {
+		fullReductionList, err := wechatService.GetProductFullReductionByProductId(product.ID)
+		if err != nil {
+			global.GVA_LOG.Error("获取购物车物品失败!", zap.Error(err))
+		}
+		reductionStr := ""
+		for _, reduction := range fullReductionList {
+			if product.Price >= reduction.FullPrice && reduceAmount < reduction.ReducePrice {
+				reduceAmount = reduction.ReducePrice
+			}
+			reductionStr += fmt.Sprintf("满%.2f元，减%.2f元,", reduction.FullPrice, reduction.ReducePrice)
+		}
+		promotionMessage = fmt.Sprintf("满减优惠：%s", reductionStr)
+	} else if promotion == 5 { // 秒杀
+		promotionMessage = "限时优惠"
+		if list != nil && len(list) > 0 {
+			for _, flashProduct := range list {
+				if flashProduct.ProductId == product.ID {
+					product.Price = flashProduct.FlashPromotionPrice
+				}
+			}
+		} else {
+			sessionProductList := GetFlashPromotionProductList()
+			for _, relation := range sessionProductList {
+				if product.ID == relation.ProductId {
+					product.Price = relation.FlashPromotionPrice
+				}
+			}
+		}
+	}
+
+	return product, promotionMessage, reduceAmount
+}
+
 // CreateProductCart 创建商品购物车
 func (e *HomeApi) CreateProductCart(c *gin.Context) {
 	var cart wechat.CartItem
@@ -1042,8 +1152,6 @@ func (e *HomeApi) CreateProductCart(c *gin.Context) {
 		return
 	}
 	cart.UserId = utils.GetUserID(c)
-	cart.AuthorityId = utils.GetUserAuthorityId(c)
-	println("--UserId-", cart.UserId)
 	err = wechatService.CreateProductCart(&cart)
 	if err != nil {
 		global.GVA_LOG.Error("创建失败!", zap.Error(err))
@@ -1098,13 +1206,11 @@ func (e *HomeApi) DeleteProductCartByIds(c *gin.Context) {
 		return
 	}
 	userId := utils.GetUserID(c)
-	for _, id := range reqIds.Ids {
-		err = wechatService.DeleteProductCartById(userId, id)
-		if err != nil {
-			global.GVA_LOG.Error("删除失败!", zap.Error(err))
-			response.FailWithMessage("删除失败", c)
-			return
-		}
+	err = wechatService.DeleteProductCartByIds(userId, reqIds.Ids)
+	if err != nil {
+		global.GVA_LOG.Error("删除失败!", zap.Error(err))
+		response.FailWithMessage("删除失败", c)
+		return
 	}
 
 	response.OkWithMessage("删除成功", c)
@@ -1113,7 +1219,6 @@ func (e *HomeApi) DeleteProductCartByIds(c *gin.Context) {
 // ClearProductCart 清空商品购物车
 func (e *HomeApi) ClearProductCart(c *gin.Context) {
 	userId := utils.GetUserID(c)
-	println("--UserId-", userId)
 	err := wechatService.ClearProductCartUserId(userId)
 	if err != nil {
 		global.GVA_LOG.Error("删除失败!", zap.Error(err))

@@ -5,4 +5,5 @@ type RouterGroup struct {
 	MemberRouter
 	ConsumeRouter
 	OrderRouter
+	QrCodeRouter
 }

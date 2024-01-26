@@ -7,11 +7,16 @@ import (
 
 type PayRouter struct{}
 
-func (e *PayRouter) InitPayRouter(Router *gin.RouterGroup) {
+func (e *PayRouter) InitPayRouter(Router *gin.RouterGroup, RouterPub *gin.RouterGroup) {
+	payPublicRouterWithoutRecord := RouterPub.Group("pay")
 	payRouterWithoutRecord := Router.Group("pay")
 	payApi := v1.ApiGroupApp.PayApiGroup.PayApi
 	{
 		payRouterWithoutRecord.POST("generateOrder", payApi.GenerateOrder)
+		payRouterWithoutRecord.GET("detail", payApi.GetOrderDetail)
+	}
+	{
+		payPublicRouterWithoutRecord.GET("notify", payApi.OrderNotify)
 
 	}
 }

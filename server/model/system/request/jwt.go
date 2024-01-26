@@ -18,6 +18,7 @@ type BaseClaims struct {
 	UserName    string
 	NickName    string
 	AuthorityId int
+	Telephone   string
 }
 
 type WXBaseClaims struct {

@@ -13,6 +13,7 @@ type OSS interface {
 	UploadFile(file *multipart.FileHeader, userId int) (string, string, error)
 	DeleteFile(key string) error
 	DeleteFiles(files []string) error
+	UploadFileWithLocationPath(localPath string, fileName string, userId int) (string, string, error)
 }
 
 // NewOss OSS的实例化方法

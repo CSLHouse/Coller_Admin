@@ -9,6 +9,7 @@ import (
 	"github.com/flipped-aurora/gin-vue-admin/server/utils"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
+	"time"
 )
 
 type FlashApi struct{}
@@ -154,6 +155,20 @@ func (e *FlashApi) CreateFlashPromotionProductRelation(c *gin.Context) {
 		return
 	}
 
+	for _, falshRelation := range flashes.Flashes {
+		flashSession, err := wechatService.GetFlashSessionById(falshRelation.FlashPromotionSessionId)
+		if err != nil {
+			response.FailWithMessage(err.Error(), c)
+			return
+		}
+		err = wechatService.UpdateProductPromotionType(&falshRelation, &flashSession)
+		if err != nil {
+			global.GVA_LOG.Error("创建产品失败!", zap.Error(err))
+			response.FailWithMessage("创建产品失败", c)
+			return
+		}
+	}
+
 	response.OkWithMessage("创建成功", c)
 }
 
@@ -172,6 +187,7 @@ func (e *FlashApi) UpdateFlashPromotionProductRelation(c *gin.Context) {
 		response.FailWithMessage("更新失败", c)
 		return
 	}
+
 	response.OkWithMessage("更新成功", c)
 
 }
@@ -212,7 +228,7 @@ func (e *FlashApi) CreateFlashSession(c *gin.Context) {
 		response.FailWithMessage(err.Error(), c)
 		return
 	}
-
+	flash.CreateDate = time.Now()
 	err = wechatService.CreateFlashSession(&flash)
 	if err != nil {
 		global.GVA_LOG.Error("创建产品失败!", zap.Error(err))

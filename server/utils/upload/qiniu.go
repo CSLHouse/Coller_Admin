@@ -99,3 +99,7 @@ func qiniuConfig() *storage.Config {
 	}
 	return &cfg
 }
+
+func (*Qiniu) UploadFileWithLocationPath(localPath string, fileName string, userId int) (string, string, error) {
+	return "", "", fmt.Errorf("")
+}

@@ -47,18 +47,28 @@ func (i *initHomeProductAttributeCategory) InitializeData(ctx context.Context) (
 
 	entities := []wechatModel.ProductAttributeCategory{
 		{
-			Name:           "服装-T恤",
-			AttributeCount: 2,
-			ParamCount:     5,
+			Name:           "体验卡",
+			AttributeCount: 1,
+			ParamCount:     0,
 		},
 		{
-			Name:           "服装-裤装",
-			AttributeCount: 2,
-			ParamCount:     4,
+			Name:           "单人票",
+			AttributeCount: 1,
+			ParamCount:     0,
 		},
 		{
-			Name:           "服装-鞋帽",
-			AttributeCount: 4,
+			Name:           "会员卡",
+			AttributeCount: 1,
+			ParamCount:     0,
+		},
+		{
+			Name:           "挖宝",
+			AttributeCount: 1,
+			ParamCount:     0,
+		},
+		{
+			Name:           "饮品",
+			AttributeCount: 1,
 			ParamCount:     0,
 		},
 	}

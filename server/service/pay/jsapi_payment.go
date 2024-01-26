@@ -18,7 +18,7 @@ import (
 type PayMentService struct{}
 
 // PrepayWithRequestPayment Jsapi支付下单，并返回调起支付的请求参数
-func (a *PayMentService) PrepayWithRequestPayment(req payRequest.PrepayRequest) (resp *payRes.PrepayWithRequestPaymentResponse, result *client.APIResult, err error) {
+func (a *PayMentService) PrepayWithRequestPayment(req payRequest.PrepayRequest) (resp payRes.PrepayWithRequestPaymentResponse, result *client.APIResult, err error) {
 	ctx := context.Background()
 	opts := []client.ClientOption{
 		option.WithWechatPayAutoAuthCipher(),
@@ -30,24 +30,23 @@ func (a *PayMentService) PrepayWithRequestPayment(req payRequest.PrepayRequest) 
 	jsapi := JsapiApiService{Client: defaultClient}
 	prepayResp, result, err := jsapi.Prepay(ctx, req)
 	if err != nil {
-		return nil, result, err
+		return resp, result, err
 	}
-	fmt.Println("--prepayResp:", prepayResp)
-	resp = new(payRes.PrepayWithRequestPaymentResponse)
+
 	resp.PrepayId = prepayResp.PrepayId
 	resp.SignType = utils.String("RSA")
 	resp.Appid = req.Appid
 	resp.TimeStamp = utils.String(strconv.FormatInt(time.Now().Unix(), 10))
 	nonce, err := utils.GenerateNonce()
 	if err != nil {
-		return nil, nil, fmt.Errorf("generate request for payment err:%s", err.Error())
+		return resp, nil, fmt.Errorf("generate request for payment err:%s", err.Error())
 	}
 	resp.NonceStr = utils.String(nonce)
 	resp.Package = utils.String("prepay_id=" + *prepayResp.PrepayId)
 	message := fmt.Sprintf("%s\n%s\n%s\n%s\n", *resp.Appid, *resp.TimeStamp, *resp.NonceStr, *resp.Package)
 	signatureResult, err := jsapi.Client.Sign(ctx, message)
 	if err != nil {
-		return nil, nil, fmt.Errorf("generate sign for payment err:%s", err.Error())
+		return resp, nil, fmt.Errorf("generate sign for payment err:%s", err.Error())
 	}
 	resp.PaySign = utils.String(signatureResult.Signature)
 	return resp, result, nil

@@ -92,7 +92,7 @@ func (exa *HomeService) GetOnlineHomeBrandInfoList() (list []wechat.Brand, err e
 	return list, err
 }
 
-func (exa *HomeService) GetOnlineHomeFlashPromotionInfoList() (list []wechat.FlashPromotion, err error) {
+func (exa *HomeService) GetOnlineHomeFlashPromotionInfoList() (list []*wechat.FlashPromotion, err error) {
 	db := global.GVA_DB.Model(&wechat.FlashPromotion{})
 	err = db.Where("status = 1").Find(&list).Error
 	return list, err
@@ -131,7 +131,7 @@ func (exa *HomeService) GetOnlineRecommendProductListInfoList(pageInfo request.P
 
 	db := global.GVA_DB.Model(&wechat.RecommendProduct{})
 
-	err = db.Limit(limit).Offset(offset).Where("recommend_status = 1").Order("sort desc").Preload("Product").Find(&recommendProductList).Error
+	err = db.Limit(limit).Offset(offset).Debug().Where("recommend_status = 1").Order("sort desc").Preload("Product").Find(&recommendProductList).Error
 	return recommendProductList, err
 }
 
@@ -243,6 +243,7 @@ func (exa *HomeService) getProductSearchCmd(searchInfo wechatRequest.ProductSear
 
 func (exa *HomeService) GetProductByID(id int) (product wechat.Product, err error) {
 	err = global.GVA_DB.Where("id = ?", id).
+		Preload("Brand").
 		Preload("ProductLadderList").
 		Preload("ProductFullReductionList").
 		Preload("SkuStockList").
@@ -591,6 +592,12 @@ func (exa *HomeService) DeleteProductCartById(userId int, id int) (err error) {
 	return err
 }
 
+func (exa *HomeService) DeleteProductCartByIds(userId int, ids []int) (err error) {
+	var cart wechat.CartItem
+	err = global.GVA_DB.Where("user_id = ? and id in ?", userId, ids).Delete(&cart).Error
+	return err
+}
+
 func (exa *HomeService) ClearProductCartUserId(id int) (err error) {
 	var cart wechat.CartItem
 	err = global.GVA_DB.Where("user_id = ?", id).Delete(&cart).Error
@@ -663,12 +670,18 @@ func (exa *HomeService) GetFlashPromotionProductRelationList(searchInfo wechatRe
 
 func (exa *HomeService) GetFlashPromotionProductRelationListById(flashPromotionId int, flashPromotionSessionId int) (list []wechat.FlashPromotionProductRelation, err error) {
 	db := global.GVA_DB.Model(&wechat.FlashPromotionProductRelation{})
-	err = db.Where("flash_promotion_id = ? and flash_promotion_session_id = ?", flashPromotionId, flashPromotionSessionId).Preload("Product").Find(&list).Error
+	err = db.Debug().Where("flash_promotion_id = ? and flash_promotion_session_id = ?", flashPromotionId, flashPromotionSessionId).Preload("Product").Find(&list).Error
 	return list, err
 }
 
 func (exa *HomeService) CreateFlashPromotionProductRelation(e []wechat.FlashPromotionProductRelation) (err error) {
 	err = global.GVA_DB.CreateInBatches(e, len(e)).Error
+	return err
+}
+
+func (exa *HomeService) UpdateProductPromotionType(relation *wechat.FlashPromotionProductRelation, session *wechat.FlashPromotionSession) (err error) {
+	db := global.GVA_DB.Model(&wechat.Product{})
+	err = db.Where("id=?", relation.ProductId).UpdateColumn("promotion_type", 5).Error
 	return err
 }
 
@@ -687,6 +700,12 @@ func (exa *HomeService) GetFlashSessionList() (list []wechat.FlashPromotionSessi
 	db := global.GVA_DB.Model(&wechat.FlashPromotionSession{})
 	err = db.Find(&list).Error
 	return list, err
+}
+
+func (exa *HomeService) GetFlashSessionById(id int) (flashSession wechat.FlashPromotionSession, err error) {
+	db := global.GVA_DB.Model(&wechat.FlashPromotionSession{})
+	err = db.Where("id = ?", id).First(&flashSession).Error
+	return flashSession, err
 }
 
 func (exa *HomeService) CreateFlashSession(e *wechat.FlashPromotionSession) (err error) {
@@ -714,5 +733,11 @@ func (exa *HomeService) UpdateFlashSessionStatus(id int, status int) (err error)
 func (exa *HomeService) GetFlashSessionSelectList(id int) (list []*wechat.FlashPromotionSession, err error) {
 	db := global.GVA_DB.Model(&wechat.FlashPromotionSession{})
 	err = db.Preload("ProductRelation").Find(&list).Error
+	return list, err
+}
+
+func (exa *HomeService) GetGroupBuyProductList() (list []*wechat.GroupBuyProduct, err error) {
+	db := global.GVA_DB.Model(&wechat.GroupBuyProduct{})
+	err = db.Preload("Product").Find(&list).Error
 	return list, err
 }

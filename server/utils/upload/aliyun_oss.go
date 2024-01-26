@@ -6,6 +6,7 @@ import (
 	"github.com/flipped-aurora/gin-vue-admin/server/global"
 	"go.uber.org/zap"
 	"mime/multipart"
+	"os"
 	"strconv"
 )
 
@@ -27,7 +28,7 @@ func (*AliyunOSS) UploadFile(file *multipart.FileHeader, userId int) (string, st
 	defer f.Close() // 创建文件 defer 关闭
 	// 上传阿里云路径 文件名格式 自己可以改 建议保证唯一性
 	// yunFileTmpPath := filepath.Join("uploads", time.Now().Format("2006-01-02")) + "/" + file.Filename
-	yunFileTmpPath := global.GVA_CONFIG.AliyunOSS.BasePath + "/" + "uploads" + "/" + strconv.Itoa(userId) + "/" + file.Filename
+	yunFileTmpPath := global.GVA_CONFIG.AliyunOSS.BasePath + "/" + strconv.Itoa(userId) + "/" + file.Filename
 
 	// 上传文件流。
 	err = bucket.PutObject(yunFileTmpPath, f)
@@ -88,4 +89,33 @@ func NewBucket() (*oss.Bucket, error) {
 	}
 
 	return bucket, nil
+}
+
+func (*AliyunOSS) UploadFileWithLocationPath(localPath string, fileName string, userId int) (string, string, error) {
+	bucket, err := NewBucket()
+	if err != nil {
+		global.GVA_LOG.Error("function AliyunOSS.NewBucket() Failed", zap.Any("err", err.Error()))
+		return "", "", errors.New("function AliyunOSS.NewBucket() Failed, err:" + err.Error())
+	}
+
+	// 读取本地文件。
+	f, openError := os.OpenFile(localPath, os.O_CREATE|os.O_APPEND, 6) // 读写方式打开
+	if openError != nil {
+		global.GVA_LOG.Error("function file.Open() Failed", zap.Any("err", openError.Error()))
+		return "", "", errors.New("function file.Open() Failed, err:" + openError.Error())
+	}
+	defer f.Close() // 创建文件 defer 关闭
+
+	// 上传阿里云路径 文件名格式 自己可以改 建议保证唯一性
+	// yunFileTmpPath := filepath.Join("uploads", time.Now().Format("2006-01-02")) + "/" + file.Filename
+	yunFileTmpPath := global.GVA_CONFIG.AliyunOSS.BasePath + "/" + strconv.Itoa(userId) + "/" + fileName
+
+	// 上传文件流。
+	err = bucket.PutObject(yunFileTmpPath, f)
+	if err != nil {
+		global.GVA_LOG.Error("function formUploader.Put() Failed", zap.Any("err", err.Error()))
+		return "", "", errors.New("function formUploader.Put() Failed, err:" + err.Error())
+	}
+
+	return global.GVA_CONFIG.AliyunOSS.BucketUrl + "/" + yunFileTmpPath, yunFileTmpPath, nil
 }

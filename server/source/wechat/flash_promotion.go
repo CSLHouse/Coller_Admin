@@ -50,10 +50,10 @@ func (i *initFlashPromotion) InitializeData(ctx context.Context) (next context.C
 	}
 
 	startTie, err := time.Parse("2006-01-02 15:04:05", "2023-12-09 00:00:00")
-	endTime, err := time.Parse("2006-01-02 15:04:05", "2024-02-18 00:00:00")
+	endTime, err := time.Parse("2006-01-02 15:04:05", "2024-02-25 00:00:00")
 	entities := []wechatModel.FlashPromotion{
 		{
-			Title:     "双11特卖活动",
+			Title:     "春节特卖活动",
 			StartDate: startTie,
 			EndDate:   endTime,
 			Status:    1,

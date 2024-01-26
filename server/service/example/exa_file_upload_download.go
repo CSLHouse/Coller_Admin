@@ -53,7 +53,7 @@ func (e *FileUploadAndDownloadService) DeleteFile(file example.ExaFileUploadAndD
 	var fileFromDb example.ExaFileUploadAndDownload
 	s := strings.Split(file.Url, "/")
 	fileName := s[len(s)-1]
-	fileIdL := strings.Split(fileName, "_")
+	fileIdL := strings.Split(fileName, ".")
 	fileId, err := strconv.ParseInt(fileIdL[0], 10, 64)
 	if err != nil {
 		return err
@@ -67,7 +67,7 @@ func (e *FileUploadAndDownloadService) DeleteFile(file example.ExaFileUploadAndD
 	if err = oss.DeleteFile(fileFromDb.Key); err != nil {
 		return errors.New("文件删除失败")
 	}
-	err = global.GVA_DB.Where("id = ?", file.ID).Unscoped().Delete(&file).Error
+	err = global.GVA_DB.Debug().Where("id = ?", file.ID).Unscoped().Delete(&file).Error
 	return err
 }
 
@@ -126,20 +126,22 @@ func (e *FileUploadAndDownloadService) UploadFile(header *multipart.FileHeader, 
 	if err != nil {
 		global.GVA_LOG.Error("创建id失败!", zap.Error(err))
 	}
+	s := strings.Split(header.Filename, ".")
+	tag := s[len(s)-1]
+
 	uuid := n.Generate()
 	fileName := uuid.String()
-	header.Filename = fileName + "_" + header.Filename
+	header.Filename = fmt.Sprintf("%s.%s", fileName, tag)
 	oss := upload.NewOss()
 	filePath, key, uploadErr := oss.UploadFile(header, userId)
 	if uploadErr != nil {
 		panic(err)
 	}
 
-	s := strings.Split(header.Filename, ".")
 	f := example.ExaFileUploadAndDownload{
 		Url:       filePath,
 		Name:      header.Filename,
-		Tag:       s[len(s)-1],
+		Tag:       tag,
 		Key:       key,
 		SysUserId: userId,
 		FileId:    uuid.Int64(),
@@ -160,4 +162,26 @@ func (e *FileUploadAndDownloadService) CheckFile(fileName string, userId int) bo
 		return true
 	}
 	return false
+}
+
+func (e *FileUploadAndDownloadService) UploadFileWithLocationPath(locationPath string, uniqueTag int64, userId int) (file example.ExaFileUploadAndDownload, err error) {
+	oss := upload.NewOss()
+	fileName := fmt.Sprintf("%d.png", uniqueTag)
+	filePath, key, uploadErr := oss.UploadFileWithLocationPath(locationPath, fileName, userId)
+	if uploadErr != nil {
+		panic(err)
+	}
+
+	s := strings.Split(fileName, ".")
+
+	f := example.ExaFileUploadAndDownload{
+		Url:       filePath,
+		Name:      fileName,
+		Tag:       s[len(s)-1],
+		Key:       key,
+		SysUserId: userId,
+		FileId:    uniqueTag,
+	}
+	err = e.Upload(&f)
+	return f, err
 }

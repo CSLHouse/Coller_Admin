@@ -100,3 +100,17 @@ func GetNickName(c *gin.Context) string {
 		return waitUse.NickName
 	}
 }
+
+// GetTelephone 从Gin的Context中获取从jwt解析出来的用户手机号
+func GetTelephone(c *gin.Context) string {
+	if claims, exists := c.Get("claims"); !exists {
+		if cl, err := GetClaims(c); err != nil {
+			return ""
+		} else {
+			return cl.Telephone
+		}
+	} else {
+		waitUse := claims.(*systemReq.CustomClaims)
+		return waitUse.Telephone
+	}
+}

@@ -1,6 +1,9 @@
 package wechat
 
-import "github.com/flipped-aurora/gin-vue-admin/server/global"
+import (
+	"github.com/flipped-aurora/gin-vue-admin/server/global"
+	"time"
+)
 
 // Order 订单表
 type Order struct {
@@ -8,7 +11,7 @@ type Order struct {
 	UserId                int          `json:"user_id" gorm:" not null;"`
 	CouponId              int          `json:"couponId" gorm:" not null;"`
 	OrderSn               string       `json:"orderSn" gorm:"null;default null;comment:订单编号;"`
-	Username              string       `json:"username" gorm:"null;default null;comment:用户帐号;"`
+	UserName              string       `json:"userName" gorm:"null;default null;comment:用户帐号;"`
 	TotalAmount           float32      `json:"totalAmount" gorm:"null;default null;comment:订单总金额;"`
 	PayAmount             float32      `json:"payAmount" gorm:"null;default null;comment:应付金额（实际支付金额）;"`
 	FreightAmount         float32      `json:"freightAmount" gorm:"null;default null;comment:运费金额;"`
@@ -42,11 +45,11 @@ type Order struct {
 	ConfirmStatus         int          `json:"confirmStatus" gorm:"null;default null;comment:确认收货状态：0->未确认；1->已确认;size:1;"`
 	DeleteStatus          int          `json:"deleteStatus" gorm:"null;default null;comment:删除状态：0->未删除；1->已删除;size:1;"`
 	UseIntegration        int          `json:"useIntegration" gorm:"null;default null;comment:下单时使用的积分;size:11;"`
-	PaymentTime           string       `json:"paymentTime" gorm:"null;default null;comment:支付时间"`
-	DeliveryTime          string       `json:"deliveryTime" gorm:"null;default null;comment:发货时间"`
-	ReceiveTime           string       `json:"receiveTime" gorm:"null;default null;comment:确认收货时间"`
-	CommentTime           string       `json:"commentTime" gorm:"null;default null;comment:评价时间"`
-	ModifyTime            string       `json:"modifyTime" gorm:"null;default null;comment:修改时间"`
+	PaymentTime           time.Time    `json:"paymentTime" gorm:"null;default null;comment:支付时间"`
+	DeliveryTime          time.Time    `json:"deliveryTime" gorm:"null;default null;comment:发货时间"`
+	ReceiveTime           time.Time    `json:"receiveTime" gorm:"null;default null;comment:确认收货时间"`
+	CommentTime           time.Time    `json:"commentTime" gorm:"null;default null;comment:评价时间"`
+	ModifyTime            time.Time    `json:"modifyTime" gorm:"null;default null;comment:修改时间"`
 	OrderItemList         []*OrderItem `json:"orderItemList" gorm:"foreignKey:OrderId"`
 	PrepayId              string       `json:"prepayId" gorm:"null;default null;comment:预支付交易会话标识"`
 }

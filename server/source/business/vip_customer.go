@@ -30,6 +30,7 @@ func (i *initMember) MigrateTable(ctx context.Context) (context.Context, error) 
 		&businessModel.VIPStatistics{},
 		&businessModel.ConsumeRecord{},
 		&businessModel.VIPCertificate{},
+		&businessModel.QrCode{},
 	)
 }
 

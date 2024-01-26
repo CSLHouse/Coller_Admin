@@ -2,6 +2,7 @@ package upload
 
 import (
 	"errors"
+	"fmt"
 	"io"
 	"mime/multipart"
 	"os"
@@ -96,4 +97,8 @@ func (*Local) DeleteFiles(files []string) error {
 	}
 
 	return nil
+}
+
+func (*Local) UploadFileWithLocationPath(localPath string, fileName string, userId int) (string, string, error) {
+	return "", "", fmt.Errorf("")
 }
