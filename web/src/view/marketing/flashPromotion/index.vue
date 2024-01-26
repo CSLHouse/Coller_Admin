@@ -45,13 +45,13 @@
           <el-table-column label="活动状态" width="140" align="center">
             <template #default="scope">{{ formatActiveStatus(scope.row) }}</template>
           </el-table-column>
-          <el-table-column label="开始时间" width="140" align="center">
+          <el-table-column label="开始时间" width="160" align="center">
             <template #default="scope">{{ formatDate(scope.row.startDate) }}</template>
           </el-table-column>
-          <el-table-column label="结束时间" width="140" align="center">
+          <el-table-column label="结束时间" width="160" align="center">
             <template #default="scope">{{ formatDate(scope.row.endDate) }}</template>
           </el-table-column>
-          <el-table-column label="上线/下线" width="200" align="center">
+          <el-table-column label="上线/下线" width="100" align="center">
             <template #default="scope">
               <el-switch
                 @change="handleStatusChange(scope.$index, scope.row)"
@@ -191,7 +191,7 @@
               return 'N/A';
             }
             let date = new Date(time);
-            return formatDate(date, 'yyyy-MM-dd')
+            return formatDate(date, 'yyyy-MM-dd HH:mm:ss')
           }
         }
         

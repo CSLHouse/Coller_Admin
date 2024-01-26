@@ -101,9 +101,10 @@
                 </el-form-item>
                 <el-form-item label="服务保证" >
                     <el-checkbox-group v-model="checkList" @change="HandleServiceIdsRadioChanged">
-                        <el-checkbox :label="1" >无忧退货</el-checkbox>
-                        <el-checkbox :label="2" >快速退款</el-checkbox>
-                        <el-checkbox :label="3" >免费包邮</el-checkbox>
+                        <el-checkbox :label="1" >自提</el-checkbox>
+                        <el-checkbox :label="2" >无忧退货</el-checkbox>
+                        <el-checkbox :label="3" >快速退款</el-checkbox>
+                        <el-checkbox :label="4" >免费包邮</el-checkbox>
                     </el-checkbox-group>
                 </el-form-item>
                 <el-form-item label="详细页标题">
@@ -125,7 +126,7 @@
                         <el-radio-button label="2" size="large">会员价格</el-radio-button>
                         <el-radio-button label="3" size="large">阶梯价格</el-radio-button>
                         <el-radio-button label="4" size="large">满减价格</el-radio-button>
-                        <el-radio-button label="5" size="large">限时购</el-radio-button>
+                        <!-- <el-radio-button label="5" size="large">限时购</el-radio-button> -->
                     </el-radio-group>
                     <el-row>
                     </el-row>

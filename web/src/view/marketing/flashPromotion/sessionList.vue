@@ -116,7 +116,7 @@
             return 'N/A';
           }
           let date = new Date(time);
-          return formatDate(date, 'hh:mm:ss')
+          return formatDate(date, 'HH:mm:ss')
         }
       }
       
