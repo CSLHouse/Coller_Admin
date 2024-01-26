@@ -1,7 +1,6 @@
 package pay
 
 import (
-	"encoding/json"
 	"fmt"
 	"github.com/bwmarrin/snowflake"
 	wechatApi "github.com/flipped-aurora/gin-vue-admin/server/api/v1/wechat"
@@ -15,9 +14,6 @@ import (
 	wechatReq "github.com/flipped-aurora/gin-vue-admin/server/model/wechat/request"
 	"github.com/flipped-aurora/gin-vue-admin/server/utils"
 	"github.com/gin-gonic/gin"
-	"github.com/mitchellh/mapstructure"
-	"github.com/wechatpay-apiv3/wechatpay-go/core/notify"
-	"github.com/wechatpay-apiv3/wechatpay-go/services/payments"
 	"go.uber.org/zap"
 	"time"
 )
@@ -249,35 +245,35 @@ func (e *PayApi) GetOrderDetail(c *gin.Context) {
 }
 
 func (e *PayApi) OrderNotify(c *gin.Context) {
-	request := notify.Request{}
-	c.ShouldBind(&request)
-	mapstructure.Decode(c.Params, &request)
-	if request.EventType == "TRANSACTION.SUCCESS" {
-		//plaintext, err := wepay.DecryptAES256GCM(
-		//	aesKey, request.Resource.AssociatedData, request.Resource.Nonce, request.Resource.Ciphertext,
-		//)
-		plaintext, err := utils.DecryptAES256GCM(
-			consts.MchAPIv3Key, request.Resource.AssociatedData, request.Resource.Nonce, request.Resource.Ciphertext,
-		)
-		if err != nil {
-			fmt.Println(err)
-			zap.S().Error("DecryptAES256GCM err" + err.Error())
-		}
-		transaction := payments.Transaction{}
-		json.Unmarshal([]byte(plaintext), &transaction)
-		go func() {
-			// 执行service层代码
-		}()
-		tmp := make(map[string]interface{})
-		tmp["code"] = "SUCCESS"
-		tmp["message"] = "成功"
-		tmpJson, _ := json.Marshal(tmp)
-		c.Writer.Write(tmpJson)
-	} else {
-		tmp := make(map[string]interface{})
-		tmp["code"] = "500"
-		tmp["message"] = "失败"
-		tmpJson, _ := json.Marshal(tmp)
-		c.Writer.Write(tmpJson)
-	}
+	//request := notify.Request{}
+	//c.ShouldBind(&request)
+	//mapstructure.Decode(c.Params, &request)
+	//if request.EventType == "TRANSACTION.SUCCESS" {
+	//	//plaintext, err := wepay.DecryptAES256GCM(
+	//	//	aesKey, request.Resource.AssociatedData, request.Resource.Nonce, request.Resource.Ciphertext,
+	//	//)
+	//	plaintext, err := utils.DecryptAES256GCM(
+	//		consts.MchAPIv3Key, request.Resource.AssociatedData, request.Resource.Nonce, request.Resource.Ciphertext,
+	//	)
+	//	if err != nil {
+	//		fmt.Println(err)
+	//		zap.S().Error("DecryptAES256GCM err" + err.Error())
+	//	}
+	//	transaction := payments.Transaction{}
+	//	json.Unmarshal([]byte(plaintext), &transaction)
+	//	go func() {
+	//		// 执行service层代码
+	//	}()
+	//	tmp := make(map[string]interface{})
+	//	tmp["code"] = "SUCCESS"
+	//	tmp["message"] = "成功"
+	//	tmpJson, _ := json.Marshal(tmp)
+	//	c.Writer.Write(tmpJson)
+	//} else {
+	//	tmp := make(map[string]interface{})
+	//	tmp["code"] = "500"
+	//	tmp["message"] = "失败"
+	//	tmpJson, _ := json.Marshal(tmp)
+	//	c.Writer.Write(tmpJson)
+	//}
 }
