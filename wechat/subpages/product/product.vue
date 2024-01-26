@@ -37,7 +37,7 @@
 				立即分享
 				<text class="yticon icon-you"></text>
 			</view> -->
-			<button class="share-btn" open-type="share" @click="share" >
+			<button class="share-btn" open-type="share" >
 				<image src="/static/temp/share_wechat.png" mode="aspectFit" style="width: 20px; height: 20px; margin-right: 5px;"></image>
 				立即分享
 			</button>
@@ -71,12 +71,12 @@
 					<text v-for="item in promotionTipList" :key="item">{{item}}</text>
 				</view>
 			</view>
-			<!-- <view class="c-row b-b">
+			<view class="c-row b-b">
 				<text class="tit">服务</text>
 				<view class="bz-list con">
 					<text v-for="item in serviceList" :key="item">{{item}} ·</text>
 				</view>
-			</view> -->
+			</view>
 		</view>
 
 		<!-- 评价 -->
@@ -133,7 +133,7 @@
 				<text class="yticon icon-bangzhu1"></text>
 				<text>客服</text>
 			</view>
-			<!-- <navigator url="/subpages/cart/cart" open-type="navigate" class="p-b-btn">
+			<navigator url="/pages/cart/cart" open-type="switchTab" class="p-b-btn">
 				<text class="yticon icon-gouwuche"></text>
 				<text>购物车</text>
 			</navigator>
@@ -141,7 +141,7 @@
 			<view class="action-btn-group">
 				<button type="primary" class=" action-btn no-border buy-now-btn" @click="buy">立即购买</button>
 				<button type="primary" class=" action-btn no-border add-cart-btn" @click="addToCart">加入购物车</button>
-			</view> -->
+			</view>
 		</view>
 
 
@@ -212,8 +212,6 @@
 				</view>
 			</view>
 		</view>
-		<!-- 分享 -->
-		<!-- <share ref="share" :contentHeight="580" :shareList="shareList"></share> -->
 		
 		<view v-if='!isCloseModel'>
 			<div class="modal-mask" @click="closePop">
@@ -231,7 +229,7 @@
 </template>
 
 <script>
-	import share from '@/components/share';
+	// import share from '@/components/share';
 	import {
 		fetchProductDetail
 	} from '@/api/product.js';
@@ -260,38 +258,21 @@
 	
 	const defaultServiceList = [{
 		id: 0,
+		name: "自提"
+	},{
+		id: 1,
 		name: "无忧退货"
 	}, {
-		id: 1,
+		id: 2,
 		name: "快速退款"
 	}, {
-		id: 2,
+		id: 3,
 		name: "免费包邮"
 	}];
-	const defaultShareList = [{
-			type: 1,
-			icon: '/static/temp/share_wechat.png',
-			text: '微信好友'
-		},
-		{
-			type: 2,
-			icon: '/static/temp/share_moment.png',
-			text: '朋友圈'
-		},
-		{
-			type: 3,
-			icon: '/static/temp/share_qq.png',
-			text: 'QQ好友'
-		},
-		{
-			type: 4,
-			icon: '/static/temp/share_qqzone.png',
-			text: 'QQ空间'
-		}
-	]
+	
 	export default {
 		components: {
-			share
+			// share
 		},
 		data() {
 			return {
@@ -299,7 +280,7 @@
 				attrClass: 'none',
 				specSelected: [],
 				favorite: false,
-				shareList: [],
+				// shareList: [],
 				imgList: [],
 				desc: '',
 				specList: [],
@@ -317,7 +298,6 @@
 		},
 		async onLoad(options) {
 			let id = options.id;
-			this.shareList = defaultShareList;
 			this.loadData(id);
 		},
 		computed: {
@@ -349,6 +329,7 @@
 					this.product = response.data;
 					this.skuStockList = response.data.skuStockList;
 					this.brandId = response.data.brandId;
+					this.brand = response.data.brand;
 					this.initImgList();
 					this.initServiceList();
 					this.initSpecList(response.data);
@@ -386,10 +367,7 @@
 				fetchProductCouponList(this.product.id).then(response => {
 					this.couponList = response.data;
 					if(this.couponList==null||this.couponList.length==0){
-						uni.showToast({
-							title:"暂无可领优惠券",
-							icon:"none"
-						})
+						this.$api.msg("暂无可领优惠券")
 						return;
 					}
 					let timer = type === 'show' ? 10 : 300;
@@ -429,15 +407,8 @@
 			addCoupon(coupon) {
 				this.toggleCoupon();
 				addMemberCoupon(coupon.id).then(response => {
-					uni.showToast({
-						title: '领取优惠券成功！',
-						duration: 2000
-					});
+					this.$api.msg('领取优惠券成功！')
 				});
-			},
-			// 分享
-			share() {
-				// this.$refs.share.toggleMask();
 			},
 			//收藏
 			toFavorite() {
@@ -475,10 +446,7 @@
 				// }
 			},
 			buy() {
-				uni.showToast({
-					title: "暂时只支持从购物车下单！",
-					icon: 'none'
-				});
+				this.$api.msg("暂时只支持从购物车下单！")
 			},
 			stopPrevent() {},
 			//设置头图信息
@@ -589,7 +557,14 @@
 				if (promotionType == 0) {
 					this.promotionTipList.push("暂无优惠");
 				} else if (promotionType == 1) {
-					this.promotionTipList.push("单品优惠");
+					let now = Date.parse(new Date());
+					let startTime = new Date(this.product.promotionStartDate)
+					let endTime = new Date(this.product.promotionEndDate)
+					let start = Date.parse(startTime)
+					let end = Date.parse(endTime)
+					if (now >= start && now <= end) {
+						this.promotionTipList.push("单品优惠");
+					}
 				} else if (promotionType == 2) {
 					this.promotionTipList.push("会员优惠");
 				} else if (promotionType == 3) {
@@ -674,32 +649,33 @@
 				}
 				let productSkuStock = this.getSkuStock();
 				// console.log("---productSkuStock---", productSkuStock)
+				let spData = null
+				let skuCode = null
+				let skuId = null
+				if (productSkuStock) {
+					spData = productSkuStock.spData
+					skuCode = productSkuStock.skuCode
+					skuId = productSkuStock.id
+				}
 				let cartItem = {
 					price: this.product.price,
-					productAttr: productSkuStock.spData,
+					productAttr: spData,
 					productBrand: this.product.brandName,
 					productCategoryId: this.product.productCategoryId,
 					productId: this.product.id,
 					productName: this.product.name,
 					productPic: this.product.pic,
-					productSkuCode: productSkuStock.skuCode,
-					productSkuId: productSkuStock.id,
+					productSkuCode: skuCode,
+					productSkuId: skuId,
 					productSn: this.product.productSn,
 					productSubTitle: this.product.subTitle,
 					quantity: 1
 				};
-				// console.log("---cartItem--", cartItem)
 				addCartItem(cartItem).then(response => {
 					if (response.code == 0) {
-						uni.showToast({
-							title: "添加成功",
-							duration: 1500
-						})
+						this.$api.msg("添加成功")
 					} else {
-						uni.showToast({
-							title: "添加失败",
-							duration: 1500
-						})
+						this.$api.msg("添加失败")
 					}
 				});
 			},
@@ -754,9 +730,9 @@
 					indicator:'default',
 					
 					// 长按图片显示操作菜单，如不填默认为保存相册
-					longPressActions:{
-						itemList:[this.l('发送给朋友'),this.l]
-					},
+					// longPressActions:{
+					// 	itemList:[this.l('发送给朋友'), this.l]
+					// },
 					success: res => {
 						// console.log('previewImage res', res);
 					}, 
@@ -985,7 +961,7 @@
 			flex: 1;
 			display: flex;
 			flex-direction: column;
-			color: $font-color-dark;
+			color: red;
 			line-height: 40upx;
 		}
 

@@ -17,7 +17,7 @@
 </template>
 
 <script>
-	import empty from "@/components/empty";
+	import empty from "@/subpages/components/empty";
 	import uniLoadMore from '@/components/uni-load-more/uni-load-more.vue';
 	import {
 		formatDate

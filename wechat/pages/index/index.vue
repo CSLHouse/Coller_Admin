@@ -55,7 +55,7 @@
 			</view>
 		</view> -->
 
-		<view class="guess-section">
+		<!-- <view class="guess-section">
 			<view v-for="(item, index) in brandList" :key="index" class="guess-item" @click="navToBrandDetailPage(item)">
 				<view class="image-wrapper-brand">
 					<image :src="item.logo" mode="aspectFit"></image>
@@ -63,28 +63,25 @@
 				<text class="title clamp">{{item.name}}</text>
 				<text class="title2">商品数量：{{item.productCount}}</text>
 			</view>
-		</view>
-
+		</view> -->
+		
 		<!-- 秒杀专区 -->
-		<view class="f-header m-t" v-if="homeFlashPromotion!==null">
+		<view class="f-header m-t" >
 			<image src="/static/icon_flash_promotion.png"></image>
 			<view class="tit-box">
 				<text class="tit">秒杀专区</text>
 				<text class="tit2">下一场 {{homeFlashPromotion.nextStartTime | formatTime}} 开始</text>
 			</view>
+			
 			<view class="tit-box">
 				<text class="tit2" style="text-align: right;">本场结束剩余：</text>
-				<view style="text-align: right;">
-					<text class="hour timer">{{cutDownTime.endHour}}</text>
-					<text>:</text>
-					<text class="minute timer">{{cutDownTime.endMinute}}</text>
-					<text>:</text>
-					<text class="second timer">{{cutDownTime.endSecond}}</text>
+				<view style="float: right;">
+					<view class="countdown">
+						<uni-countdown color="#f30079" background-color="#cccccc" :showDay="false" :hour="cutDownTime.endHour" :minute="cutDownTime.endMinute" :second="cutDownTime.endSecond"></uni-countdown>
+					</view>
 				</view>
 			</view>
-			<text class="yticon icon-you" v-show="false"></text>
 		</view>
-
 		<view class="guess-section">
 			<view v-for="(item, index) in homeFlashPromotion.productList" :key="index" class="guess-item" @click="navToDetailPage(item)">
 				<view class="image-wrapper">
@@ -95,7 +92,56 @@
 				<text class="price">￥{{item.price}}</text>
 			</view>
 		</view>
-
+		
+		<!-- 团购楼层 -->
+		<!-- <view class="f-header m-t" v-if="groupBuyProducts.groups != null && groupBuyProducts.groups.length > 0">
+			<image src="/static/temp/h1.png"></image>
+			<view class="tit-box">
+				<text class="tit">精品团购</text>
+			</view>
+			<text class="yticon icon-you"></text>
+		</view>
+		<view class="group-section" v-if="groupBuyProducts.groups != null && groupBuyProducts.groups.length > 0">
+			<swiper class="g-swiper" :duration="500">
+				<swiper-item class="g-swiper-item" v-for="(item, index) in groupBuyProducts.groups" :key="index">
+					<view class="g-item left" @click="navToDetailPageById(item.productId)" >
+						<image :src="item.pic" mode="aspectFill"></image>
+						<view class="t-box">
+							<text class="title clamp">{{item.name}}</text>
+							<view class="price-box">
+								<text class="price">￥{{item.price}}</text> 
+								<text class="m-price">￥{{item.originalPrice}}</text> 
+							</view>
+							
+							<view class="pro-box">
+							  	<view class="progress-box">
+							  		<progress :percent="item.percent" activeColor="#fa436a" active stroke-width="6" />
+							  	</view>
+								<text>火热团购</text>
+							</view>
+						</view>
+					</view>
+					<view class="g-item right" @click="navToDetailPageById(item.productId)">
+						<image :src="item.pic" mode="aspectFill"></image>
+						<view class="t-box">
+							<text class="title clamp">{{item.name}}</text>
+							<view class="price-box">
+								<text class="price">￥{{item.price}}</text> 
+								<text class="m-price">￥{{item.originalPrice}}</text> 
+							</view>
+							<view class="pro-box">
+							  	<view class="progress-box">
+							  		<progress :percent="item.percent" activeColor="#fa436a" active stroke-width="6" />
+							  	</view>
+								<text>热门推荐</text>
+							</view>
+						</view>
+					</view>
+				</swiper-item>
+		
+			</swiper>
+		</view> -->
+		
 		<!-- 新鲜好物 -->
 		<!-- <view class="f-header m-t" @click="navToNewProudctListPage()">
 			<image src="/static/icon_new_product.png"></image>
@@ -198,13 +244,13 @@
 		recordShareCount
 	} from '@/api/home.js';
 	import { getWXPhoneNumber, wxRefreshLogin, WXResetNickName } from '@/api/member.js';
-	import {
-		formatDate
-	} from '@/utils/date';
+	import { formatDate } from '@/utils/date';
 	import uniLoadMore from '@/components/uni-load-more/uni-load-more.vue';
+	import UniCountdown from '@/components/uni-countdown/uni-countdown.vue'
 	export default {
 		components: {
 			uniLoadMore,
+			UniCountdown
 		},
 		data() {
 			return {
@@ -227,10 +273,10 @@
 				isCloseModel: false,
 				isCloseNickNameModel: false,
 				nickName: '',
+				groupBuyProducts: [],
 			};
 		},
 		onLoad(options) {
-			console.log("=====options===", options)
 			if (options.refCode && options.refCode.length > 0) {
 				recordShareCount({openId: options.refCode})
 			}
@@ -269,6 +315,9 @@
 				endDateTime.setMinutes(endTime.getMinutes());
 				endDateTime.setSeconds(endTime.getSeconds());
 				let offsetTime = (endDateTime.getTime() - startDateTime.getTime());
+				if (offsetTime < 0) {
+					offsetTime = 0
+				}
 				let endHour = Math.floor(offsetTime / (60 * 60 * 1000));
 				let offsetMinute = offsetTime % (60 * 60 * 1000);
 				let endMinute = Math.floor(offsetMinute / (60 * 1000));
@@ -283,11 +332,11 @@
 		},
 		filters: {
 			formatTime(time) {
-				if (time == null || time === '') {
+				if (time == null || time === '0001-01-01T00:00:00Z') {
 					return 'N/A';
 				}
 				let date = new Date(time);
-				return formatDate(date, 'hh:mm:ss')
+				return formatDate(date, 'HH:mm:ss')
 			},
 		},
 		methods: {
@@ -297,18 +346,12 @@
 			},
 			checkNickName() {
 				if (!this.nickName) {
-					uni.showToast({
-						title: '请输入昵称',
-						icon: 'none'
-					})
+					this.$api.msg('请输入昵称')
 					return false
 				}
 				let str = this.nickName.trim();
 				if (str.length == 0) {
-					uni.showToast({
-						title: '请输入正确的昵称',
-						icon: 'none'
-					})
+					this.$api.msg('请输入正确的昵称')
 					return false
 				}
 				this.nickName = str
@@ -321,16 +364,16 @@
 					_this.$store.state.userInfo.nickName = this.nickName
 					WXResetNickName(this.$store.state.userInfo).then(res=>{
 						if (res.code == 0) {
-							uni.showToast({ title: '设置成功', duration: 2000 })
 							_this.$store.state.hadNickName = true
 							uni.setStorage({//缓存用户登陆状态
 							    key: 'UserInfo',
 							    data: _this.$store.state.userInfo  
 							})
 							_this.isCloseNickNameModel = true
+							this.$api.msg('设置成功')
 						}
 						else {
-							uni.showToast({ title: '设置失败', duration: 2000 })
+							this.$api.msg('设置失败')
 						}
 					});
 				}
@@ -348,11 +391,11 @@
 					if (_this.$store.state.openId && _this.$store.state.openId.length > 0) {
 						getWXPhoneNumber({openId: _this.$store.state.openId, code: e.detail.code}).then(res=>{
 							if (res.code == 0) {
-								uni.showToast({ title: '注册成功', duration: 2000 })
 								_this.getToken()
+								this.$api.msg('注册成功')
 							}
 							else {
-								uni.showToast({ title: '注册会员失败', duration: 2000 })
+								this.$api.msg('注册会员失败')
 							}
 						});
 					}
@@ -385,9 +428,9 @@
 					this.swiperLength = this.advertiseList.length;
 					this.brandList = response.data.brandList;
 					this.homeFlashPromotion = response.data.homeFlashPromotion;
-					console.log("------homeFlashPromotion:", this.homeFlashPromotion)
 					this.newProductList = response.data.newProductList;
 					// this.hotProductList = response.data.hotProductList;
+					this.groupBuyProducts = response.data.groupBuy
 					fetchRecommendProductList(this.recommendParams).then(response => {
 						this.recommendProductList = response.data.list;
 						uni.stopPullDownRefresh();
@@ -398,6 +441,11 @@
 			//商品详情页
 			navToDetailPage(item) {
 				let id = item.id;
+				uni.navigateTo({
+					url: `/subpages/product/product?id=${id}`
+				})
+			},
+			navToDetailPageById(id) {
 				uni.navigateTo({
 					url: `/subpages/product/product?id=${id}`
 				})
@@ -759,8 +807,81 @@
 			border-radius: 2px;
 			background: rgba(0, 0, 0, .8);
 		}
+		.countdown {
+			display: inline-block;
+			float: right;
+			margin-right: 6%;
+			width: 140upx;
+			height: 36upx;
+			// background-color: green;
+		}
 	}
-
+	/* 团购楼层 */
+	.group-section{
+		background: #fff;
+		.g-swiper{
+			height: 650upx;
+			padding-bottom: 30upx;
+		}
+		.g-swiper-item{
+			width: 100%;
+			padding: 0 30upx;
+			display:flex;
+		}
+		image{
+			width: 100%;
+			height: 460upx;
+			border-radius: 4px;
+		}
+		.g-item{
+			display:flex;
+			flex-direction: column;
+			overflow:hidden;
+		}
+		.left{
+			flex: 1.2;
+			margin-right: 24upx;
+			.t-box{
+				padding-top: 20upx;
+			}
+		}
+		.right{
+			flex: 0.8;
+			flex-direction: column-reverse;
+			.t-box{
+				padding-bottom: 20upx;
+			}
+		}
+		.t-box{
+			height: 160upx;
+			font-size: $font-base+2upx;
+			color: $font-color-dark;
+			line-height: 1.6;
+		}
+		.price{
+			color:$uni-color-primary;
+		}
+		.m-price{
+			font-size: $font-sm+2upx;
+			text-decoration: line-through;
+			color: $font-color-light;
+			margin-left: 8upx;
+		}
+		.pro-box{
+			display:flex;
+			align-items:center;
+			margin-top: 10upx;
+			font-size: $font-sm;
+			color: $font-base;
+			padding-right: 10upx;
+		}
+		.progress-box{
+			flex: 1;
+			border-radius: 10px;
+			overflow: hidden;
+			margin-right: 8upx;
+		}
+	}
 	/* 分类推荐楼层 */
 	.hot-floor {
 		width: 100%;

@@ -74,7 +74,7 @@
 			async handleConfirmNickName () {
 				let _this = this
 				let isUpload = false
-				if (_this.avatarUrl && _this.avatarUrl != '' ) {
+				if (_this.avatarUrl && _this.avatarUrl != '' && _this.nickName != '') {
 					uni.uploadFile({
 						url: common.baseUrl + "/fileUploadAndDownload/upload",
 						filePath: _this.avatarUrl,
@@ -89,6 +89,7 @@
 							const response = JSON.parse(res.data)
 							if (response.code == 0) {
 								 _this.$store.state.userInfo.avatarUrl = response.data.file.url
+								 _this.$store.state.userInfo.nickName = _this.nickName
 								_this.$store.state.hadNickName = true
 								uni.setStorage({ //缓存用户登陆状态
 									key: 'UserInfo',  
@@ -100,9 +101,17 @@
 							}
 						},
 						fail: (error) => {
-							uni.showToast({ title: '设置失败', duration: 2000 })
+							this.$api.msg('设置失败')
 						}
 					})
+				} else {
+					if (_this.nickName != '') {
+						_this.$store.state.userInfo.nickName = _this.nickName
+						_this.$store.state.hadNickName = true
+						_this.isCloseNickNameModel = true
+						_this.isUpload = true
+						this.resetNick()
+					}
 				}
 			},
 			async resetNick() {
@@ -111,20 +120,21 @@
 					_this.$store.state.userInfo.nickName = _this.nickName
 					WXResetNickName(_this.$store.state.userInfo).then(res=>{
 						if (res.code == 0) {
-							uni.showToast({ title: '设置成功', duration: 2000 })
 							_this.$store.state.hadNickName = true
 							uni.setStorage({ //缓存用户登陆状态
 							    key: 'UserInfo',  
 							    data: _this.$store.state.userInfo  
 							})
 							_this.isCloseNickNameModel = true
+							this.$api.msg('设置成功')
 						}
 						else {
-							uni.showToast({ title: '设置失败', duration: 2000 })
+							this.$api.msg('设置失败')
 						}
 					});
 				} else {
-					uni.showToast({ title: '头像设置失败', duration: 2000 })
+					this.$api.msg('头像设置失败')
+					_this.isCloseNickNameModel = true
 				}
 			},
 			closeNickNamePop() {

@@ -44,7 +44,7 @@
 </template>
 
 <script>
-	import share from '@/components/share';
+	// import share from '@/components/share';
 	import {
 		getBrandDetail,
 		fetchBrandProductList
@@ -59,9 +59,9 @@
 		mapState
 	} from 'vuex';
 	export default {
-		components: {
-			share
-		},
+		// components: {
+		// 	share
+		// },
 		data() {
 			return {
 				loaded: false,
@@ -104,10 +104,7 @@
 					deleteBrandAttention({
 						brandId: this.brand.id
 					}).then(response => {
-						uni.showToast({
-							title: "取消收藏成功！",
-							icon: 'none'
-						});
+						this.$api.msg("取消收藏成功！")
 						this.favoriteStatus = !this.favoriteStatus;
 					});
 				} else {
@@ -119,10 +116,7 @@
 						brandCity : ""
 					}
 					createBrandAttention(brandAttention).then(response=>{
-						uni.showToast({
-							title: "收藏成功！",
-							icon: 'none'
-						});
+						this.$api.msg("收藏成功！")
 						this.favoriteStatus = !this.favoriteStatus;
 					});
 				}

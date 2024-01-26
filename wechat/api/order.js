@@ -38,7 +38,7 @@ export function payOrderSuccess(data) {
 export function fetchOrderDetail(params) {
 	return request({
 		method: 'GET',
-		url: `/order/detail`,
+		url: `/pay/detail`,
 		params: params
 	})
 }
@@ -46,10 +46,10 @@ export function fetchOrderDetail(params) {
 export function cancelUserOrder(data) {
 	return request({
 		method: 'POST',
-		url: '/order/cancelUserOrder',
-		header: {
-			'content-type': 'application/x-www-form-urlencoded;charset=utf-8'
-		},
+		url: '/order/cancelOrder',
+		// header: {
+		// 	'content-type': 'application/x-www-form-urlencoded;charset=utf-8'
+		// },
 		data: data
 	})
 }

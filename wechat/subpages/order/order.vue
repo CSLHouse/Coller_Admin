@@ -15,38 +15,43 @@
 
 					<!-- 订单列表 -->
 					<view v-for="(item, index) in orderList" :key="index" class="order-item">
-						<view class="i-top b-b">
-							<text class="time" @click="showOrderDetail(item.id)">{{item.CreatedAt | formatDateTime}}</text>
-							<text class="state" :style="{color: '#fa436a'}">{{item.status | formatStatus}}</text>
-							<text v-if="item.status===3||item.status===4" class="del-btn yticon icon-iconfontshanchu1" @click="deleteOrder(item.id)"></text>
-						</view>
-						<view class="goods-box-single" v-for="(orderItem, itemIndex) in item.orderItemList"
-						 :key="itemIndex">
-							<image class="goods-img" :src="orderItem.productPic" mode="aspectFill"></image>
-							<view class="right">
-								<text class="title clamp">{{orderItem.productName}}</text>
-								<text class="attr-box">{{orderItem.productAttr | formatProductAttr}} x {{orderItem.quantity}}</text>
-								<text class="price">{{orderItem.price}}</text>
+						<div @click="showOrderDetail(item.id)">
+							<div @click="showOrderDetail(item.id)">
+								<view class="i-top b-b">
+									<text class="time" >{{item.CreatedAt | formatDateTime}}</text>
+									<text class="state" :style="{color: '#fa436a'}">{{item.status | formatStatus}}</text>
+									<text v-if="item.status===3||item.status===4" class="del-btn yticon icon-iconfontshanchu1" @click="deleteOrder(item.id)"></text>
+								</view>
+								<view class="goods-box-single" v-for="(orderItem, itemIndex) in item.orderItemList"
+								 :key="itemIndex">
+									<image class="goods-img" :src="orderItem.productPic" mode="aspectFill"></image>
+									<view class="right">
+										<text class="title clamp">{{orderItem.productName}}</text>
+										<text class="attr-box">{{orderItem.productAttr | formatProductAttr}} x {{orderItem.quantity}}</text>
+										<text class="price">{{orderItem.price}}</text>
+									</view>
+								</view>
+							</div>
+							
+							<view class="price-box">
+								共
+								<text class="num">{{calcTotalQuantity(item)}}</text>
+								件商品 实付款
+								<text class="price">{{item.payAmount}}</text>
 							</view>
-						</view>
-
-						<view class="price-box">
-							共
-							<text class="num">{{calcTotalQuantity(item)}}</text>
-							件商品 实付款
-							<text class="price">{{item.payAmount}}</text>
-						</view>
-						<view class="action-box b-t" v-if="item.status == 0">
-							<button class="action-btn" @click="cancelOrder(item.id)">取消订单</button>
-							<button class="action-btn recom" @click="payOrder(item.id)">立即付款</button>
-						</view>
-						<view class="action-box b-t" v-if="item.status == 2">
-							<button class="action-btn" >查看物流</button>
-							<button class="action-btn recom" @click="receiveOrder(item.id)">确认收货</button>
-						</view>
-						<view class="action-box b-t" v-if="item.status == 3">
-							<button class="action-btn recom" >评价商品</button>
-						</view>
+							<view class="action-box b-t" v-if="item.status == 0">
+								<button class="action-btn" @click="cancelOrder(item.id)">取消订单</button>
+								<button class="action-btn recom" @click="payOrder(item.id)">立即付款</button>
+							</view>
+							<view class="action-box b-t" v-if="item.status == 2">
+								<button class="action-btn" >查看物流</button>
+								<button class="action-btn recom" @click="receiveOrder(item.id)">确认收货</button>
+							</view>
+							<view class="action-box b-t" v-if="item.status == 3">
+								<button class="action-btn recom" >评价商品</button>
+							</view>
+						</div>
+						
 					</view>
 
 					<uni-load-more :status="loadingType"></uni-load-more>
@@ -59,7 +64,7 @@
 
 <script>
 	import uniLoadMore from '@/components/uni-load-more/uni-load-more.vue';
-	import empty from "@/components/empty";
+	import empty from "@/subpages/components/empty";
 	import {
 		formatDate
 	} from '@/utils/date';
@@ -244,7 +249,7 @@
 				            uni.showLoading({
 				            	title: '请稍后'
 				            })
-				            cancelUserOrder({orderId:orderId}).then(response=>{
+				            cancelUserOrder({id:orderId}).then(response=>{
 				            	uni.hideLoading();
 				            	superThis.loadData();
 				            });

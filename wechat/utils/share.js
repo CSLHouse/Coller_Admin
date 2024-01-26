@@ -10,7 +10,7 @@ export default {
 			menus: ["shareAppMessage", "shareTimeline"]
 		})
 	},
-	onShareAppMessage(res) {
+	onShareAppMessage(res) { //发送给朋友
 		let that = this;
 		let imageUrl = that.shareUrl || '';
 		console.log("----------scope:", this.$scope)

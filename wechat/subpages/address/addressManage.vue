@@ -8,10 +8,10 @@
 			<text class="tit">手机号码</text>
 			<input class="input" type="number" v-model="addressData.phoneNumber" placeholder="收货人手机号码" placeholder-class="placeholder" />
 		</view>
-		<view class="row b-b">
+		<!-- <view class="row b-b">
 			<text class="tit">邮政编码</text>
 			<input class="input" type="number" v-model="addressData.postCode" placeholder="收货人邮政编码" placeholder-class="placeholder" />
-		</view>
+		</view> -->
 	<!-- 	<view class="row b-b">
 			<text class="tit">所在区域</text>
 			<text @click="chooseLocation" class="input">

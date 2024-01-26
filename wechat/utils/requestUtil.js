@@ -53,21 +53,21 @@ http.interceptor.response((response) => { /* 请求之后拦截器 */
 	}
 	const res = response.data;
 	if (res.code !== 0) {
-		// if (res.code === 7 && res.data.reload) {
-		// 	wxRefreshLogin({openId: store.state.openId}).then(res => {
-		// 		if (res.code == 0) {
-		// 			console.log("---[interceptor]---wxRefreshLogin--s--------", res)
-		// 			const userinfo = res.data
-		// 			wx.setStorageSync("Token", userinfo.token)
-		// 			console.log("--[getToken]expiresAt:", userinfo.expiresAt)
-		// 			wx.setStorageSync("TokenTime", userinfo.expiresAt)
-		// 			store.state.token = userinfo.token
-		// 			this.login(userinfo.customer);
-		// 		}
-		// 	}).catch(errors => {
-		// 		console.log("------wxRefreshLogin---errors--------", errors)
-		// 	});
-		// }
+		if (res.code === 7 && res.data.reload) {
+			wxRefreshLogin({openId: store.state.openId}).then(res => {
+				if (res.code == 0) {
+					// console.log("---[interceptor]---wxRefreshLogin--s--------", res)
+					const userinfo = res.data
+					wx.setStorageSync("Token", userinfo.token)
+					// console.log("--[getToken]expiresAt:", userinfo.expiresAt)
+					wx.setStorageSync("TokenTime", userinfo.expiresAt)
+					store.state.token = userinfo.token
+					this.login(userinfo.customer);
+				}
+			}).catch(errors => {
+				console.log("------wxRefreshLogin---errors--------", errors)
+			});
+		}
 		//提示错误信息
 		uni.showToast({
 			title:res.message,

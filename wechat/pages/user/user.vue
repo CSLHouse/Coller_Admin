@@ -38,7 +38,7 @@
 					<text>优惠券</text>
 				</view> -->
 			</view>
-			<!-- <view class="order-section">
+			<view class="order-section">
 				<view class="order-item" @click="navTo('/subpages/order/order?state=0')" hover-class="common-hover"  :hover-stay-time="50">
 					<text class="yticon icon-shouye"></text>
 					<text>全部订单</text>
@@ -51,11 +51,11 @@
 					<text class="yticon icon-yishouhuo"></text>
 					<text>待收货</text>
 				</view>
-				<view class="order-item" hover-class="common-hover"  :hover-stay-time="50">
+				<view class="order-item"  @click="navTo('/subpages/order/order?state=4')" hover-class="common-hover"  :hover-stay-time="50">
 					<text class="yticon icon-shouhoutuikuan"></text>
 					<text>退款/售后</text>
 				</view>
-			</view> -->
+			</view>
 			<!-- 浏览历史 -->
 			<view class="history-section icon">
 				<list-cell icon="icon-dizhi" iconColor="#5fcda2" title="会员管理" @eventClick="navTo('/subpages/member/member')"></list-cell>
@@ -207,7 +207,7 @@
 							}
 						},
 						fail: (error) => {
-							uni.showToast({ title: '设置失败', duration: 2000 })
+							this.$api.msg("设置失败", 2000)
 						}
 					})
 				}
@@ -218,7 +218,7 @@
 					_this.$store.state.userInfo.nickName = _this.nickName
 					WXResetNickName(_this.$store.state.userInfo).then(res=>{
 						if (res.code == 0) {
-							uni.showToast({ title: '设置成功', duration: 2000 })
+							this.$api.msg("设置成功", 2000)
 							_this.$store.state.hadNickName = true
 							uni.setStorage({ //缓存用户登陆状态
 							    key: 'UserInfo',  
@@ -227,11 +227,11 @@
 							_this.isCloseNickNameModel = true
 						}
 						else {
-							uni.showToast({ title: '设置失败', duration: 2000 })
+							this.$api.msg("设置失败", 2000)
 						}
 					});
 				} else {
-					uni.showToast({ title: '头像设置失败', duration: 2000 })
+					this.$api.msg("头像设置失败", 2000)
 				}
 			},
 			closePop() {
@@ -246,11 +246,11 @@
 					if (_this.$store.state.openId && _this.$store.state.openId.length > 0) {
 						getWXPhoneNumber({openId: _this.$store.state.openId, code: e.detail.code}).then(res=>{
 							if (res.code == 0) {
-								uni.showToast({ title: '注册成功', duration: 2000 })
+								this.$api.msg("注册成功", 2000)
 								_this.getToken()
 							}
 							else {
-								uni.showToast({ title: '注册会员失败', duration: 2000 })
+								this.$api.msg("注册会员失败", 2000)
 							}
 						});
 					}
@@ -275,7 +275,7 @@
 				});
 			},
 			goLogin() {
-				this.isCloseLoginModel = false
+				this.isCloseModel = false
 			},
 			/**
 			 * 统一跳转接口,拦截未登录路由
@@ -283,7 +283,7 @@
 			 */
 			navTo(url){
 				if(!this.hasLogin){
-					uni.showToast({ title: '请先登录', duration: 2000 })
+					this.$api.msg("请先登录", 2000)
 					return
 				}
 				uni.navigateTo({  
