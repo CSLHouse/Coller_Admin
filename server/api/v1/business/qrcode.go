@@ -101,6 +101,13 @@ func (e *QrCodeApi) GenerateQrCode(qrcodeInfo *business.QrCode, userId int) erro
 		}
 		qrcodeInfo.RemoteUrl = file.Url
 		qrcodeInfo.UploadId = file.ID
+
+		liveCodeUrl := fmt.Sprintf("https://cs.coollerbaby.cn/qrcode/scan?id=%d", qrcodeInfo.ID)
+		err = qrcode.WriteColorFile(liveCodeUrl, qrcode.Medium, 256, color.White, color.Black, qrcodeInfo.Path)
+		if err != nil {
+			global.GVA_LOG.Error("生成二维码失败!", zap.Error(err))
+			return fmt.Errorf("生成二维码失败:", zap.Error(err))
+		}
 	}
 	return nil
 }
