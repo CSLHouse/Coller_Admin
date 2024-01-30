@@ -62,32 +62,27 @@ func (exa *VIPOrderService) GetVIPOrderInfoList(userId int, searchInfo request.O
 
 func (exa *VIPOrderService) CreateVIPStatement(e *business.VIPStatement) (err error) {
 	var sql bytes.Buffer
-	sql.WriteString("insert into bus_statement(date, recharge, card_number,new_member,consume_number,sys_user_id) values (")
-	sql.WriteString("\"")
-	sql.WriteString(strings.TrimSpace(e.Date))
-	sql.WriteString("\",")
-	sql.WriteString(strconv.Itoa(int(e.Recharge)))
+	sql.WriteString("insert into bus_statement(recharge, card_number,new_member,consume_number,sys_user_id) values (")
+	sql.WriteString(strconv.Itoa(e.Recharge))
 	sql.WriteString(",")
-	sql.WriteString(strconv.Itoa(int(e.CardNumber)))
+	sql.WriteString(strconv.Itoa(e.CardNumber))
 	sql.WriteString(",")
-	sql.WriteString(strconv.Itoa(int(e.NewMember)))
+	sql.WriteString(strconv.Itoa(e.NewMember))
 	sql.WriteString(",")
-	sql.WriteString(strconv.Itoa(int(e.ConsumeNumber)))
+	sql.WriteString(strconv.Itoa(e.ConsumeNumber))
 	sql.WriteString(",")
-	sql.WriteString(strconv.Itoa(int(e.SysUserId)))
+	sql.WriteString(strconv.Itoa(e.SysUserId))
 	sql.WriteString(") ON DUPLICATE KEY UPDATE ")
 	sql.WriteString("recharge=recharge+")
-	sql.WriteString(strconv.Itoa(int(e.Recharge)))
+	sql.WriteString(strconv.Itoa(e.Recharge))
 	sql.WriteString(",card_number=card_number+")
-	sql.WriteString(strconv.Itoa(int(e.CardNumber)))
+	sql.WriteString(strconv.Itoa(e.CardNumber))
 	sql.WriteString(",new_member=new_member+")
-	sql.WriteString(strconv.Itoa(int(e.NewMember)))
+	sql.WriteString(strconv.Itoa(e.NewMember))
 	sql.WriteString(",consume_number=consume_number+")
-	sql.WriteString(strconv.Itoa(int(e.ConsumeNumber)))
+	sql.WriteString(strconv.Itoa(e.ConsumeNumber))
 	sql.WriteString(";")
-	fmt.Println("------sql:", sql.String())
 	err = global.GVA_DB.Exec(sql.String()).Error
-
 	if err != nil {
 		global.GVA_LOG.Error("创建统计失败!", zap.Error(err))
 		return err
@@ -124,7 +119,7 @@ func (exa *VIPOrderService) GetVIPStatementInfoList(userId int, searchInfo reque
 
 	for rows.Next() {
 		mould := business.VIPStatement{}
-		err = rows.Scan(&mould.Date, &mould.Recharge, &mould.CardNumber, &mould.NewMember, &mould.ConsumeNumber)
+		err = rows.Scan(&mould.Recharge, &mould.CardNumber, &mould.NewMember, &mould.ConsumeNumber)
 		orderList = append(orderList, mould)
 	}
 	rows.Close()

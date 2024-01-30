@@ -244,6 +244,37 @@ func (e *PayApi) GetOrderDetail(c *gin.Context) {
 	response.OkWithData(data, c)
 }
 
+// CancelOrder 取消订单 付费版
+//func (e *PayApi) CancelOrder(c *gin.Context) {
+//	var reqIds request.IdsReq
+//	err := c.ShouldBindJSON(&reqIds)
+//	if err != nil {
+//		response.FailWithMessage(err.Error(), c)
+//		return
+//	}
+//	userId := utils.GetUserID(c)
+//	if userId <= 0 {
+//		response.FailWithMessage("Not get userId!", c)
+//		return
+//	}
+//	orderList, err := orderService.DeleteManyOrder(reqIds.Ids)
+//	if err != nil {
+//		global.GVA_LOG.Error("删除订单数据失败!", zap.Error(err))
+//		response.FailWithMessage("删除订单数据失败", c)
+//		return
+//	}
+//	for _, order := range orderList {
+//		err = jspaymentService.CloseOrder(order.OrderSn)
+//		if err != nil {
+//			global.GVA_LOG.Error("删除订单数据失败!", zap.Error(err))
+//			response.FailWithMessage("删除订单数据失败", c)
+//			return
+//		}
+//	}
+//
+//	response.OkWithMessage("删除成功", c)
+//}
+
 func (e *PayApi) OrderNotify(c *gin.Context) {
 	//request := notify.Request{}
 	//c.ShouldBind(&request)

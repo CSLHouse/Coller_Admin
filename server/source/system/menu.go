@@ -97,9 +97,9 @@ func (i *initMenu) InitializeData(ctx context.Context) (next context.Context, er
 		{MenuLevel: 0, Hidden: false, ParentId: "19", Path: "consumeList", Name: "consumeList", Component: "view/shop/consumeList/consumeList.vue", Sort: 3, Meta: Meta{Title: "消费列表", Icon: "Reading"}},
 
 		{MenuLevel: 0, Hidden: false, ParentId: "0", Path: "orderManage", Name: "orderManage", Component: "view/orderManage/index.vue", Sort: 5, Meta: Meta{Title: "订单管理", Icon: "Management"}},
-		{MenuLevel: 0, Hidden: false, ParentId: "23", Path: "orderManage", Name: "orderList", Component: "view/orderManage/orderList.vue", Sort: 1, Meta: Meta{Title: "订单列表", Icon: "Collection"}},
-		{MenuLevel: 0, Hidden: false, ParentId: "23", Path: "orderManage", Name: "orderSetting", Component: "view/orderManage/orderSetting.vue", Sort: 2, Meta: Meta{Title: "订单设置", Icon: "Reading"}},
-		{MenuLevel: 0, Hidden: true, ParentId: "23", Path: "orderManage", Name: "orderDetail", Component: "view/orderManage/orderDetail.vue", Sort: 3, Meta: Meta{Title: "订单详情", Icon: "Reading"}},
+		{MenuLevel: 0, Hidden: false, ParentId: "23", Path: "orderList", Name: "orderList", Component: "view/orderManage/orderList/orderList.vue", Sort: 1, Meta: Meta{Title: "订单列表", Icon: "Collection"}},
+		{MenuLevel: 0, Hidden: false, ParentId: "23", Path: "orderSetting", Name: "orderSetting", Component: "view/orderManage/orderSetting/orderSetting.vue", Sort: 2, Meta: Meta{Title: "订单设置", Icon: "Reading"}},
+		{MenuLevel: 0, Hidden: true, ParentId: "23", Path: "orderDetail", Name: "orderDetail", Component: "view/orderManage/orderDetail/orderDetail.vue", Sort: 3, Meta: Meta{Title: "订单详情", Icon: "Reading"}},
 
 		{MenuLevel: 0, Hidden: false, ParentId: "0", Path: "product", Name: "Product", Component: "view/product/index.vue", Sort: 6, Meta: Meta{Title: "商品", Icon: "Goods"}},
 		{MenuLevel: 0, Hidden: false, ParentId: "27", Path: "productList", Name: "ProductList", Component: "view/product/productList/ProductList.vue", Sort: 1, Meta: Meta{Title: "商品列表", Icon: "Box"}},

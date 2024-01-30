@@ -52,5 +52,7 @@ type ChangeUserInfo struct {
 	AvatarUrl    string                `json:"avatarUrl" gorm:"default:https://qmplusimg.henrongyi.top/gva_header.jpg;comment:用户头像"` // 用户头像
 	SideMode     string                `json:"sideMode"  gorm:"comment:用户侧边主题"`                                                      // 用户侧边主题
 	Enable       int                   `json:"enable" gorm:"comment:冻结用户"`                                                           //冻结用户
+	IsMembership int                   `json:"isMembership" gorm:"comment:是否是会员制 1是，2不是"`
+	PayOnline    int                   `json:"payOnline" gorm:"comment:是否线上付费 1是，2不是"`
 	Authorities  []system.SysAuthority `json:"-" gorm:"many2many:sys_user_authority;"`
 }

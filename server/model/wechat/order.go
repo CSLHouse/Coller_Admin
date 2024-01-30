@@ -28,7 +28,7 @@ type Order struct {
 	AutoConfirmDay        int          `json:"autoConfirmDay" gorm:"null;default null;comment:自动确认时间（天）;size:11;"`
 	Integration           int          `json:"integration" gorm:"null;default null;comment:可以获得的积分;size:1;"`
 	Growth                int          `json:"growth" gorm:"null;default null;comment:可以活动的成长值;size:1;"`
-	PromotionInfo         string       `json:"promotionInfo" gorm:"null;default null;comment:活动信息;"`
+	PromotionInfo         string       `json:"promotionInfo" gorm:"null;default '';comment:活动信息;"`
 	BillType              int          `json:"billType" gorm:"null;default null;size:1;comment:发票类型：0->不开发票；1->电子发票；2->纸质发票;"`
 	BillHeader            string       `json:"billHeader" gorm:"null;default null;comment:发票抬头"`
 	BillContent           string       `json:"billContent" gorm:"null;default null;comment:发票内容"`
@@ -89,4 +89,14 @@ type OrderItem struct {
 
 func (OrderItem) TableName() string {
 	return "oms_order_item"
+}
+
+type OrderSetting struct {
+	global.GVA_MODEL
+	FlashOrderOvertime  int `json:"flashOrderOvertime" gorm:"null;default null;comment:秒杀订单超时关闭时间(分);"`
+	NormalOrderOvertime int `json:"normalOrderOvertime" gorm:"null;default null;comment:常订单超时时间(分);"`
+}
+
+func (OrderSetting) TableName() string {
+	return "oms_order_setting"
 }

@@ -6,6 +6,7 @@ import (
 	"github.com/flipped-aurora/gin-vue-admin/server/model/common/request"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/wechat"
 	wechatReq "github.com/flipped-aurora/gin-vue-admin/server/model/wechat/request"
+	date_conversion "github.com/flipped-aurora/gin-vue-admin/server/utils/timer"
 	"gorm.io/gorm"
 	"strings"
 )
@@ -62,73 +63,88 @@ func (o *OrderService) GetProductOrderListByStatus(searchInfo request.StateInfo)
 	state := searchInfo.State
 	db := global.GVA_DB.Model(&wechat.Order{})
 
-	var cmdSN string
-	var cmdReceiver string
-	var cmdOrderType string
-	var cmdCreateTime string
-
+	var cmdList []interface{}
+	var cmdString string
 	if len(searchInfo.OrderSn) > 0 {
-		cmdSN += fmt.Sprintf("order_sn = %s", strings.TrimSpace(searchInfo.OrderSn))
+		cmdList = append(cmdList, strings.TrimSpace(searchInfo.OrderSn))
+		cmdString = "order_sn = ?"
 	}
 	if len(searchInfo.ReceiverKeyword) > 0 {
-		cmdReceiver += fmt.Sprintf("receiver_keyword = %s", strings.TrimSpace(searchInfo.ReceiverKeyword))
+		keyword := "%" + strings.TrimSpace(searchInfo.ReceiverKeyword) + "%"
+		if len(cmdList) >= 1 {
+			cmdList = append(cmdList, keyword)
+			cmdList = append(cmdList, keyword)
+			cmdString += " and receiver_name like ? or receiver_phone like ?"
+		} else {
+			cmdList = append(cmdList, keyword)
+			cmdList = append(cmdList, keyword)
+			cmdString += "receiver_name like ? or receiver_phone like ?"
+		}
 	}
 
 	if searchInfo.OrderType > 0 {
-		cmdOrderType += fmt.Sprintf("order_type = %d", searchInfo.OrderType-100)
+		if len(cmdList) >= 1 {
+			cmdList = append(cmdList, searchInfo.OrderType-100)
+			cmdString += " and order_type = ?"
+		} else {
+			cmdList = append(cmdList, searchInfo.OrderType-100)
+			cmdString += "order_type = ?"
+		}
 	}
-	if !searchInfo.CreateTime.IsZero() {
-		cmdCreateTime += fmt.Sprintf("create_at = %v", searchInfo.CreateTime)
-	}
+	if len(searchInfo.CreateTime) > 0 {
+		thatDay := date_conversion.ParseStringDate(searchInfo.CreateTime)
+		nextDay := thatDay.AddDate(0, 0, 1)
 
-	cmdSearch := ""
-	cmds := [4]string{cmdSN, cmdReceiver, cmdOrderType, cmdCreateTime}
-	isFirst := true
-	for _, cmd := range cmds {
-		if len(cmd) > 0 {
-			if isFirst {
-				cmdSearch += cmd
-				isFirst = false
-			} else {
-				cmdSearch += " and " + cmd
-			}
+		if len(cmdList) >= 1 {
+			cmdList = append(cmdList, thatDay)
+			cmdList = append(cmdList, nextDay)
+			cmdString += " and created_at between ? and ?"
+		} else {
+			cmdList = append(cmdList, thatDay)
+			cmdList = append(cmdList, nextDay)
+			cmdString += "created_at between ? and ?"
 		}
 	}
 
 	switch state {
 	case -1:
 		{
-			err = db.Count(&total).Error
+			err = db.Where(cmdString, cmdList...).Count(&total).Error
 			if err != nil {
 				return list, total, err
 			} else {
-				err = db.Limit(limit).Offset(offset).Preload("OrderItemList").Order("id desc").Find(&list).Error
+				err = db.Debug().Where(cmdString, cmdList...).Limit(limit).Offset(offset).Preload("OrderItemList").Order("id desc").Find(&list).Error
 			}
 			return list, total, err
 		}
 	case 0, 3, 4:
 		{
-			if len(cmdSearch) > 0 {
-				cmdSearch = fmt.Sprintf("%s and status = %d", cmdSearch, state)
+			if len(cmdString) > 0 {
+				cmdString = fmt.Sprintf(" %s and status = %d", cmdString, state)
+			} else {
+				cmdString = fmt.Sprintf("status = %d", state)
 			}
-			err = db.Where(cmdSearch).Count(&total).Error
+			err = db.Debug().Where(cmdString, cmdList...).Count(&total).Error
 			if err != nil {
 				return list, total, err
 			} else {
-				err = db.Where(cmdSearch).Limit(limit).Offset(offset).Preload("OrderItemList").Order("id desc").Find(&list).Error
+
+				err = db.Debug().Where(cmdString, cmdList...).Limit(limit).Offset(offset).Preload("OrderItemList").Order("id desc").Find(&list).Error
 			}
 			return list, total, err
 		}
 	case 1, 2:
 		{
-			if len(cmdSearch) > 0 {
-				cmdSearch = fmt.Sprintf("%s and status = 1 or status = 2", cmdSearch)
+			if len(cmdString) > 0 {
+				cmdString = fmt.Sprintf("%s and status = 1 or status = 2", cmdString)
+			} else {
+				cmdString = "status = 1 or status = 2"
 			}
-			err = db.Where(cmdSearch).Count(&total).Error
+			err = db.Where(cmdString, cmdList...).Count(&total).Error
 			if err != nil {
 				return list, total, err
 			} else {
-				err = db.Where(cmdSearch).Limit(limit).Offset(offset).Preload("OrderItemList").Order("id desc").Find(&list).Error
+				err = db.Debug().Where(cmdString, cmdList...).Limit(limit).Offset(offset).Preload("OrderItemList").Order("id desc").Find(&list).Error
 			}
 			return list, total, err
 		}
@@ -171,4 +187,68 @@ func (o *OrderService) CancelOrder(id int) (outTrade string, err error) {
 		return order.OrderSn, err
 	}
 	return order.OrderSn, nil
+}
+
+func (o *OrderService) DeleteManyOrder(ids []int) (orderList []wechat.Order, err error) {
+	db := global.GVA_DB
+	if err := db.Where("id in ?", ids).Preload("OrderItemList").Find(&orderList).Error; err != nil {
+		return orderList, err
+	}
+	// 执行关联删除操作
+	err = db.Select("OrderItemList").Delete(&orderList).Error
+	if err != nil {
+		return orderList, err
+	}
+	return orderList, nil
+}
+
+func (o *OrderService) UpdateManyOrderStatus(ids []int, status int) (err error) {
+	db := global.GVA_DB.Model(&wechat.Order{})
+	err = db.Where("id in ?", ids).UpdateColumn("status", status).Error
+	return err
+}
+
+func (o *OrderService) UpdateOrderReceiverInfo(e *wechatReq.OrderReceiveAddress) (err error) {
+	db := global.GVA_DB.Model(&wechat.Order{})
+	err = db.Select("receiver_name", "receiver_phone", "receiver_post_code", "receiver_detail_address", "receiver_province", "receiver_city", "receiver_region").
+		Where("id=?", e.OrderId).
+		Updates(map[string]interface{}{
+			"receiver_name":           e.ReceiverName,
+			"receiver_phone":          e.ReceiverPhone,
+			"receiver_post_code":      e.ReceiverPostCode,
+			"receiver_detail_address": e.ReceiverDetailAddress,
+			"receiver_province":       e.ReceiverProvince,
+			"receiver_city":           e.ReceiverCity,
+			"receiver_region":         e.ReceiverRegion,
+		}).Error
+	return err
+}
+
+func (o *OrderService) UpdateOrderMoneyInfo(info *wechatReq.OrderMoneyInfo) (err error) {
+	db := global.GVA_DB.Model(&wechat.Order{})
+	err = db.Where("id = ?", info.OrderId).UpdateColumn("discount_amount", info.DiscountAmount).Error
+	return err
+}
+
+func (o *OrderService) UpdateOrderNoteInfo(info *wechatReq.OrderNoteInfo) (err error) {
+	db := global.GVA_DB.Model(&wechat.Order{})
+	err = db.Where("id = ?", info.OrderId).UpdateColumn("note", info.Note).Error
+	return err
+}
+
+func (o *OrderService) UpdateOrdersStatus(ids []int, status int) (err error) {
+	db := global.GVA_DB.Model(&wechat.Order{})
+	err = db.Where("id in ?", ids).UpdateColumn("status", status).Error
+	return err
+}
+
+func (o *OrderService) GetOrderSetting(id int) (order wechat.OrderSetting, err error) {
+	db := global.GVA_DB.Model(&wechat.OrderSetting{})
+	db.Where("id = ?", id).First(&order)
+	return order, err
+}
+
+func (exa *HomeService) UpdateOrderSetting(e *wechat.OrderSetting) (err error) {
+	err = global.GVA_DB.Save(e).Error
+	return err
 }

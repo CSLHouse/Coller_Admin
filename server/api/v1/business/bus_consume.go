@@ -113,7 +113,6 @@ func (e *ConsumeApi) ConsumeVIPCard(c *gin.Context) {
 	//	return
 	//}
 	var statement business.VIPStatement
-	statement.Date = date_conversion.BuildTheDayStr()
 	statement.CardNumber = 1
 	statement.ConsumeNumber = consumeRecord.ConsumeTimes
 	consumeRecord.SysUserId = utils.GetUserID(c)

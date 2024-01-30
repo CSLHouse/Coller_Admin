@@ -14,6 +14,7 @@ func (e *PayRouter) InitPayRouter(Router *gin.RouterGroup, RouterPub *gin.Router
 	{
 		payRouterWithoutRecord.POST("generateOrder", payApi.GenerateOrder)
 		payRouterWithoutRecord.GET("detail", payApi.GetOrderDetail)
+		//payRouterWithoutRecord.POST("cancelOrder", payApi.CancelOrder)
 	}
 	{
 		payPublicRouterWithoutRecord.GET("notify", payApi.OrderNotify)

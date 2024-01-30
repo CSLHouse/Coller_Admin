@@ -116,7 +116,6 @@ func (e *MemberApi) CreateVIPMember(c *gin.Context) {
 	//}
 
 	var statement business.VIPStatement
-	statement.Date = member.StartDate
 	statement.Recharge = member.Collection
 	statement.NewMember = 1
 	statement.SysUserId = userId
@@ -363,7 +362,6 @@ func (e *MemberApi) RenewVIPCard(c *gin.Context) {
 	//	return
 	//}
 	var statement business.VIPStatement
-	statement.Date = oldData.StartDate
 	statement.Recharge = member.Collection
 	statement.SysUserId = oldData.SysUserId
 	//err = orderService.CreateVIPStatement(statement)

@@ -262,24 +262,168 @@ func (e *OrderApi) PaySuccess(c *gin.Context) {
 	response.OkWithMessage("支付成功", c)
 }
 
-func (e *OrderApi) CancelOrder(c *gin.Context) {
+// CancelOrders 取消订单 不付费版
+func (e *OrderApi) CancelOrders(c *gin.Context) {
+	var reqIds request.IdsReq
+	err := c.ShouldBindJSON(&reqIds)
+	if err != nil {
+		response.FailWithMessage(err.Error(), c)
+		return
+	}
+	userId := utils.GetUserID(c)
+	if userId <= 0 {
+		response.FailWithMessage("Not get userId!", c)
+		return
+	}
+	err = orderService.UpdateOrdersStatus(reqIds.Ids, 5)
+	if err != nil {
+		global.GVA_LOG.Error("更新订单数据失败!", zap.Error(err))
+		response.FailWithMessage("更新订单数据失败", c)
+		return
+	}
+	response.OkWithMessage("删除成功", c)
+}
+
+// CloseOrders 关闭订单
+func (e *OrderApi) CloseOrders(c *gin.Context) {
+	var reqIds request.IdsReq
+	err := c.ShouldBindJSON(&reqIds)
+	if err != nil {
+		response.FailWithMessage(err.Error(), c)
+		return
+	}
+	userId := utils.GetUserID(c)
+	if userId <= 0 {
+		response.FailWithMessage("Not get userId!", c)
+		return
+	}
+
+	err = orderService.UpdateManyOrderStatus(reqIds.Ids, 4)
+	if err != nil {
+		global.GVA_LOG.Error("更新订单数据失败!", zap.Error(err))
+		response.FailWithMessage("更新订单数据失败", c)
+		return
+	}
+
+	response.OkWithMessage("关闭成功", c)
+}
+
+// DeleteOrders 删除订单
+func (e *OrderApi) DeleteOrders(c *gin.Context) {
+	var reqIds request.IdsReq
+	err := c.ShouldBindJSON(&reqIds)
+	if err != nil {
+		response.FailWithMessage(err.Error(), c)
+		return
+	}
+	userId := utils.GetUserID(c)
+	if userId <= 0 {
+		response.FailWithMessage("Not get userId!", c)
+		return
+	}
+	_, err = orderService.DeleteManyOrder(reqIds.Ids)
+	if err != nil {
+		global.GVA_LOG.Error("更新订单数据失败!", zap.Error(err))
+		response.FailWithMessage("更新订单数据失败", c)
+		return
+	}
+
+	response.OkWithMessage("删除成功", c)
+}
+
+func (e *OrderApi) UpdateOrderReceiverInfo(c *gin.Context) {
+	var address wechatReq.OrderReceiveAddress
+	err := c.ShouldBindJSON(&address)
+	if err != nil {
+		response.FailWithMessage(err.Error(), c)
+		return
+	}
+	err = orderService.UpdateOrderReceiverInfo(&address)
+	if err != nil {
+		global.GVA_LOG.Error("更新失败!", zap.Error(err))
+		response.FailWithMessage("更新失败", c)
+		return
+	}
+	response.OkWithMessage("更新成功", c)
+}
+
+func (e *OrderApi) UpdateOrderMoneyInfo(c *gin.Context) {
+	var info wechatReq.OrderMoneyInfo
+	err := c.ShouldBindJSON(&info)
+	if err != nil {
+		response.FailWithMessage(err.Error(), c)
+		return
+	}
+	err = orderService.UpdateOrderMoneyInfo(&info)
+	if err != nil {
+		global.GVA_LOG.Error("更新失败!", zap.Error(err))
+		response.FailWithMessage("更新失败", c)
+		return
+	}
+	response.OkWithMessage("更新成功", c)
+}
+
+func (e *OrderApi) UpdateOrderNote(c *gin.Context) {
+	var info wechatReq.OrderNoteInfo
+	err := c.ShouldBindJSON(&info)
+	if err != nil {
+		response.FailWithMessage(err.Error(), c)
+		return
+	}
+	err = orderService.UpdateOrderNoteInfo(&info)
+	if err != nil {
+		global.GVA_LOG.Error("更新失败!", zap.Error(err))
+		response.FailWithMessage("更新失败", c)
+		return
+	}
+	response.OkWithMessage("更新成功", c)
+}
+
+func (e *OrderApi) UpdateOrderCompletedStatus(c *gin.Context) {
+	var reqIds request.IdsReq
+	err := c.ShouldBindJSON(&reqIds)
+	if err != nil {
+		response.FailWithMessage(err.Error(), c)
+		return
+	}
+	err = orderService.UpdateOrdersStatus(reqIds.Ids, 3)
+	if err != nil {
+		global.GVA_LOG.Error("更新失败!", zap.Error(err))
+		response.FailWithMessage("更新失败", c)
+		return
+	}
+	response.OkWithMessage("更新成功", c)
+}
+
+func (e *OrderApi) GetOrderSetting(c *gin.Context) {
 	var reqId request.GetById
 	err := c.ShouldBindJSON(&reqId)
 	if err != nil {
 		response.FailWithMessage(err.Error(), c)
 		return
 	}
-	outTrade, err := orderService.CancelOrder(reqId.ID)
+	setting, err := orderService.GetOrderSetting(reqId.ID)
 	if err != nil {
 		global.GVA_LOG.Error("更新订单数据失败!", zap.Error(err))
 		response.FailWithMessage("更新订单数据失败", c)
 		return
 	}
-	err = jspaymentService.CloseOrder(outTrade)
+
+	response.OkWithData(setting, c)
+}
+
+func (e *OrderApi) UpdateOrderSetting(c *gin.Context) {
+	var home wechat.OrderSetting
+	err := c.ShouldBindJSON(&home)
 	if err != nil {
-		global.GVA_LOG.Error("删除订单数据失败!", zap.Error(err))
-		response.FailWithMessage("删除订单数据失败", c)
+		response.FailWithMessage(err.Error(), c)
 		return
 	}
-	response.OkWithMessage("删除成功", c)
+	err = wechatService.UpdateOrderSetting(&home)
+	if err != nil {
+		global.GVA_LOG.Error("更新失败!", zap.Error(err))
+		response.FailWithMessage("更新失败", c)
+		return
+	}
+	response.OkWithMessage("更新成功", c)
 }
