@@ -109,11 +109,20 @@ func (o *OrderService) GetProductOrderListByStatus(searchInfo request.StateInfo)
 	switch state {
 	case -1:
 		{
-			err = db.Where(cmdString, cmdList...).Count(&total).Error
-			if err != nil {
-				return list, total, err
+			if len(cmdList) > 0 {
+				err = db.Where(cmdString, cmdList...).Count(&total).Error
+				if err != nil {
+					return list, total, err
+				} else {
+					err = db.Where(cmdString, cmdList...).Limit(limit).Offset(offset).Preload("OrderItemList").Order("id desc").Find(&list).Error
+				}
 			} else {
-				err = db.Debug().Where(cmdString, cmdList...).Limit(limit).Offset(offset).Preload("OrderItemList").Order("id desc").Find(&list).Error
+				err = db.Count(&total).Error
+				if err != nil {
+					return list, total, err
+				} else {
+					err = db.Limit(limit).Offset(offset).Preload("OrderItemList").Order("id desc").Find(&list).Error
+				}
 			}
 			return list, total, err
 		}

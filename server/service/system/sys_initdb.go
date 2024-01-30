@@ -171,6 +171,26 @@ func createTables(ctx context.Context, inits initSlice) error {
 	return nil
 }
 
+func InitTables() error {
+	ctx := context.TODO()
+	if global.GVA_DB == nil {
+		global.GVA_LOG.Error("已存在数据库配置!")
+		return fmt.Errorf("已存在数据库配置!")
+	}
+	ctx = context.WithValue(ctx, "db", global.GVA_DB)
+
+	next, cancel := context.WithCancel(ctx)
+	defer func(c func()) { c() }(cancel)
+	for _, init := range initializers {
+		if n, err := init.MigrateTable(next); err != nil {
+			return err
+		} else {
+			next = n
+		}
+	}
+	return nil
+}
+
 /* -- sortable interface -- */
 
 func (a initSlice) Len() int {

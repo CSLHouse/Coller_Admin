@@ -14,7 +14,7 @@ type initCombo struct{}
 
 // auto run
 func init() {
-	//system.RegisterInit(initOrderCombo, &initCombo{})
+	system.RegisterInit(initOrderCombo, &initCombo{})
 }
 
 func (i *initCombo) MigrateTable(ctx context.Context) (context.Context, error) {

@@ -115,7 +115,5 @@ func (e *OrderApi) GetVIPStatisticsList(c *gin.Context) {
 		response.FailWithMessage("获取失败"+err.Error(), c)
 		return
 	}
-	response.OkWithDetailed(response.AllResult{
-		List: statistics,
-	}, "获取成功", c)
+	response.OkWithDetailed(statistics, "获取成功", c)
 }

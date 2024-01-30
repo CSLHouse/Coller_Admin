@@ -8,7 +8,7 @@ import (
 	"gorm.io/gorm"
 )
 
-const initOrderMember = system.InitBusinessSystem + 1
+const initOrderMember = initOrderConsume + 1
 
 type initMember struct{}
 
@@ -25,7 +25,6 @@ func (i *initMember) MigrateTable(ctx context.Context) (context.Context, error) 
 	return ctx, db.AutoMigrate(
 		&businessModel.Customer{},
 		&businessModel.VIPCard{},
-		&businessModel.VIPCombo{},
 		&businessModel.VIPOrder{},
 		&businessModel.VIPStatement{},
 		&businessModel.VIPStatistics{},

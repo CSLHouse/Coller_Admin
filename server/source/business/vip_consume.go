@@ -7,13 +7,13 @@ import (
 	"gorm.io/gorm"
 )
 
-const initOrderConsume = initOrderMember + 1
+const initOrderConsume = initOrderCombo + 1
 
 type initConsume struct{}
 
 // auto run
 func init() {
-	//system.RegisterInit(initOrderConsume, &initConsume{})
+	system.RegisterInit(initOrderConsume, &initConsume{})
 }
 
 func (i *initConsume) MigrateTable(ctx context.Context) (context.Context, error) {

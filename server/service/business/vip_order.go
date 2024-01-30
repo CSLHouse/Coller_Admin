@@ -6,9 +6,10 @@ import (
 	"github.com/flipped-aurora/gin-vue-admin/server/global"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/business"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/common/request"
+	date_conversion "github.com/flipped-aurora/gin-vue-admin/server/utils/timer"
 	"go.uber.org/zap"
 	"strconv"
-	"strings"
+	"time"
 )
 
 type VIPOrderService struct{}
@@ -62,7 +63,10 @@ func (exa *VIPOrderService) GetVIPOrderInfoList(userId int, searchInfo request.O
 
 func (exa *VIPOrderService) CreateVIPStatement(e *business.VIPStatement) (err error) {
 	var sql bytes.Buffer
-	sql.WriteString("insert into bus_statement(recharge, card_number,new_member,consume_number,sys_user_id) values (")
+	sql.WriteString("insert into bus_statement(updated_at, recharge, card_number,new_member,consume_number,sys_user_id) values (")
+	sql.WriteString("\"")
+	sql.WriteString(time.Now().Format("2006-01-02 15:04:05"))
+	sql.WriteString("\",")
 	sql.WriteString(strconv.Itoa(e.Recharge))
 	sql.WriteString(",")
 	sql.WriteString(strconv.Itoa(e.CardNumber))
@@ -97,34 +101,26 @@ func (exa *VIPOrderService) CreateVIPStatement(e *business.VIPStatement) (err er
 //@param: sysUserAuthorityID string, info request.PageInfo
 //@return: list interface{}, total int64, err error
 
-func (exa *VIPOrderService) GetVIPStatementInfoList(userId int, searchInfo request.StatisticsSearchInfo) (list interface{}, err error) {
-	var sql bytes.Buffer
-	sql.WriteString("Select date,recharge,card_number,new_member,consume_number from bus_statement where sys_user_id = ")
-	sql.WriteString(strconv.Itoa(userId))
-	if len(searchInfo.StartDate) >= 10 {
-		sql.WriteString(" and date > ")
-		sql.WriteString(strings.TrimSpace(searchInfo.StartDate))
+func (exa *VIPOrderService) GetVIPStatementInfoList(userId int, searchInfo request.StatisticsSearchInfo) (list []*business.VIPStatement, err error) {
+
+	var cmdList []interface{}
+	var cmdString = "sys_user_id = ?"
+	cmdList = append(cmdList, userId)
+
+	if len(searchInfo.StartDate) > 0 {
+		cmdList = append(cmdList, date_conversion.ParseStringDate(searchInfo.StartDate))
+		cmdString += " and updated_at >= ?"
 	}
-	if len(searchInfo.EndDate) >= 10 {
-		sql.WriteString(" and date < ")
-		sql.WriteString(strings.TrimSpace(searchInfo.EndDate))
+	if len(searchInfo.EndDate) > 0 {
+		endDate := date_conversion.ParseStringDate(searchInfo.EndDate)
+		cmdList = append(cmdList, endDate)
+		cmdString += " and updated_at <= ?"
 	}
 
-	var orderList []business.VIPStatement
-	//fmt.Println(sql.String())
-	rows, err := global.GVA_DB.Raw(sql.String()).Rows()
-	if err != nil {
-		return orderList, err
-	}
+	db := global.GVA_DB.Model(&business.VIPStatement{})
+	err = db.Debug().Where(cmdString, cmdList...).Find(&list).Error
 
-	for rows.Next() {
-		mould := business.VIPStatement{}
-		err = rows.Scan(&mould.Recharge, &mould.CardNumber, &mould.NewMember, &mould.ConsumeNumber)
-		orderList = append(orderList, mould)
-	}
-	rows.Close()
-
-	return orderList, err
+	return list, err
 }
 
 func (exa *VIPOrderService) BuildVIPStatistics(e *business.VIPStatistics) (cmd string) {
@@ -167,7 +163,7 @@ func (exa *VIPOrderService) CreateVIPStatistics(e *business.VIPStatistics) (err 
 	return err
 }
 
-func (exa *VIPOrderService) GetVIPStatisticsInfoList(userId int) (list []business.VIPStatistics, err error) {
-	err = global.GVA_DB.Where("sys_user_id = ? ", userId).First(&list).Error
-	return list, err
+func (exa *VIPOrderService) GetVIPStatisticsInfoList(userId int) (statistics business.VIPStatistics, err error) {
+	err = global.GVA_DB.Where("sys_user_id = ? ", userId).First(&statistics).Error
+	return statistics, err
 }
