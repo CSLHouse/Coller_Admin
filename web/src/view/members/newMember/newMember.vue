@@ -1,6 +1,7 @@
 <template>
+  <div>
     <el-menu class="el-menu-demo" mode="horizontal">
-      <el-menu-item index="1">{{ isRetail == 1 ?  "新": "临时"}}会员办理</el-menu-item>
+      <el-menu-item index="1">{{ isMembership == 1 ?  "新": "临时"}}会员办理</el-menu-item>
     </el-menu>
     <div class="h-6" />
     <el-form
@@ -11,13 +12,13 @@
       class="demo-ruleForm"
       style="max-width: 460px"
     >
-      <el-form-item v-if="isRetail == 1" label="会员卡号" prop="cardId">
+      <el-form-item v-if="isMembership == 1" label="会员卡号" prop="cardId">
         <el-input v-model="memberForm.cardId" type="text" autocomplete="off" />
       </el-form-item>
       <el-form-item label="联系电话" prop="telephone">
         <el-input v-model="memberForm.telephone" type="text" autocomplete="off" />
       </el-form-item>
-      <view v-if="isRetail == 1">
+      <view v-if="isMembership == 1">
         <el-form-item label="姓名" prop="name">
           <el-input v-model="memberForm.userName" type="text" autocomplete="off" />
         </el-form-item>
@@ -63,6 +64,7 @@
         <el-button @click="resetForm(ruleFormRef)">清空</el-button>
       </el-form-item>
     </el-form>
+  </div>
   </template>
   
   <script lang="ts" setup>
@@ -74,7 +76,7 @@
   import { useUserStore } from '@/pinia/modules/user'
   const userStore = useUserStore()
 
-  let isRetail = userStore.userInfo.retail
+  let isMembership = userStore.userInfo.isMembership
 
   const ruleFormRef = ref<FormInstance>()
   const validateCardId = (rule: any, value: any, callback: any) => {

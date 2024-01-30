@@ -7,22 +7,29 @@ export function fetchList(params) {
   })
 }
 
-export function closeOrder(params) {
+export function closeOrder(data) {
   return request({
-    url:'/order/update/close',
+    url:'/order/closeOrders',
     method:'post',
-    params:params
+    data:data
   })
 }
 
-export function deleteOrder(params) {
+export function deleteOrder(data) {
   return request({
     url:'/order/delete',
-    method:'post',
-    params:params
+    method:'delete',
+    data:data
   })
 }
 
+export function cancelOrder(data) {
+  return request({
+    url:'/order/cancelOrder',
+    method:'post',
+    data:data
+  })
+}
 export function deliveryOrder(data) {
   return request({
     url:'/order/update/delivery',
@@ -31,10 +38,11 @@ export function deliveryOrder(data) {
   });
 }
 
-export function getOrderDetail(id) {
+export function getOrderDetail(params) {
   return request({
-    url:'/order/'+id,
-    method:'get'
+    url:'/order/detail',
+    method:'get',
+    params: params,
   });
 }
 
@@ -54,10 +62,34 @@ export function updateMoneyInfo(data) {
   });
 }
 
-export function updateOrderNote(params) {
+export function updateOrderNote(data) {
   return request({
     url:'/order/update/note',
     method:'post',
+    data:data
+  })
+}
+
+export function updateOrderCompletedStatus(data) {
+  return request({
+    url:'/order/update/complete',
+    method:'post',
+    data:data
+  })
+}
+
+export function getOrderSetting(params) {
+  return request({
+    url:'/order/setting',
+    method:'get',
     params:params
   })
+}
+
+export function updateOrderSetting(data) {
+  return request({
+    url:'/order/settingUpdate',
+    method:'post',
+    data:data
+  });
 }

@@ -1,5 +1,4 @@
-<template></template>
-<!-- <template> 
+<template>
     <el-card class="form-container" shadow="never">
       <el-form :model="orderSetting"
                ref="orderSettingForm"
@@ -17,7 +16,7 @@
           </el-input>
           <span class="note-margin">未付款，订单自动关闭</span>
         </el-form-item>
-        <el-form-item label="发货超过：" prop="confirmOvertime">
+        <!-- <el-form-item label="发货超过：" prop="confirmOvertime">
           <el-input v-model="orderSetting.confirmOvertime" class="input-width">
             <template slot="append">天</template>
           </el-input>
@@ -34,7 +33,7 @@
             <template slot="append">天</template>
           </el-input>
           <span class="note-margin">自动五星好评</span>
-        </el-form-item>
+        </el-form-item> -->
         <el-form-item>
           <el-button
             @click="confirm('orderSettingForm')"
@@ -44,7 +43,7 @@
     </el-card>
   </template>
   <script>
-    import {getOrderSetting,updateOrderSetting} from '@/api/orderSetting';
+    import {getOrderSetting, updateOrderSetting} from '@/api/order';
     const defaultOrderSetting = {
       id: null,
       flashOrderOvertime: 0,
@@ -90,7 +89,7 @@
                 cancelButtonText: '取消',
                 type: 'warning'
               }).then(() => {
-                updateOrderSetting(1,this.orderSetting).then(response=>{
+                updateOrderSetting(this.orderSetting).then(response=>{
                   this.$message({
                     type: 'success',
                     message: '提交成功!',
@@ -108,7 +107,7 @@
           });
         },
         getDetail(){
-          getOrderSetting(1).then(response=>{
+          getOrderSetting({id: 1}).then(response=>{
             this.orderSetting=response.data;
           })
         }
@@ -126,4 +125,4 @@
   </style>
   
   
-   -->
+  
