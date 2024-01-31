@@ -411,9 +411,10 @@
   const handleRecommendStatusStatusChange = async (inex, row) => {
     const res = await updateRecommendProduct({ids: [row.id], key: "recommend_status", value: row.recommendStatus })
     if ('code' in res && res.code == 0) {
-        hotProductData.value.forEach(element => {
-            element[stateOption.value.key] = stateOption.value.value
-        });
+      ElMessage({
+        type: 'success',
+        message: '推荐成功!',
+      })
     }
   }
   </script>
