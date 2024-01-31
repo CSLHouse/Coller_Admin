@@ -132,12 +132,22 @@ export const updateAdvertiseByIdForState = (data) => {
     })
 }
 
+
 // 获取首页推荐专题表 猜你喜欢
 export const getRecommendProductList = (params) => {
     return service({
         url: '/product/recommendProduct',
         method: 'get',
         params
+    })
+}
+
+// 获取首页推荐专题表排序 猜你喜欢
+export const updateRecommendProductByIdForSort = (data) => {
+    return service({
+        url: '/product/updateRecommendSort',
+        method: 'post',
+        data
     })
 }
 

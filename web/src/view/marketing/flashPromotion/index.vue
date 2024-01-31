@@ -94,7 +94,7 @@
           small="small"
           :background="false"
           layout="total, sizes, prev, pager, next, jumper"
-          :total="total"
+          :total.number="+total"
           @size-change="handleSizeChange"
           @current-change="handleCurrentChange"
         />

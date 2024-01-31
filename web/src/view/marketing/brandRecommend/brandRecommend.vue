@@ -88,7 +88,7 @@
             :current-page="page"
             :page-size="pageSize"
             :page-sizes="[5, 5, 5, 5]"
-            :total="total"
+            :total.number="+total"
             layout="total, sizes, prev, pager, next, jumper"
             @current-change="handleCurrentChange"
             @size-change="handleSizeChange"

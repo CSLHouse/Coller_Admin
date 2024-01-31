@@ -6,7 +6,7 @@
           <el-form :inline="true" :model="searchData" class="demo-form-inline">
             <el-form-item label="开始日期：" class="form-item">
               <el-date-picker
-                v-model="searchData.buyDate"
+                v-model="searchData.startDate"
                 placeholder="按开始日期搜索"
                 clearable
                 type="date"
@@ -75,9 +75,6 @@
   } from '@/api/member'
   import { ref, reactive, onBeforeMount, watch } from 'vue'
   import { ElMessage } from 'element-plus'
-  import { comboStore } from '@/pinia/modules/combo'
-  import config from '@/core/config'
-  import { trim } from '@/utils/stringFun'
   const searchData = reactive({
     startDate: null,
     endDate: null,
@@ -90,13 +87,11 @@
   const getsStatisticsList = async() => {
     const res = await getStatisticsList()
     if ('code' in res && res.code === 0) {
-      if (res.data.list) {
-        let total = res.data.list
-        totalStream.value = total.totalStream
-        totalOrder.value = total.totalOrder
-        totalMember.value = total.totalMember
-        totalConsumer.value = total.totalConsumer
-      }
+      let total = res.data
+      totalStream.value = total.totalStream
+      totalOrder.value = total.totalOrder
+      totalMember.value = total.totalMember
+      totalConsumer.value = total.totalConsumer
     }
   }
   
@@ -144,9 +139,9 @@
   getsStatementList()
   getsStatisticsList()
   
-  watch(() => searchData.startDate, () => {
-    getsStatementList()
-  })
+  // watch(() => searchData.startDate, () => {
+  //   getsStatementList()
+  // })
   
   </script>
   

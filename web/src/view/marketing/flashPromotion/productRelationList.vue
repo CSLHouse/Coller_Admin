@@ -68,7 +68,7 @@
         :current-page.sync="listQuery.page"
         :page-size="listQuery.pageSize"
         :page-sizes="[5,10,15]"
-        :total="total">
+        :total.number="+total">
       </el-pagination>
     </div>
     <el-dialog title="选择商品" v-model="selectDialogVisible" width="50%">
@@ -100,7 +100,7 @@
           :current-page.sync="dialogData.listQuery.page"
           :page-size="dialogData.listQuery.pageSize"
           :page-sizes="[5,10,15]"
-          :total="dialogData.total">
+          :total.number="+dialogData.total">
         </el-pagination>
       </div>
       <div style="clear: both;"></div>

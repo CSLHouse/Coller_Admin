@@ -69,7 +69,7 @@
           :page-size="pageSize"
           :page-sizes="[10, 30, 50, 100]"
           :style="{ float: 'right', padding: '20px' }"
-          :total="total"
+          :total.number="+total"
           layout="total, sizes, prev, pager, next, jumper"
           @current-change="handleCurrentChange"
           @size-change="handleSizeChange"
