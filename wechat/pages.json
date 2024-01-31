@@ -5,7 +5,7 @@
 			"path": "pages/index/index",
 			"style": {
 				// #ifdef MP 
-				"navigationBarTitleText": "猪迪克",
+				"navigationBarTitleText": "猪迪克星动乐园",
 				//"navigationStyle": "custom",
 				// #endif 
 				"enablePullDownRefresh": true,
@@ -173,75 +173,6 @@
 						"navigationBarTitleText": "推荐品牌列表"
 					}
 				}, 
-				// {
-				// 	"path": "product/newProductList",
-				// 	"name": "newProduct",
-				// 	"style": {
-				// 		"enablePullDownRefresh": true,
-				// 		"navigationBarTitleText": "新鲜好物"
-				// 	}
-				// }, 
-				// {
-				// 	"path": "product/hotProductList",
-				// 	"style": {
-				// 		"enablePullDownRefresh": true,
-				// 		"navigationBarTitleText": "人气推荐"
-				// 	}
-				// }, 
-				// {
-				// 	"path": "user/readHistory",
-				// 	"name": "readHistory",
-				// 	"style": {
-				// 		"enablePullDownRefresh": true,
-				// 		"navigationBarTitleText": "我的足迹",
-				// 		"app-plus": {
-				// 			"titleNView": {
-				// 				"buttons": [{
-				// 					"text": "清空",
-				// 					"fontSize": "16",
-				// 					"color": "#303133",
-				// 					"width": "46px",
-				// 					"background": "rgba(0,0,0,0)"
-				// 				}]
-				// 			}
-				// 		}
-				// 	}
-				// },{
-				// 	"path": "user/productCollection",
-				// 	"style": {
-				// 		"enablePullDownRefresh": true,
-				// 		"navigationBarTitleText": "我的收藏",
-				// 		"app-plus": {
-				// 			"titleNView": {
-				// 				"buttons": [{
-				// 					"text": "清空",
-				// 					"fontSize": "16",
-				// 					"color": "#303133",
-				// 					"width": "46px",
-				// 					"background": "rgba(0,0,0,0)"
-				// 				}]
-				// 			}
-				// 		}
-				// 	}
-				// }, {
-				// 	"path": "user/brandAttention",
-				// 	"name": "attention",
-				// 	"style": {
-				// 		"enablePullDownRefresh": true,
-				// 		"navigationBarTitleText": "我的关注",
-				// 		"app-plus": {
-				// 			"titleNView": {
-				// 				"buttons": [{
-				// 					"text": "清空",
-				// 					"fontSize": "16",
-				// 					"color": "#303133",
-				// 					"width": "46px",
-				// 					"background": "rgba(0,0,0,0)"
-				// 				}]
-				// 			}
-				// 		}
-				// 	}
-				// } ,
 				{
 					"path" : "member/member",
 					"name": "member",
@@ -269,7 +200,7 @@
 	// },
 	"globalStyle": {
 		"navigationBarTextStyle": "black",
-		"navigationBarTitleText": "猪迪克",
+		"navigationBarTitleText": "猪迪克星动乐园",
 		"navigationBarBackgroundColor": "#FFFFFF",
 		"backgroundColor": "#f8f8f8"
 	},

@@ -33,10 +33,7 @@
 				返
 			</view>
 			<text class="tit">该商品分享可领取10积分</text>
-			<!-- <view class="share-btn">
-				立即分享
-				<text class="yticon icon-you"></text>
-			</view> -->
+
 			<button class="share-btn" open-type="share" >
 				<image src="/static/temp/share_wechat.png" mode="aspectFit" style="width: 20px; height: 20px; margin-right: 5px;"></image>
 				立即分享
@@ -309,7 +306,7 @@
 					return 'N/A';
 				}
 				let date = new Date(time);
-				return formatDate(date, 'yyyy-MM-dd hh:mm:ss')
+				return formatDate(date, 'yyyy-MM-dd HH:mm:ss')
 			},
 			formatCouponUseType(useType) {
 				if (useType == 0) {
@@ -400,7 +397,7 @@
 						this.specSelected.push(item);
 					}
 				})
-				// this.changeSpecInfo();
+				this.changeSpecInfo();
 
 			},
 			//领取优惠券
@@ -527,7 +524,7 @@
 						if (cItem.pid === item.id) {
 							this.$set(cItem, 'selected', true);
 							this.specSelected.push(cItem);
-							// this.changeSpecInfo();
+							this.changeSpecInfo();
 							break;
 						}
 					}
@@ -584,7 +581,7 @@
 			//初始化商品详情信息
 			initProductDesc() {
 				let rawhtml = this.product.detailMobileHtml;
-				let tempNode = document.$createElement('div');
+				let tempNode = this.$createElement('div');
 				tempNode.innerHTML = rawhtml;
 				let imgs = tempNode.getElementsByTagName('img');
 				for (let i = 0; i < imgs.length; i++) {
