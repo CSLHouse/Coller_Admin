@@ -5,10 +5,10 @@ package credentials
 
 import (
 	"context"
+	"cooller/server/client/auth"
+	"cooller/server/client/consts"
+	"cooller/server/utils"
 	"fmt"
-	"github.com/flipped-aurora/gin-vue-admin/server/client/auth"
-	"github.com/flipped-aurora/gin-vue-admin/server/client/consts"
-	"github.com/flipped-aurora/gin-vue-admin/server/utils"
 	"time"
 )
 

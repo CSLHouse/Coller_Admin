@@ -4,8 +4,8 @@ package ciphers
 
 import (
 	"context"
+	cipher2 "cooller/server/client/cipher"
 	"fmt"
-	cipher2 "github.com/flipped-aurora/gin-vue-admin/server/client/cipher"
 	"reflect"
 )
 

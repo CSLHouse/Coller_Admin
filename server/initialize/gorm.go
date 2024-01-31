@@ -3,10 +3,10 @@ package initialize
 import (
 	"os"
 
-	"github.com/flipped-aurora/gin-vue-admin/server/global"
-	"github.com/flipped-aurora/gin-vue-admin/server/model/example"
-	"github.com/flipped-aurora/gin-vue-admin/server/model/system"
-	service "github.com/flipped-aurora/gin-vue-admin/server/service/system"
+	"cooller/server/global"
+	"cooller/server/model/example"
+	"cooller/server/model/system"
+	service "cooller/server/service/system"
 	"go.uber.org/zap"
 	"gorm.io/gorm"
 )

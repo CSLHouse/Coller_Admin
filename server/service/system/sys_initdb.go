@@ -2,11 +2,11 @@ package system
 
 import (
 	"context"
+	"cooller/server/global"
+	"cooller/server/model/system/request"
 	"database/sql"
 	"errors"
 	"fmt"
-	"github.com/flipped-aurora/gin-vue-admin/server/global"
-	"github.com/flipped-aurora/gin-vue-admin/server/model/system/request"
 	"gorm.io/gorm"
 	"sort"
 )

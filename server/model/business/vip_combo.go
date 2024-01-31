@@ -1,7 +1,7 @@
 package business
 
 import (
-	"github.com/flipped-aurora/gin-vue-admin/server/global"
+	"cooller/server/global"
 )
 
 type VIPCombo struct {

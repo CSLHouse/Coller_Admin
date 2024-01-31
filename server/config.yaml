@@ -29,7 +29,7 @@ aws-s3:
     secret-id: your-secret-id
     secret-key: your-secret-key
     base-url: https://gin.vue.admin
-    path-prefix: github.com/flipped-aurora/gin-vue-admin/server
+    path-prefix: cooller/server
 captcha:
     key-long: 4
     img-width: 240
@@ -188,7 +188,7 @@ tencent-cos:
     secret-id: your-secret-id
     secret-key: your-secret-key
     base-url: https://gin.vue.admin
-    path-prefix: github.com/flipped-aurora/gin-vue-admin/server
+    path-prefix: cooller/server
 timer:
     start: true
     spec: '@daily'
@@ -208,7 +208,7 @@ wechat:
     telephone-url: https://api.weixin.qq.com/wxa/business/getuserphonenumber?access_token=%s
 zap:
     level: info
-    prefix: '[github.com/flipped-aurora/gin-vue-admin/server]'
+    prefix: '[cooller/server]'
     format: console
     director: log
     encode-level: LowercaseColorLevelEncoder

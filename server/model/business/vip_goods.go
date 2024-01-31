@@ -1,6 +1,6 @@
 package business
 
-import "github.com/flipped-aurora/gin-vue-admin/server/global"
+import "cooller/server/global"
 
 type Goods struct {
 	global.GVA_MODEL

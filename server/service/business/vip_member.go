@@ -1,10 +1,10 @@
 package business
 
 import (
+	"cooller/server/global"
+	"cooller/server/model/business"
+	"cooller/server/model/common/request"
 	"fmt"
-	"github.com/flipped-aurora/gin-vue-admin/server/global"
-	"github.com/flipped-aurora/gin-vue-admin/server/model/business"
-	"github.com/flipped-aurora/gin-vue-admin/server/model/common/request"
 	"github.com/gofrs/uuid/v5"
 	"gorm.io/gorm"
 	"strings"
@@ -103,9 +103,9 @@ func (exa *VIPMemberService) CreateVIPMemberSynchronous(card *business.VIPCard, 
 //@param: e model.ExaMember
 //@return: err error
 
-func (exa *VIPMemberService) DeleteVIPMemberById(id int) (err error) {
+func (exa *VIPMemberService) DeleteVIPMemberById(id int, userId int) (err error) {
 	var card business.VIPCard
-	err = global.GVA_DB.Where("id = ?", id).Delete(&card).Error
+	err = global.GVA_DB.Where("id = ? and sys_user_id = ?", id, userId).Delete(&card).Error
 	return err
 }
 
@@ -266,15 +266,15 @@ func (exa *VIPMemberService) GetVIPCardById(id int) (card business.VIPCard, err 
 	return card, err
 }
 
-func (exa *VIPMemberService) GetVIPCardByTelephone(id int) (card []business.VIPCard, err error) {
-	err = global.GVA_DB.Where("telephone = ?", id).Preload("Combo").Find(&card).Error
+func (exa *VIPMemberService) GetVIPCardByTelephone(id int, userId int) (card []business.VIPCard, err error) {
+	err = global.GVA_DB.Where("telephone = ? and sys_user_id = ?", id, userId).Preload("Combo").Find(&card).Error
 	return card, err
 }
 
 func (exa *VIPMemberService) CreateVIPCertificate(e *business.VIPCertificate) (err error) {
 	db := global.GVA_DB.Model(&business.VIPCertificate{})
 	var card business.VIPCertificate
-	result := db.Where("telephone = ?", e.Telephone).First(&card)
+	result := db.Where("telephone = ? and sys_user_id = ?", e.Telephone, e.SysUserId).First(&card)
 	if result.Error != nil {
 		if result.Error == gorm.ErrRecordNotFound {
 			e.IsFirst = true
@@ -293,7 +293,7 @@ func (exa *VIPMemberService) CreateVIPCertificate(e *business.VIPCertificate) (e
 			}
 			err = result.Error
 		} else {
-			err = db.Debug().Where("telephone = ? and sys_user_id = ?", e.Telephone, e.SysUserId).UpdateColumn("count", gorm.Expr("count+?", 1)).Error
+			err = db.Where("telephone = ? and sys_user_id = ?", e.Telephone, e.SysUserId).UpdateColumn("count", gorm.Expr("count+?", 1)).Error
 			return err
 		}
 	}

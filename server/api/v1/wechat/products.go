@@ -1,15 +1,15 @@
 package wechat
 
 import (
+	"cooller/server/global"
+	"cooller/server/model/common/request"
+	"cooller/server/model/common/response"
+	"cooller/server/model/example"
+	"cooller/server/model/wechat"
+	wechatRequest "cooller/server/model/wechat/request"
+	wechatRes "cooller/server/model/wechat/response"
+	"cooller/server/utils"
 	"fmt"
-	"github.com/flipped-aurora/gin-vue-admin/server/global"
-	"github.com/flipped-aurora/gin-vue-admin/server/model/common/request"
-	"github.com/flipped-aurora/gin-vue-admin/server/model/common/response"
-	"github.com/flipped-aurora/gin-vue-admin/server/model/example"
-	"github.com/flipped-aurora/gin-vue-admin/server/model/wechat"
-	wechatRequest "github.com/flipped-aurora/gin-vue-admin/server/model/wechat/request"
-	wechatRes "github.com/flipped-aurora/gin-vue-admin/server/model/wechat/response"
-	"github.com/flipped-aurora/gin-vue-admin/server/utils"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 	"time"

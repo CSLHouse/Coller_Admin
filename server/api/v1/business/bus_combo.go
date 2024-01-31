@@ -1,12 +1,12 @@
 package business
 
 import (
-	"github.com/flipped-aurora/gin-vue-admin/server/global"
-	"github.com/flipped-aurora/gin-vue-admin/server/model/business"
-	businessRes "github.com/flipped-aurora/gin-vue-admin/server/model/business/response"
-	"github.com/flipped-aurora/gin-vue-admin/server/model/common/request"
-	"github.com/flipped-aurora/gin-vue-admin/server/model/common/response"
-	"github.com/flipped-aurora/gin-vue-admin/server/utils"
+	"cooller/server/global"
+	"cooller/server/model/business"
+	businessRes "cooller/server/model/business/response"
+	"cooller/server/model/common/request"
+	"cooller/server/model/common/response"
+	"cooller/server/utils"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 )
@@ -67,7 +67,7 @@ func (e *ComboApi) DeleteVIPComboById(c *gin.Context) {
 		response.FailWithMessage(err.Error(), c)
 		return
 	}
-	err = comboService.DeleteVIPComboById(reqId.ID)
+	err = comboService.DeleteVIPComboById(reqId.ID, utils.GetUserID(c))
 	if err != nil {
 		global.GVA_LOG.Error("删除失败!", zap.Error(err))
 		response.FailWithMessage("删除失败", c)
@@ -128,7 +128,7 @@ func (e *ComboApi) GetVIPComboById(c *gin.Context) {
 		return
 	}
 
-	data, err := comboService.GetVIPComboById(reqId.ID)
+	data, err := comboService.GetVIPComboById(reqId.ID, utils.GetUserID(c))
 	if err != nil {
 		global.GVA_LOG.Error("获取失败!", zap.Error(err))
 		response.FailWithMessage("获取失败", c)

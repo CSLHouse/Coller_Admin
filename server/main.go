@@ -1,11 +1,11 @@
 package main
 
 import (
+	"cooller/server/api/v1/business"
+	"cooller/server/core"
+	"cooller/server/global"
+	"cooller/server/initialize"
 	"fmt"
-	"github.com/flipped-aurora/gin-vue-admin/server/api/v1/business"
-	"github.com/flipped-aurora/gin-vue-admin/server/core"
-	"github.com/flipped-aurora/gin-vue-admin/server/global"
-	"github.com/flipped-aurora/gin-vue-admin/server/initialize"
 	"go.uber.org/zap"
 )
 

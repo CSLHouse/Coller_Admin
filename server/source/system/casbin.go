@@ -3,8 +3,8 @@ package system
 import (
 	"context"
 
+	"cooller/server/service/system"
 	adapter "github.com/casbin/gorm-adapter/v3"
-	"github.com/flipped-aurora/gin-vue-admin/server/service/system"
 	"github.com/pkg/errors"
 	"gorm.io/gorm"
 )
@@ -314,6 +314,12 @@ func (i *initCasbin) InitializeData(ctx context.Context) (context.Context, error
 		{Ptype: "p", V0: "8881", V1: "/business/statement", V2: "GET"},
 		{Ptype: "p", V0: "8881", V1: "/product/deletes", V2: "DELETE"},
 		{Ptype: "p", V0: "8881", V1: "/product/allCategory", V2: "GET"},
+		{Ptype: "p", V0: "8881", V1: "/product/create", V2: "POST"},
+		{Ptype: "p", V0: "8881", V1: "/product/update", V2: "PUT"},
+		{Ptype: "p", V0: "8881", V1: "/product/attributeCategory", V2: "POST"},
+		{Ptype: "p", V0: "8881", V1: "/product/attributeCategory", V2: "PUT"},
+		{Ptype: "p", V0: "8881", V1: "/product/attributeCategory", V2: "GET"},
+		{Ptype: "p", V0: "8881", V1: "/product/attributeCategory", V2: "DELETE"},
 		{Ptype: "p", V0: "8881", V1: "/flash/create", V2: "POST"},
 		{Ptype: "p", V0: "8881", V1: "/flash/delete", V2: "DELETE"},
 		{Ptype: "p", V0: "8881", V1: "/flash/list", V2: "GET"},

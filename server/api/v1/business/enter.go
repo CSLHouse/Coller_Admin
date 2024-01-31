@@ -1,6 +1,6 @@
 package business
 
-import "github.com/flipped-aurora/gin-vue-admin/server/service"
+import "cooller/server/service"
 
 type ApiGroup struct {
 	ComboApi

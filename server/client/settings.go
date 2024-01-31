@@ -1,9 +1,9 @@
 package client
 
 import (
+	auth2 "cooller/server/client/auth"
+	"cooller/server/client/cipher"
 	"fmt"
-	auth2 "github.com/flipped-aurora/gin-vue-admin/server/client/auth"
-	"github.com/flipped-aurora/gin-vue-admin/server/client/cipher"
 	"net/http"
 )
 

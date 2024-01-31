@@ -1,7 +1,7 @@
 package pay
 
 import (
-	v1 "github.com/flipped-aurora/gin-vue-admin/server/api/v1"
+	v1 "cooller/server/api/v1"
 	"github.com/gin-gonic/gin"
 )
 
@@ -17,7 +17,7 @@ func (e *PayRouter) InitPayRouter(Router *gin.RouterGroup, RouterPub *gin.Router
 		//payRouterWithoutRecord.POST("cancelOrder", payApi.CancelOrder)
 	}
 	{
-		payPublicRouterWithoutRecord.GET("notify", payApi.OrderNotify)
+		payPublicRouterWithoutRecord.POST("notify", payApi.OrderNotify)
 
 	}
 }

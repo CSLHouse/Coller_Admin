@@ -4,15 +4,15 @@ package signers
 
 import (
 	"context"
+	"cooller/server/client/auth"
 	"crypto/rsa"
 	"fmt"
-	"github.com/flipped-aurora/gin-vue-admin/server/client/auth"
 	"strings"
 	"testing"
 
 	"github.com/agiledragon/gomonkey"
 
-	"github.com/flipped-aurora/gin-vue-admin/server/utils"
+	"cooller/server/utils"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

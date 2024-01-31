@@ -1,15 +1,15 @@
 package system
 
 import (
+	"cooller/server/model/business"
 	"errors"
 	"fmt"
-	"github.com/flipped-aurora/gin-vue-admin/server/model/business"
 	"time"
 
-	"github.com/flipped-aurora/gin-vue-admin/server/global"
-	"github.com/flipped-aurora/gin-vue-admin/server/model/common/request"
-	"github.com/flipped-aurora/gin-vue-admin/server/model/system"
-	"github.com/flipped-aurora/gin-vue-admin/server/utils"
+	"cooller/server/global"
+	"cooller/server/model/common/request"
+	"cooller/server/model/system"
+	"cooller/server/utils"
 	"github.com/gofrs/uuid/v5"
 	"gorm.io/gorm"
 )

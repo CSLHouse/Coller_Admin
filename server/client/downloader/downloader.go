@@ -4,17 +4,17 @@ package downloader
 
 import (
 	"context"
+	"cooller/server/client"
+	"cooller/server/client/auth/signers"
+	validators2 "cooller/server/client/auth/validators"
+	"cooller/server/client/auth/verifiers"
+	"cooller/server/client/consts"
 	"crypto/rsa"
 	"crypto/x509"
 	"fmt"
-	"github.com/flipped-aurora/gin-vue-admin/server/client"
-	"github.com/flipped-aurora/gin-vue-admin/server/client/auth/signers"
-	validators2 "github.com/flipped-aurora/gin-vue-admin/server/client/auth/validators"
-	"github.com/flipped-aurora/gin-vue-admin/server/client/auth/verifiers"
-	"github.com/flipped-aurora/gin-vue-admin/server/client/consts"
 	"sync"
 
-	"github.com/flipped-aurora/gin-vue-admin/server/utils"
+	"cooller/server/utils"
 )
 
 // isSameCertificateMap Check if two CertificateMaps stores same certificates.

@@ -4,12 +4,12 @@ package verifiers
 
 import (
 	"context"
+	"cooller/server/client"
+	"cooller/server/client/auth"
 	"crypto/x509"
-	"github.com/flipped-aurora/gin-vue-admin/server/client"
-	"github.com/flipped-aurora/gin-vue-admin/server/client/auth"
 	"testing"
 
-	"github.com/flipped-aurora/gin-vue-admin/server/utils"
+	"cooller/server/utils"
 )
 
 const (

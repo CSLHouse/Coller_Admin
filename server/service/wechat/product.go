@@ -1,11 +1,11 @@
 package wechat
 
 import (
+	"cooller/server/global"
+	"cooller/server/model/common/request"
+	"cooller/server/model/wechat"
+	wechatRequest "cooller/server/model/wechat/request"
 	"fmt"
-	"github.com/flipped-aurora/gin-vue-admin/server/global"
-	"github.com/flipped-aurora/gin-vue-admin/server/model/common/request"
-	"github.com/flipped-aurora/gin-vue-admin/server/model/wechat"
-	wechatRequest "github.com/flipped-aurora/gin-vue-admin/server/model/wechat/request"
 	"go.uber.org/zap"
 	"gorm.io/gorm"
 	"strings"

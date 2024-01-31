@@ -1,7 +1,7 @@
 package request
 
 import (
-	wechatModel "github.com/flipped-aurora/gin-vue-admin/server/model/wechat"
+	wechatModel "cooller/server/model/wechat"
 )
 
 type UpdateIdsKeywordRequest struct {

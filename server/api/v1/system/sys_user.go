@@ -1,22 +1,22 @@
 package system
 
 import (
+	"cooller/server/middleware"
+	"cooller/server/model/business"
+	businessRes "cooller/server/model/business/response"
+	wechatReq "cooller/server/model/wechat/request"
+	wechatRes "cooller/server/model/wechat/response"
 	"fmt"
-	"github.com/flipped-aurora/gin-vue-admin/server/middleware"
-	"github.com/flipped-aurora/gin-vue-admin/server/model/business"
-	businessRes "github.com/flipped-aurora/gin-vue-admin/server/model/business/response"
-	wechatReq "github.com/flipped-aurora/gin-vue-admin/server/model/wechat/request"
-	wechatRes "github.com/flipped-aurora/gin-vue-admin/server/model/wechat/response"
 	"strconv"
 	"time"
 
-	"github.com/flipped-aurora/gin-vue-admin/server/global"
-	"github.com/flipped-aurora/gin-vue-admin/server/model/common/request"
-	"github.com/flipped-aurora/gin-vue-admin/server/model/common/response"
-	"github.com/flipped-aurora/gin-vue-admin/server/model/system"
-	systemReq "github.com/flipped-aurora/gin-vue-admin/server/model/system/request"
-	systemRes "github.com/flipped-aurora/gin-vue-admin/server/model/system/response"
-	"github.com/flipped-aurora/gin-vue-admin/server/utils"
+	"cooller/server/global"
+	"cooller/server/model/common/request"
+	"cooller/server/model/common/response"
+	"cooller/server/model/system"
+	systemReq "cooller/server/model/system/request"
+	systemRes "cooller/server/model/system/response"
+	"cooller/server/utils"
 
 	"github.com/gin-gonic/gin"
 	"github.com/redis/go-redis/v9"
@@ -649,10 +649,8 @@ func (b *BaseApi) ParsePhoneNumber(c *gin.Context) {
 		response.FailWithMessage(err.Error(), c)
 		return
 	}
-	fmt.Println("---code:", loginInfo.Code)
-	fmt.Println("---OpenID:", loginInfo.OpenID)
+
 	accessToken, ok := global.BlackCache.Get("access_token")
-	fmt.Println("---accessToken:", accessToken)
 	if !ok || accessToken == nil {
 		wechatClient := middleware.NewWechatClient(nil)
 		wxMap, err := wechatClient.GetWXAccessToken()
@@ -663,14 +661,12 @@ func (b *BaseApi) ParsePhoneNumber(c *gin.Context) {
 		}
 		accessToken = wxMap["access_token"]
 		openCaptchaTimeOut := global.GVA_CONFIG.Captcha.OpenCaptchaTimeOut // 缓存超时时间
-		fmt.Println("------openCaptchaTimeOut:", openCaptchaTimeOut)
 		global.BlackCache.Set("access_token", accessToken, time.Second*time.Duration(openCaptchaTimeOut))
 	}
 
 	//httpClient := http.Client{}
 	wechatClient := middleware.NewWechatClient(nil)
 	wxMap, err := wechatClient.GetWXTelephone(accessToken.(string), loginInfo.Code)
-	fmt.Println("----wxMap:", wxMap)
 
 	if err != nil {
 		global.GVA_LOG.Error("登录失败!", zap.Error(err))
@@ -694,7 +690,6 @@ func (b *BaseApi) ParsePhoneNumber(c *gin.Context) {
 		response.FailWithMessage(err.Error(), c)
 		return
 	}
-	fmt.Println("---wxUser:", wxUser)
 
 	response.OkWithData(wechatRes.WXPhoneNum{
 		PhoneNumber: phoneNumber,

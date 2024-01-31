@@ -2,8 +2,8 @@ package wechat
 
 import (
 	"context"
-	wechatModel "github.com/flipped-aurora/gin-vue-admin/server/model/wechat"
-	"github.com/flipped-aurora/gin-vue-admin/server/service/system"
+	wechatModel "cooller/server/model/wechat"
+	"cooller/server/service/system"
 	"github.com/pkg/errors"
 	"gorm.io/gorm"
 )

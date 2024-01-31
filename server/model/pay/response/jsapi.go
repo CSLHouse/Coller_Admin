@@ -1,6 +1,6 @@
 package response
 
-import "github.com/flipped-aurora/gin-vue-admin/server/model/wechat"
+import "cooller/server/model/wechat"
 
 // PrepayResponse
 type PrepayResponse struct {

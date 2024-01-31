@@ -1,19 +1,23 @@
 package pay
 
 import (
+	wechatApi "cooller/server/api/v1/wechat"
+	"cooller/server/client/consts"
+	"cooller/server/client/notify"
+	"cooller/server/global"
+	"cooller/server/model/common/request"
+	"cooller/server/model/common/response"
+	payModel "cooller/server/model/pay"
+	payRequest "cooller/server/model/pay/request"
+	payRes "cooller/server/model/pay/response"
+	"cooller/server/model/wechat"
+	wechatReq "cooller/server/model/wechat/request"
+	"cooller/server/utils"
+	"encoding/json"
 	"fmt"
 	"github.com/bwmarrin/snowflake"
-	wechatApi "github.com/flipped-aurora/gin-vue-admin/server/api/v1/wechat"
-	"github.com/flipped-aurora/gin-vue-admin/server/client/consts"
-	"github.com/flipped-aurora/gin-vue-admin/server/global"
-	"github.com/flipped-aurora/gin-vue-admin/server/model/common/request"
-	"github.com/flipped-aurora/gin-vue-admin/server/model/common/response"
-	payRequest "github.com/flipped-aurora/gin-vue-admin/server/model/pay/request"
-	payRes "github.com/flipped-aurora/gin-vue-admin/server/model/pay/response"
-	"github.com/flipped-aurora/gin-vue-admin/server/model/wechat"
-	wechatReq "github.com/flipped-aurora/gin-vue-admin/server/model/wechat/request"
-	"github.com/flipped-aurora/gin-vue-admin/server/utils"
 	"github.com/gin-gonic/gin"
+	"github.com/mitchellh/mapstructure"
 	"go.uber.org/zap"
 	"time"
 )
@@ -40,7 +44,7 @@ func (e *PayApi) GenerateOrder(c *gin.Context) {
 	order.PayAmount = 0
 	order.PromotionAmount = 0
 
-	if orderReq.BuyType > 0 {
+	if orderReq.BuyType == 1 {
 		productCartList, err := orderService.GetProductCartByIds(userId, orderReq.Ids)
 		if err != nil || len(productCartList) < 1 {
 			global.GVA_LOG.Error("获取购物车物品失败!", zap.Error(err))
@@ -61,7 +65,6 @@ func (e *PayApi) GenerateOrder(c *gin.Context) {
 			goodDetail.UnitPrice = utils.Int64(int64(cartItem.Price * 100))
 
 			var orderItem wechat.OrderItem
-			promotionAmount := float32(0)
 			_, promotionMessage, reduceAmount := wechatApi.CalculateProductPromotionPrice(product, nil)
 
 			order.PromotionAmount += reduceAmount
@@ -72,8 +75,12 @@ func (e *PayApi) GenerateOrder(c *gin.Context) {
 			// 计算优惠前总金额
 			order.TotalAmount += order.TotalAmount + cartItem.Price*float32(cartItem.Quantity)
 			// 该商品经过优惠后的实际金额
-			realAmount := cartItem.Price*float32(cartItem.Quantity) - promotionAmount
-
+			realAmount := cartItem.Price*float32(cartItem.Quantity) - reduceAmount
+			if realAmount < 0 {
+				global.GVA_LOG.Error("[GenerateOrder]获取价格计算失败!", zap.Error(err))
+				response.FailWithMessage("[GenerateOrder]获取价格计算失败", c)
+				return
+			}
 			orderItem.OrderId = order.ID
 			orderItem.ProductId = cartItem.ProductId
 			orderItem.ProductSkuId = cartItem.ProductSkuId
@@ -101,6 +108,23 @@ func (e *PayApi) GenerateOrder(c *gin.Context) {
 
 			goodsDetail = append(goodsDetail, goodDetail)
 		}
+	} else if orderReq.BuyType == 2 {
+		if len(orderReq.Ids) < 1 {
+			global.GVA_LOG.Error("下单ids不可为空!", zap.Error(err))
+			response.FailWithMessage("下单ids不可为空", c)
+			return
+		}
+		product, err := wechatService.GetProductByID(orderReq.Ids[0])
+		if err != nil {
+			global.GVA_LOG.Error("获取商品数据失败!", zap.Error(err))
+			response.FailWithMessage("获取商品数据失败", c)
+			return
+		}
+		var goodDetail payRequest.GoodsDetail
+		goodDetail.MerchantGoodsId = utils.String(product.ProductSN)
+		goodDetail.GoodsName = utils.String(product.Name)
+		goodDetail.Quantity = utils.Int64(int64(cartItem.Quantity))
+		goodDetail.UnitPrice = utils.Int64(int64(cartItem.Price * 100))
 	}
 
 	//address, err := accountService.GetMemberReceiveAddressById(orderReq.MemberReceiveAddressId)
@@ -161,7 +185,7 @@ func (e *PayApi) GenerateOrder(c *gin.Context) {
 	payReq.Description = utils.String(orderDescription)
 	payReq.OutTradeNo = utils.String(order.OrderSn)
 	payReq.TimeExpire = utils.String(time.Now().Format(time.RFC3339))
-	payReq.NotifyUrl = utils.String("https://www.weixin.qq.com/wxpay/pay.php")
+	payReq.NotifyUrl = utils.String("https://cs.coollerbaby.cn/pay/notify")
 	payReq.GoodsTag = utils.String("WXG")
 	payReq.SettleInfo = &payRequest.SettleInfo{
 		ProfitSharing: utils.Bool(false),
@@ -234,7 +258,6 @@ func (e *PayApi) GetOrderDetail(c *gin.Context) {
 	_, res, _, err := jspaymentService.QueryOrderByOutTradeNo(queryReq, order.PrepayId)
 	if err != nil {
 		global.GVA_LOG.Error("更新失败!", zap.Error(err))
-		fmt.Println("支付失败!", zap.Error(err))
 		response.FailWithMessage(err.Error(), c)
 		return
 	}
@@ -276,35 +299,39 @@ func (e *PayApi) GetOrderDetail(c *gin.Context) {
 //}
 
 func (e *PayApi) OrderNotify(c *gin.Context) {
-	//request := notify.Request{}
-	//c.ShouldBind(&request)
-	//mapstructure.Decode(c.Params, &request)
-	//if request.EventType == "TRANSACTION.SUCCESS" {
-	//	//plaintext, err := wepay.DecryptAES256GCM(
-	//	//	aesKey, request.Resource.AssociatedData, request.Resource.Nonce, request.Resource.Ciphertext,
-	//	//)
-	//	plaintext, err := utils.DecryptAES256GCM(
-	//		consts.MchAPIv3Key, request.Resource.AssociatedData, request.Resource.Nonce, request.Resource.Ciphertext,
-	//	)
-	//	if err != nil {
-	//		fmt.Println(err)
-	//		zap.S().Error("DecryptAES256GCM err" + err.Error())
-	//	}
-	//	transaction := payments.Transaction{}
-	//	json.Unmarshal([]byte(plaintext), &transaction)
-	//	go func() {
-	//		// 执行service层代码
-	//	}()
-	//	tmp := make(map[string]interface{})
-	//	tmp["code"] = "SUCCESS"
-	//	tmp["message"] = "成功"
-	//	tmpJson, _ := json.Marshal(tmp)
-	//	c.Writer.Write(tmpJson)
-	//} else {
-	//	tmp := make(map[string]interface{})
-	//	tmp["code"] = "500"
-	//	tmp["message"] = "失败"
-	//	tmpJson, _ := json.Marshal(tmp)
-	//	c.Writer.Write(tmpJson)
-	//}
+	request := notify.Request{}
+	c.ShouldBind(&request)
+	mapstructure.Decode(c.Params, &request)
+	if request.EventType == "TRANSACTION.SUCCESS" {
+		//plaintext, err := wepay.DecryptAES256GCM(
+		//	aesKey, request.Resource.AssociatedData, request.Resource.Nonce, request.Resource.Ciphertext,
+		//)
+		plaintext, err := utils.DecryptAES256GCM(
+			consts.MchAPIv3Key, request.Resource.AssociatedData, request.Resource.Nonce, request.Resource.Ciphertext,
+		)
+		if err != nil {
+			fmt.Println(err)
+			zap.S().Error("DecryptAES256GCM err" + err.Error())
+		}
+		transaction := payModel.Transaction{}
+		json.Unmarshal([]byte(plaintext), &transaction)
+		go func() {
+			// 执行service层代码
+			err = orderService.UpdateOrderStatusByOrderSn(transaction.OutTradeNo, 1)
+			if err != nil {
+				global.GVA_LOG.Error("支付回调更新订单状态失败!", zap.Error(err))
+			}
+		}()
+		tmp := make(map[string]interface{})
+		tmp["code"] = "SUCCESS"
+		tmp["message"] = "成功"
+		tmpJson, _ := json.Marshal(tmp)
+		c.Writer.Write(tmpJson)
+	} else {
+		tmp := make(map[string]interface{})
+		tmp["code"] = "500"
+		tmp["message"] = "失败"
+		tmpJson, _ := json.Marshal(tmp)
+		c.Writer.Write(tmpJson)
+	}
 }

@@ -1,7 +1,7 @@
 package business
 
 import (
-	"github.com/flipped-aurora/gin-vue-admin/server/global"
+	"cooller/server/global"
 	"github.com/gofrs/uuid/v5"
 )
 
@@ -20,6 +20,7 @@ type Customer struct {
 	ShareCount  int        `json:"shareCount" form:"shareCount" gorm:"comment:分享次数"`
 	CardList    []*VIPCard `json:"cardList" form:"cardList" gorm:"foreignKey:CustomerId;comment:会员卡号"`
 	AuthorityId int        `json:"authorityId" gorm:"default:9528;comment:用户角色ID"`
+	SysUserId   int        `json:"sysUserId" form:"sysUserId" gorm:"comment:管理ID"`
 }
 
 func (Customer) TableName() string {

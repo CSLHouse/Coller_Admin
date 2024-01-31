@@ -1,8 +1,8 @@
 package internal
 
 import (
+	"cooller/server/global"
 	"fmt"
-	"github.com/flipped-aurora/gin-vue-admin/server/global"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	"time"

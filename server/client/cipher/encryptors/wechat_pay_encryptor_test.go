@@ -4,12 +4,12 @@ package encryptors
 
 import (
 	"context"
+	"cooller/server/client"
 	"crypto/x509"
-	"github.com/flipped-aurora/gin-vue-admin/server/client"
 	"strings"
 	"testing"
 
-	"github.com/flipped-aurora/gin-vue-admin/server/utils"
+	"cooller/server/utils"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

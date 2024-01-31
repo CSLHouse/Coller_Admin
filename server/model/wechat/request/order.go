@@ -10,7 +10,7 @@ type OrderCreateRequest struct {
 	PayType                int    `json:"payType" gorm:"null;default null;comment:支付方式"`
 	UseIntegration         int    `json:"useIntegration" gorm:"null;default null"`
 	Note                   string `json:"note" gorm:"null;default null"`
-	BuyType                int    `json:"buyType" gorm:"null;default null;comment:购买类型，0直接购买，1购物车购买"`
+	BuyType                int    `json:"buyType" gorm:"null;default null;comment:购买类型，2直接购买，1购物车购买"`
 }
 
 type PaySuccessRequest struct {

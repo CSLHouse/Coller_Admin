@@ -4,8 +4,8 @@ package client
 
 import (
 	"context"
+	"cooller/server/utils"
 	"crypto/x509"
-	"github.com/flipped-aurora/gin-vue-admin/server/utils"
 )
 
 // CertificateMap 最简单的证书获取器——证书Map

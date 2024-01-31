@@ -6,7 +6,7 @@ import (
 	"context"
 	"crypto/rsa"
 
-	"github.com/flipped-aurora/gin-vue-admin/server/utils"
+	"cooller/server/utils"
 )
 
 // WechatPayDecryptor 微信支付字符串解密器

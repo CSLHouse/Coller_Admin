@@ -5,12 +5,12 @@ package verifiers
 
 import (
 	"context"
+	"cooller/server/client"
 	"crypto"
 	"crypto/rsa"
 	"crypto/sha256"
 	"encoding/base64"
 	"fmt"
-	"github.com/flipped-aurora/gin-vue-admin/server/client"
 	"strings"
 )
 

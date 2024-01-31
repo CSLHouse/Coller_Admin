@@ -4,18 +4,18 @@ package option
 
 import (
 	"context"
+	"cooller/server/client"
+	"cooller/server/client/auth/signers"
+	"cooller/server/client/auth/validators"
+	"cooller/server/client/auth/verifiers"
+	"cooller/server/client/cipher/ciphers"
+	"cooller/server/client/cipher/decryptors"
+	"cooller/server/client/cipher/encryptors"
+	"cooller/server/client/consts"
+	downloader2 "cooller/server/client/downloader"
+	"cooller/server/utils"
 	"crypto/rsa"
 	"crypto/x509"
-	"github.com/flipped-aurora/gin-vue-admin/server/client"
-	"github.com/flipped-aurora/gin-vue-admin/server/client/auth/signers"
-	"github.com/flipped-aurora/gin-vue-admin/server/client/auth/validators"
-	"github.com/flipped-aurora/gin-vue-admin/server/client/auth/verifiers"
-	"github.com/flipped-aurora/gin-vue-admin/server/client/cipher/ciphers"
-	"github.com/flipped-aurora/gin-vue-admin/server/client/cipher/decryptors"
-	"github.com/flipped-aurora/gin-vue-admin/server/client/cipher/encryptors"
-	"github.com/flipped-aurora/gin-vue-admin/server/client/consts"
-	downloader2 "github.com/flipped-aurora/gin-vue-admin/server/client/downloader"
-	"github.com/flipped-aurora/gin-vue-admin/server/utils"
 	"log"
 )
 

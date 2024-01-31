@@ -1,7 +1,7 @@
 package pay
 
 import (
-	"github.com/flipped-aurora/gin-vue-admin/server/service"
+	"cooller/server/service"
 )
 
 type ApiGroup struct {

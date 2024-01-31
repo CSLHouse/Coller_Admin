@@ -1,14 +1,14 @@
 package business
 
 import (
+	"cooller/server/global"
+	"cooller/server/model/business"
+	businessReq "cooller/server/model/business/request"
+	"cooller/server/model/common/request"
+	"cooller/server/model/common/response"
+	"cooller/server/utils"
+	date_conversion "cooller/server/utils/timer"
 	"github.com/bwmarrin/snowflake"
-	"github.com/flipped-aurora/gin-vue-admin/server/global"
-	"github.com/flipped-aurora/gin-vue-admin/server/model/business"
-	businessReq "github.com/flipped-aurora/gin-vue-admin/server/model/business/request"
-	"github.com/flipped-aurora/gin-vue-admin/server/model/common/request"
-	"github.com/flipped-aurora/gin-vue-admin/server/model/common/response"
-	"github.com/flipped-aurora/gin-vue-admin/server/utils"
-	date_conversion "github.com/flipped-aurora/gin-vue-admin/server/utils/timer"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 )
@@ -39,6 +39,7 @@ func (e *MemberApi) CreateVIPMember(c *gin.Context) {
 	var customer business.Customer
 	customer.Telephone = member.Telephone
 	customer.UserName = member.UserName
+	customer.SysUserId = userId
 	err = memberService.CreateCustomerFormWeb(&customer)
 	if err != nil {
 		global.GVA_LOG.Error("创建失败!", zap.Error(err))
@@ -46,7 +47,7 @@ func (e *MemberApi) CreateVIPMember(c *gin.Context) {
 		return
 	}
 
-	comboData, err := comboService.GetVIPComboById(member.ComboId)
+	comboData, err := comboService.GetVIPComboById(member.ComboId, userId)
 	var card business.VIPCard
 	card.CardId = member.CardID
 	card.UserName = member.UserName
@@ -168,8 +169,8 @@ func (e *MemberApi) DeleteVIPMemberById(c *gin.Context) {
 		response.FailWithMessage(err.Error(), c)
 		return
 	}
-
-	err = memberService.DeleteVIPMemberById(reqId.ID)
+	userId := utils.GetUserID(c)
+	err = memberService.DeleteVIPMemberById(reqId.ID, userId)
 	if err != nil {
 		global.GVA_LOG.Error("删除失败!", zap.Error(err))
 		response.FailWithMessage("删除失败", c)
@@ -199,6 +200,7 @@ func (e *MemberApi) UpdateVIPMember(c *gin.Context) {
 		response.FailWithMessage(err.Error(), c)
 		return
 	}
+	userId := utils.GetUserID(c)
 	var customer business.Customer
 	customer.Telephone = member.Telephone
 	customer.UserName = member.UserName
@@ -209,8 +211,9 @@ func (e *MemberApi) UpdateVIPMember(c *gin.Context) {
 		return
 	}
 
-	comboData, err := comboService.GetVIPComboById(member.ComboId)
+	comboData, err := comboService.GetVIPComboById(member.ComboId, userId)
 	var card business.VIPCard
+	card.SysUserId = userId
 	card.CardId = member.CardID
 	card.StartDate = member.StartDate
 	card.Deadline = date_conversion.DateYearLater(member.StartDate, 1)
@@ -347,7 +350,7 @@ func (e *MemberApi) RenewVIPCard(c *gin.Context) {
 		response.FailWithMessage("获取失败", c)
 		return
 	}
-	comboData, err := comboService.GetVIPComboById(member.ComboId)
+	comboData, err := comboService.GetVIPComboById(member.ComboId, utils.GetUserID(c))
 	remainTimes := oldData.RemainTimes
 	oldData.RemainTimes = remainTimes + comboData.Times + member.Times
 	oldData.ComboId = member.ComboId
@@ -402,7 +405,8 @@ func (e *MemberApi) GetVipCardList(c *gin.Context) {
 		response.FailWithMessage(err.Error(), c)
 		return
 	}
-	memberList, err := memberService.GetVIPCardByTelephone(cardInfo.OnlyId)
+	userId := utils.GetUserID(c)
+	memberList, err := memberService.GetVIPCardByTelephone(cardInfo.OnlyId, userId)
 	if err != nil {
 		global.GVA_LOG.Error("获取失败!", zap.Error(err))
 		response.FailWithMessage("获取失败"+err.Error(), c)

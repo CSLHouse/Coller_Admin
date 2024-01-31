@@ -2,10 +2,10 @@ package middleware
 
 import (
 	"bytes"
+	"cooller/server/global"
+	systemRes "cooller/server/model/system/response"
 	"encoding/json"
 	"fmt"
-	"github.com/flipped-aurora/gin-vue-admin/server/global"
-	systemRes "github.com/flipped-aurora/gin-vue-admin/server/model/system/response"
 	"net/http"
 	"net/url"
 	"time"

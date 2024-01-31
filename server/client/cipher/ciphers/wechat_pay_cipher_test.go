@@ -4,11 +4,11 @@ package ciphers
 
 import (
 	"context"
+	"cooller/server/client"
+	"cooller/server/client/cipher/decryptors"
+	encryptors2 "cooller/server/client/cipher/encryptors"
+	"cooller/server/utils"
 	"github.com/agiledragon/gomonkey"
-	"github.com/flipped-aurora/gin-vue-admin/server/client"
-	"github.com/flipped-aurora/gin-vue-admin/server/client/cipher/decryptors"
-	encryptors2 "github.com/flipped-aurora/gin-vue-admin/server/client/cipher/encryptors"
-	"github.com/flipped-aurora/gin-vue-admin/server/utils"
 	"reflect"
 	"testing"
 

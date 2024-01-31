@@ -3,14 +3,14 @@ package global
 import (
 	"sync"
 
-	"github.com/flipped-aurora/gin-vue-admin/server/utils/timer"
+	"cooller/server/utils/timer"
 	"github.com/songzhibin97/gkit/cache/local_cache"
 
 	"golang.org/x/sync/singleflight"
 
 	"go.uber.org/zap"
 
-	"github.com/flipped-aurora/gin-vue-admin/server/config"
+	"cooller/server/config"
 
 	"github.com/redis/go-redis/v9"
 	"github.com/spf13/viper"

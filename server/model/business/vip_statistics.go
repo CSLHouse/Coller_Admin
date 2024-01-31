@@ -1,6 +1,6 @@
 package business
 
-import "github.com/flipped-aurora/gin-vue-admin/server/global"
+import "cooller/server/global"
 
 // VIPStatement 流水
 type VIPStatement struct {

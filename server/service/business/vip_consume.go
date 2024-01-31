@@ -1,10 +1,10 @@
 package business
 
 import (
+	"cooller/server/global"
+	"cooller/server/model/business"
+	"cooller/server/model/common/request"
 	"fmt"
-	"github.com/flipped-aurora/gin-vue-admin/server/global"
-	"github.com/flipped-aurora/gin-vue-admin/server/model/business"
-	"github.com/flipped-aurora/gin-vue-admin/server/model/common/request"
 )
 
 type VIPConsumeService struct{}
@@ -57,17 +57,6 @@ func (exa *VIPConsumeService) CreateVIPConsumeSynchronous(consumeRecord *busines
 }
 
 //@author: [piexlmax](https://github.com/piexlmax)
-//@function: DeleteFileChunk
-//@description: 删除客户
-//@param: e model.ExaConsume
-//@return: err error
-
-func (exa *VIPConsumeService) DeleteVIPConsume(e business.ConsumeRecord) (err error) {
-	err = global.GVA_DB.Delete(&e).Error
-	return err
-}
-
-//@author: [piexlmax](https://github.com/piexlmax)
 //@function: UpdateExaConsume
 //@description: 更新客户
 //@param: e *model.ExaConsume
@@ -76,17 +65,6 @@ func (exa *VIPConsumeService) DeleteVIPConsume(e business.ConsumeRecord) (err er
 func (exa *VIPConsumeService) UpdateVIPConsume(e *business.ConsumeRecord) (err error) {
 	err = global.GVA_DB.Save(e).Error
 	return err
-}
-
-//@author: [piexlmax](https://github.com/piexlmax)
-//@function: GetExaConsume
-//@description: 获取客户信息
-//@param: id int
-//@return: member model.ExaConsume, err error
-
-func (exa *VIPConsumeService) GetVIPConsume(id int) (member business.ConsumeRecord, err error) {
-	err = global.GVA_DB.Where("id = ?", id).First(&member).Error
-	return
 }
 
 func (exa *VIPConsumeService) GetVIPConsumeInfoList(userId int, searchInfo request.ConsumeSearchInfo) (list interface{}, total int64, err error) {

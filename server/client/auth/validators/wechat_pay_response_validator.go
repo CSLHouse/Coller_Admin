@@ -6,8 +6,8 @@ package validators
 import (
 	"bytes"
 	"context"
+	"cooller/server/client/auth"
 	"fmt"
-	"github.com/flipped-aurora/gin-vue-admin/server/client/auth"
 	"io/ioutil"
 	"net/http"
 )

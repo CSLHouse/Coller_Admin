@@ -4,9 +4,9 @@ package encryptors
 
 import (
 	"context"
+	"cooller/server/client"
+	"cooller/server/utils"
 	"fmt"
-	"github.com/flipped-aurora/gin-vue-admin/server/client"
-	"github.com/flipped-aurora/gin-vue-admin/server/utils"
 )
 
 // WechatPayEncryptor 微信支付字符串加密器

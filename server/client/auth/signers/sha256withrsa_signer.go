@@ -5,10 +5,10 @@ package signers
 
 import (
 	"context"
+	"cooller/server/client/auth"
+	"cooller/server/utils"
 	"crypto/rsa"
 	"fmt"
-	"github.com/flipped-aurora/gin-vue-admin/server/client/auth"
-	"github.com/flipped-aurora/gin-vue-admin/server/utils"
 	"strings"
 )
 

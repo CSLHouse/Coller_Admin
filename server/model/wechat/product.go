@@ -1,7 +1,7 @@
 package wechat
 
 import (
-	"github.com/flipped-aurora/gin-vue-admin/server/global"
+	"cooller/server/global"
 	"time"
 )
 
@@ -203,7 +203,7 @@ type ProductAttributeCategory struct {
 	Name           string `json:"name" gorm:"not null;comment:名称;size:100"`
 	AttributeCount int    `json:"attributeCount" gorm:"not null；comment:属性数量"`
 	ParamCount     int    `json:"paramCount" gorm:"not null；comment:参数数量"`
-	//SysUserAuthorityID int   `json:"sys_user_authority_id" form:"sys_user_authority_id" gorm:"comment:管理角色ID"`
+	SysUserId      int    `json:"sysUserId" form:"sysUserId" gorm:"comment:管理ID"`
 }
 
 func (ProductAttributeCategory) TableName() string {
@@ -224,7 +224,7 @@ type ProductCategory struct {
 	Icon         string `json:"icon" gorm:"comment:图标"`
 	Keywords     string `json:"keywords"`
 	Description  string `json:"description" gorm:"not null；comment:描述"`
-	//SysUserAuthorityID int   `json:"sys_user_authority_id" form:"sys_user_authority_id" gorm:"comment:管理角色ID"`
+	SysUserId    int    `json:"sysUserId" form:"sysUserId" gorm:"comment:管理ID"`
 }
 
 func (ProductCategory) TableName() string {
@@ -245,7 +245,7 @@ type ProductAttribute struct {
 	RelatedStatus              int    `json:"relatedStatus" gorm:"comment:相同属性产品是否关联；0->不关联；1->关联;size:1"`
 	HandAddStatus              int    `json:"handAddStatus" gorm:"comment:是否支持手动新增；0->不支持；1->支持;size:1"`
 	Type                       int    `json:"type" gorm:"not null；comment:属性的类型；0->规格；1->参数;size:1"`
-	//SysUserAuthorityID int   `json:"sys_user_authority_id" form:"sys_user_authority_id" gorm:"comment:管理角色ID"`
+	SysUserId                  int    `json:"sysUserId" form:"sysUserId" gorm:"comment:管理ID"`
 }
 
 func (ProductAttribute) TableName() string {
@@ -302,6 +302,7 @@ type SkuStock struct {
 	PromotionPrice float32 `json:"promotionPrice" gorm:"null;default null;comment:单品促销价格;"`
 	LockStock      int     `json:"lockStock" gorm:"null;default null;comment:锁定库存;"`
 	SpData         string  `json:"spData" gorm:"null;default null;comment:商品销售属性，json格式;"`
+	SysUserId      int     `json:"sysUserId" form:"sysUserId" gorm:"comment:管理ID"`
 }
 
 func (SkuStock) TableName() string {

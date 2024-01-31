@@ -4,9 +4,9 @@ package validators
 
 import (
 	"context"
+	"cooller/server/client/auth"
+	"cooller/server/client/consts"
 	"fmt"
-	"github.com/flipped-aurora/gin-vue-admin/server/client/auth"
-	"github.com/flipped-aurora/gin-vue-admin/server/client/consts"
 	"math"
 	"net/http"
 	"strconv"

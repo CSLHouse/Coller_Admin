@@ -1,12 +1,12 @@
 package wechat
 
 import (
+	"cooller/server/global"
+	"cooller/server/model/common/request"
+	"cooller/server/model/wechat"
+	wechatReq "cooller/server/model/wechat/request"
+	date_conversion "cooller/server/utils/timer"
 	"fmt"
-	"github.com/flipped-aurora/gin-vue-admin/server/global"
-	"github.com/flipped-aurora/gin-vue-admin/server/model/common/request"
-	"github.com/flipped-aurora/gin-vue-admin/server/model/wechat"
-	wechatReq "github.com/flipped-aurora/gin-vue-admin/server/model/wechat/request"
-	date_conversion "github.com/flipped-aurora/gin-vue-admin/server/utils/timer"
 	"gorm.io/gorm"
 	"strings"
 )
@@ -171,6 +171,12 @@ func (o *OrderService) UpdateOrderStatus(e *wechatReq.PaySuccessRequest, status 
 func (o *OrderService) UpdateOrderStatusById(orderId int, status int) (err error) {
 	db := global.GVA_DB.Model(&wechat.Order{})
 	err = db.Debug().Where("id = ?", orderId).UpdateColumn("status", status).Error
+	return err
+}
+
+func (o *OrderService) UpdateOrderStatusByOrderSn(orderSn *string, status int) (err error) {
+	db := global.GVA_DB.Model(&wechat.Order{})
+	err = db.Debug().Where("order_sn = ?", orderSn).UpdateColumn("status", status).Error
 	return err
 }
 

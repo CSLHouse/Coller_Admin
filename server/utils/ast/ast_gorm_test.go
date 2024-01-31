@@ -1,8 +1,8 @@
 package ast
 
 import (
-	"github.com/flipped-aurora/gin-vue-admin/server/global"
-	"github.com/flipped-aurora/gin-vue-admin/server/model/example"
+	"cooller/server/global"
+	"cooller/server/model/example"
 	"testing"
 )
 

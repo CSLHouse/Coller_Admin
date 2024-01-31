@@ -1,8 +1,8 @@
 package wechat
 
 import (
-	"github.com/flipped-aurora/gin-vue-admin/server/global"
-	"github.com/flipped-aurora/gin-vue-admin/server/model/wechat"
+	"cooller/server/global"
+	"cooller/server/model/wechat"
 	"gorm.io/gorm"
 )
 

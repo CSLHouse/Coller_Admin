@@ -1,9 +1,9 @@
 package business
 
 import (
-	"github.com/flipped-aurora/gin-vue-admin/server/global"
-	"github.com/flipped-aurora/gin-vue-admin/server/model/business"
-	"github.com/flipped-aurora/gin-vue-admin/server/model/common/request"
+	"cooller/server/global"
+	"cooller/server/model/business"
+	"cooller/server/model/common/request"
 )
 
 type VIPComboService struct{}
@@ -25,9 +25,9 @@ func (exa *VIPComboService) CreateVIPCombo(e business.VIPCombo) (err error) {
 //@param: e model.VIPCombo
 //@return: err error
 
-func (exa *VIPComboService) DeleteVIPComboById(id int) (err error) {
+func (exa *VIPComboService) DeleteVIPComboById(id int, userId int) (err error) {
 	var combo business.VIPCombo
-	err = global.GVA_DB.Where("id = ?", id).Delete(&combo).Error
+	err = global.GVA_DB.Where("id = ? and sys_user_id = ?", id, userId).Delete(&combo).Error
 	return err
 }
 
@@ -48,8 +48,8 @@ func (exa *VIPComboService) UpdateVIPCombo(e *business.VIPCombo) (err error) {
 //@param: id int
 //@return: customer model.VIPCombo, err error
 
-func (exa *VIPComboService) GetVIPComboById(id int) (customer business.VIPCombo, err error) {
-	err = global.GVA_DB.Where("id = ?", id).First(&customer).Error
+func (exa *VIPComboService) GetVIPComboById(id int, userId int) (customer business.VIPCombo, err error) {
+	err = global.GVA_DB.Where("id = ?  and sys_user_id = ?", id, userId).First(&customer).Error
 	return
 }
 

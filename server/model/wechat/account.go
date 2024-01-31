@@ -1,7 +1,7 @@
 package wechat
 
 import (
-	"github.com/flipped-aurora/gin-vue-admin/server/global"
+	"cooller/server/global"
 	"github.com/gofrs/uuid/v5"
 )
 

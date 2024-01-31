@@ -1,16 +1,16 @@
 package business
 
 import (
-	"github.com/flipped-aurora/gin-vue-admin/server/global"
-	"github.com/flipped-aurora/gin-vue-admin/server/model/business"
-	"github.com/flipped-aurora/gin-vue-admin/server/model/common/request"
+	"cooller/server/global"
+	"cooller/server/model/business"
+	"cooller/server/model/common/request"
 	"gorm.io/gorm"
 	"time"
 )
 
 type QrCodeService struct{}
 
-func (exa *QrCodeService) GetQrCodeInfoList(info request.PageInfo) (list []business.QrCode, total int64, err error) {
+func (exa *QrCodeService) GetQrCodeInfoList(info request.PageInfo, userId int) (list []business.QrCode, total int64, err error) {
 	limit := info.PageSize
 	offset := info.PageSize * (info.Page - 1)
 	db := global.GVA_DB.Model(&business.QrCode{})
@@ -18,13 +18,13 @@ func (exa *QrCodeService) GetQrCodeInfoList(info request.PageInfo) (list []busin
 	if err != nil {
 		return list, total, err
 	} else {
-		err = db.Limit(limit).Offset(offset).Find(&list).Error
+		err = db.Where("sys_user_id = ?", userId).Limit(limit).Offset(offset).Find(&list).Error
 	}
 	return list, total, err
 }
 
-func (exa *QrCodeService) GetQrCodeById(id int) (qrcode business.QrCode, err error) {
-	err = global.GVA_DB.Where("id = ?", id).First(&qrcode).Error
+func (exa *QrCodeService) GetQrCodeById(id int, userId int) (qrcode business.QrCode, err error) {
+	err = global.GVA_DB.Where("id = ? and sys_user_id = ?", id, userId).First(&qrcode).Error
 	return qrcode, err
 }
 
@@ -33,9 +33,9 @@ func (exa *QrCodeService) CreateQrCode(e business.QrCode) (err error) {
 	return err
 }
 
-func (exa *QrCodeService) DeleteQrCodeById(id int) (err error) {
+func (exa *QrCodeService) DeleteQrCodeById(id int, userId int) (err error) {
 	var qrcode business.QrCode
-	err = global.GVA_DB.Where("id = ?", id).Delete(&qrcode).Error
+	err = global.GVA_DB.Where("id = ? and sys_user_id = ?", id, userId).Delete(&qrcode).Error
 	return err
 }
 
@@ -44,9 +44,9 @@ func (exa *QrCodeService) UpdateQrCode(e *business.QrCode) (err error) {
 	return err
 }
 
-func (exa *QrCodeService) UpdateQrCodeCount(id int) (err error) {
+func (exa *QrCodeService) UpdateQrCodeCount(id int, userId int) (err error) {
 	db := global.GVA_DB.Model(&business.QrCode{})
-	err = db.Where("id = ?", id).Update("count", gorm.Expr("count+ ?", 1)).Error
+	err = db.Where("id = ? and sys_user_id = ?", id, userId).Update("count", gorm.Expr("count+ ?", 1)).Error
 	return err
 }
 

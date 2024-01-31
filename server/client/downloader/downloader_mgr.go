@@ -4,13 +4,13 @@ package downloader
 
 import (
 	"context"
+	"cooller/server/client"
 	"crypto/rsa"
 	"crypto/x509"
-	"github.com/flipped-aurora/gin-vue-admin/server/client"
 	"sync"
 	"time"
 
-	"github.com/flipped-aurora/gin-vue-admin/server/utils/task"
+	"cooller/server/utils/task"
 )
 
 const (

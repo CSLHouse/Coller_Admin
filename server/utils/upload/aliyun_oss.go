@@ -1,9 +1,9 @@
 package upload
 
 import (
+	"cooller/server/global"
 	"errors"
 	"github.com/aliyun/aliyun-oss-go-sdk/oss"
-	"github.com/flipped-aurora/gin-vue-admin/server/global"
 	"go.uber.org/zap"
 	"mime/multipart"
 	"os"

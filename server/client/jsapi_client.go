@@ -7,13 +7,13 @@ package client
 import (
 	"bytes"
 	"context"
+	auth2 "cooller/server/client/auth"
+	"cooller/server/client/auth/credentials"
+	"cooller/server/client/cipher"
+	"cooller/server/client/consts"
 	"encoding/json"
 	"encoding/xml"
 	"fmt"
-	auth2 "github.com/flipped-aurora/gin-vue-admin/server/client/auth"
-	"github.com/flipped-aurora/gin-vue-admin/server/client/auth/credentials"
-	"github.com/flipped-aurora/gin-vue-admin/server/client/cipher"
-	"github.com/flipped-aurora/gin-vue-admin/server/client/consts"
 
 	"runtime"
 

@@ -1,12 +1,12 @@
 package product
 
 import (
-	"github.com/flipped-aurora/gin-vue-admin/server/global"
-	"github.com/flipped-aurora/gin-vue-admin/server/model/common/request"
-	"github.com/flipped-aurora/gin-vue-admin/server/model/common/response"
-	"github.com/flipped-aurora/gin-vue-admin/server/model/wechat"
-	request2 "github.com/flipped-aurora/gin-vue-admin/server/model/wechat/request"
-	"github.com/flipped-aurora/gin-vue-admin/server/utils"
+	"cooller/server/global"
+	"cooller/server/model/common/request"
+	"cooller/server/model/common/response"
+	"cooller/server/model/wechat"
+	request2 "cooller/server/model/wechat/request"
+	"cooller/server/utils"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 	"time"

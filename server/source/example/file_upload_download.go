@@ -2,8 +2,8 @@ package example
 
 import (
 	"context"
-	"github.com/flipped-aurora/gin-vue-admin/server/model/example"
-	"github.com/flipped-aurora/gin-vue-admin/server/service/system"
+	"cooller/server/model/example"
+	"cooller/server/service/system"
 	"gorm.io/gorm"
 )
 
