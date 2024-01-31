@@ -119,6 +119,12 @@ func (exa *HomeService) UpdateRecommendProducts(e *wechatRequest.UpdateIdsKeywor
 	return err
 }
 
+func (exa *HomeService) UpdateRecommendProductSortById(e *request.SortUpdateInfo) (err error) {
+	db := global.GVA_DB.Model(&wechat.RecommendProduct{})
+	db.Where("id = ?", e.ID).UpdateColumn("sort", e.Sort)
+	return err
+}
+
 func (exa *HomeService) DeleteRecommendProducts(ids []int) (err error) {
 	var product wechat.RecommendProduct
 	err = global.GVA_DB.Where("id in ?", ids).Delete(&product).Error
@@ -131,15 +137,40 @@ func (exa *HomeService) GetOnlineRecommendProductListInfoList(pageInfo request.P
 
 	db := global.GVA_DB.Model(&wechat.RecommendProduct{})
 
-	err = db.Limit(limit).Offset(offset).Debug().Where("recommend_status = 1").Order("sort desc").Preload("Product").Find(&recommendProductList).Error
+	err = db.Limit(limit).Offset(offset).Where("recommend_status = 1").Order("sort desc").Preload("Product").Find(&recommendProductList).Error
 	return recommendProductList, err
 }
 
-//func (exa *HomeService) GetOnlineRecommendProductListInfoList() (list []wechat.RecommendProduct, err error) {
-//	db := global.GVA_DB.Model(&wechat.RecommendProduct{})
-//	err = db.Where("recommend_status = 1").Preload("Product").Find(&list).Error
-//	return list, err
-//}
+func (exa *HomeService) GetRecommendProductListByCondition(searchInfo wechatRequest.RecommendProductSearchInfo) (list []wechat.RecommendProduct, total int64, err error) {
+	limit := searchInfo.PageSize
+	offset := searchInfo.PageSize * (searchInfo.Page - 1)
+
+	var cmdList []interface{}
+	var cmdString string
+	if len(searchInfo.ProductName) > 0 {
+		cmdString = "product_name = ?"
+		cmdList = append(cmdList, strings.TrimSpace(searchInfo.ProductName))
+	}
+	if searchInfo.RecommendStatus > 0 {
+		if len(cmdList) >= 1 {
+			cmdString += " and recommend_status = ?"
+			cmdList = append(cmdList, searchInfo.RecommendStatus-100)
+		} else {
+			cmdString += "recommend_status = ?"
+			cmdList = append(cmdList, searchInfo.RecommendStatus-100)
+		}
+	}
+
+	db := global.GVA_DB.Model(&wechat.RecommendProduct{})
+	err = db.Where(cmdString, cmdList...).Count(&total).Error
+	if err != nil {
+		return list, total, err
+	} else {
+		err = db.Limit(limit).Offset(offset).Where(cmdString, cmdList...).Order("sort desc").Find(&list).Error
+	}
+
+	return list, total, err
+}
 
 func (exa *HomeService) CreateHomeProduct(e *wechat.Product) (err error) {
 	// TODO: 会员价格

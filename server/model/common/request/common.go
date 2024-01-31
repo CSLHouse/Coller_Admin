@@ -112,3 +112,8 @@ type StatusUpdateInfo struct {
 	ID     int `json:"id" form:"id"`         // 主键ID
 	Status int `json:"status" form:"status"` // 数量
 }
+
+type SortUpdateInfo struct {
+	ID   int `json:"id" form:"id"` // 主键ID
+	Sort int `json:"sort" form:"sort"`
+}

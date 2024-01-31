@@ -148,7 +148,7 @@ func (i *initHomeProduct) DataInserted(ctx context.Context) bool {
 	if !ok {
 		return false
 	}
-	if errors.Is(db.Where("brand_id = ?", 6).First(&wechatModel.Product{}).Error, gorm.ErrRecordNotFound) { // 判断是否存在数据
+	if errors.Is(db.Where("name = ?", "猪迪克单人票").First(&wechatModel.Product{}).Error, gorm.ErrRecordNotFound) { // 判断是否存在数据
 		return false
 	}
 	return true

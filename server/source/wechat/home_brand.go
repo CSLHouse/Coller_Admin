@@ -72,7 +72,7 @@ func (i *initBrand) DataInserted(ctx context.Context) bool {
 	if !ok {
 		return false
 	}
-	if errors.Is(db.Where("name = ?", "三星").First(&wechatModel.Brand{}).Error, gorm.ErrRecordNotFound) { // 判断是否存在数据
+	if errors.Is(db.Where("name = ?", "猪迪克星动乐园").First(&wechatModel.Brand{}).Error, gorm.ErrRecordNotFound) { // 判断是否存在数据
 		return false
 	}
 	return true

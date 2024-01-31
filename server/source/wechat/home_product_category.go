@@ -99,7 +99,7 @@ func (i *initHomeProductCategory) DataInserted(ctx context.Context) bool {
 	if !ok {
 		return false
 	}
-	if errors.Is(db.Where("name = ?", "笔记本").First(&wechatModel.ProductCategory{}).Error, gorm.ErrRecordNotFound) { // 判断是否存在数据
+	if errors.Is(db.Where("name = ?", "饮料").First(&wechatModel.ProductCategory{}).Error, gorm.ErrRecordNotFound) { // 判断是否存在数据
 		return false
 	}
 	return true

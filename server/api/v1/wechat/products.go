@@ -338,6 +338,38 @@ func (e *HomeApi) GetRecommendProductList(c *gin.Context) {
 	}, "获取成功", c)
 }
 
+func (e *HomeApi) GetRecommendProductListByCondition(c *gin.Context) {
+	var pageInfo wechatRequest.RecommendProductSearchInfo
+	err := c.ShouldBindQuery(&pageInfo)
+	if err != nil {
+		response.FailWithMessage(err.Error(), c)
+		return
+	}
+	err = utils.Verify(pageInfo, utils.PageInfoVerify)
+	if err != nil {
+		response.FailWithMessage(err.Error(), c)
+		return
+	}
+	recommendProductList, total, err := wechatService.GetRecommendProductListByCondition(pageInfo)
+	if err != nil {
+		global.GVA_LOG.Error("获取失败!", zap.Error(err))
+		response.FailWithMessage("获取失败"+err.Error(), c)
+		return
+	}
+	var list []wechat.Product
+	for _, recommend := range recommendProductList {
+		if recommend.Product.ID != 0 {
+			list = append(list, recommend.Product)
+		}
+	}
+	response.OkWithDetailed(response.PageResult{
+		List:     recommendProductList,
+		Total:    total,
+		Page:     pageInfo.Page,
+		PageSize: pageInfo.PageSize,
+	}, "获取成功", c)
+}
+
 func (e *HomeApi) CreateProduct(c *gin.Context) {
 	var product wechat.Product
 	err := c.ShouldBindJSON(&product)
@@ -413,7 +445,7 @@ func (e *HomeApi) GetProductList(c *gin.Context) {
 		response.FailWithMessage(err.Error(), c)
 		return
 	}
-	recommendProductList, total, err := wechatService.GetProductList(pageInfo)
+	productList, total, err := wechatService.GetProductList(pageInfo)
 	if err != nil {
 		global.GVA_LOG.Error("获取失败!", zap.Error(err))
 		response.FailWithMessage("获取失败"+err.Error(), c)
@@ -421,7 +453,7 @@ func (e *HomeApi) GetProductList(c *gin.Context) {
 	}
 
 	response.OkWithDetailed(response.PageResult{
-		List:     recommendProductList,
+		List:     productList,
 		Total:    total,
 		Page:     pageInfo.Page,
 		PageSize: pageInfo.PageSize,
@@ -717,6 +749,24 @@ func (e *HomeApi) UpdateRecommendProducts(c *gin.Context) {
 	}
 
 	err3 := wechatService.UpdateRecommendProducts(&product)
+	if err3 != nil {
+		global.GVA_LOG.Error("更新失败!", zap.Error(err3))
+		response.FailWithMessage("更新失败", c)
+		return
+	}
+	response.OkWithMessage("更新成功", c)
+}
+
+// UpdateRecommendProductSortById 更新人气推荐商品
+func (e *HomeApi) UpdateRecommendProductSortById(c *gin.Context) {
+	var info request.SortUpdateInfo
+	err := c.ShouldBindJSON(&info)
+	if err != nil {
+		response.FailWithMessage(err.Error(), c)
+		return
+	}
+
+	err3 := wechatService.UpdateRecommendProductSortById(&info)
 	if err3 != nil {
 		global.GVA_LOG.Error("更新失败!", zap.Error(err3))
 		response.FailWithMessage("更新失败", c)

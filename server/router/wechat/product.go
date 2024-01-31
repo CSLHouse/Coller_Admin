@@ -32,6 +32,7 @@ func (e *WechatRouter) InitWechatRouter(Router *gin.RouterGroup, RouterPub *gin.
 		wechatRouter.POST("recommendProduct", homeApi.CreateRecommendProducts)
 		wechatRouter.PUT("recommendProduct", homeApi.UpdateRecommendProducts)
 		wechatRouter.DELETE("recommendProduct", homeApi.DeleteRecommendProducts)
+		wechatRouter.POST("updateRecommendSort", homeApi.UpdateRecommendProductSortById)
 
 		wechatRouter.POST("attributeCategory", homeApi.CreateProductAttributeCategory)
 		wechatRouter.PUT("attributeCategory", homeApi.UpdateProductAttributeCategory)
@@ -59,6 +60,7 @@ func (e *WechatRouter) InitWechatRouter(Router *gin.RouterGroup, RouterPub *gin.
 		homePublicRouterWithoutRecord.GET("recommendProductList", homeApi.GetRecommendProductList) // 获取推荐商品列表
 		homePublicRouterWithoutRecord.GET("list", homeApi.GetProductList)                          // 获取商品列表
 		homePublicRouterWithoutRecord.GET("brand", homeApi.GetProductBrandList)
+		homePublicRouterWithoutRecord.GET("recommendProduct", homeApi.GetRecommendProductListByCondition)
 
 		homePublicRouterWithoutRecord.GET("brandDetail", homeApi.GetProductBrandByID)
 		homePublicRouterWithoutRecord.GET("productDetail", homeApi.GetProductByID)

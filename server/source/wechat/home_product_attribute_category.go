@@ -85,7 +85,7 @@ func (i *initHomeProductAttributeCategory) DataInserted(ctx context.Context) boo
 	if !ok {
 		return false
 	}
-	if errors.Is(db.Where("name = ?", "配件").First(&wechatModel.ProductAttributeCategory{}).Error, gorm.ErrRecordNotFound) { // 判断是否存在数据
+	if errors.Is(db.Where("name = ?", "饮品").First(&wechatModel.ProductAttributeCategory{}).Error, gorm.ErrRecordNotFound) { // 判断是否存在数据
 		return false
 	}
 	return true

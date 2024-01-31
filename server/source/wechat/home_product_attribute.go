@@ -126,7 +126,7 @@ func (i *initHomeProductAttribute) DataInserted(ctx context.Context) bool {
 	if !ok {
 		return false
 	}
-	if errors.Is(db.Where("name = ?", "版本").First(&wechatModel.ProductAttribute{}).Error, gorm.ErrRecordNotFound) { // 判断是否存在数据
+	if errors.Is(db.Where("name = ?", "款式").First(&wechatModel.ProductAttribute{}).Error, gorm.ErrRecordNotFound) { // 判断是否存在数据
 		return false
 	}
 	return true

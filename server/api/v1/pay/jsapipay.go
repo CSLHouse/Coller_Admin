@@ -123,8 +123,8 @@ func (e *PayApi) GenerateOrder(c *gin.Context) {
 		var goodDetail payRequest.GoodsDetail
 		goodDetail.MerchantGoodsId = utils.String(product.ProductSN)
 		goodDetail.GoodsName = utils.String(product.Name)
-		goodDetail.Quantity = utils.Int64(int64(cartItem.Quantity))
-		goodDetail.UnitPrice = utils.Int64(int64(cartItem.Price * 100))
+		//goodDetail.Quantity = utils.Int64(int64(cartItem.Quantity))
+		//goodDetail.UnitPrice = utils.Int64(int64(cartItem.Price * 100))
 	}
 
 	//address, err := accountService.GetMemberReceiveAddressById(orderReq.MemberReceiveAddressId)

@@ -45,3 +45,10 @@ type FlashProductRelationInfo struct {
 	Page                    int `json:"page" form:"page"`         // 页码
 	PageSize                int `json:"pageSize" form:"pageSize"` // 每页大小
 }
+
+type RecommendProductSearchInfo struct {
+	ProductName     string `json:"productName" form:"productName" gorm:"comment:商品名称"`
+	RecommendStatus int    `json:"recommendStatus" form:"recommendStatus" gorm:"comment:推荐状态"`
+	Page            int    `json:"page" form:"page"`         // 页码
+	PageSize        int    `json:"pageSize" form:"pageSize"` // 每页大小
+}

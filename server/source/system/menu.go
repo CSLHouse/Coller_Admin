@@ -110,17 +110,15 @@ func (i *initMenu) InitializeData(ctx context.Context) (next context.Context, er
 		{MenuLevel: 0, Hidden: true, ParentId: "27", Path: "attribute", Name: "Attribute", Component: "view/product/attribute/Attribute.vue", Sort: 6, Meta: Meta{Title: "商品属性参数", Icon: "Medal"}},
 		{MenuLevel: 0, Hidden: true, ParentId: "27", Path: "updateProduct", Name: "updateProduct", Component: "view/product/updateProduct/updateProduct.vue", Sort: 7, Meta: Meta{Title: "修改商品", Icon: "Sell"}},
 
-		{MenuLevel: 0, Hidden: false, ParentId: "0", Path: "marketing", Name: "Marketing", Component: "view/marketing/index.vue", Sort: 7, Meta: Meta{Title: "营销", Icon: "Goods"}},
-		{MenuLevel: 0, Hidden: false, ParentId: "35", Path: "flashPromotion", Name: "FlashPromotion", Component: "view/marketing/flashPromotion/index.vue", Sort: 1, Meta: Meta{Title: "秒杀活动列表", Icon: "Box"}},
-		{MenuLevel: 0, Hidden: true, ParentId: "35", Path: "productRelation", Name: "productRelation", Component: "view/marketing/flashPromotion/productRelationList.vue", Sort: 2, Meta: Meta{Title: "秒杀商品列表", Icon: "Box"}},
+		{MenuLevel: 0, Hidden: false, ParentId: "0", Path: "marketing", Name: "Marketing", Component: "view/marketing/index.vue", Sort: 7, Meta: Meta{Title: "营销", Icon: "Van"}},
+		{MenuLevel: 0, Hidden: false, ParentId: "35", Path: "flashPromotion", Name: "FlashPromotion", Component: "view/marketing/flashPromotion/index.vue", Sort: 1, Meta: Meta{Title: "秒杀活动列表", Icon: "Clock"}},
+		{MenuLevel: 0, Hidden: true, ParentId: "35", Path: "productRelation", Name: "productRelation", Component: "view/marketing/flashPromotion/productRelationList.vue", Sort: 2, Meta: Meta{Title: "秒杀商品列表", Icon: "Present"}},
 		{MenuLevel: 0, Hidden: true, ParentId: "35", Path: "selectSession", Name: "selectSession", Component: "view/marketing/flashPromotion/selectSessionList.vue", Sort: 3, Meta: Meta{Title: "秒杀时间段选择", Icon: "Box"}},
 		{MenuLevel: 0, Hidden: true, ParentId: "35", Path: "session", Name: "session", Component: "view/marketing/flashPromotion/sessionList.vue", Sort: 4, Meta: Meta{Title: "秒杀时间段列表", Icon: "Box"}},
-
-		{MenuLevel: 0, Hidden: false, ParentId: "35", Path: "brandRecommend", Name: "BrandRecommend", Component: "view/marketing/brandRecommend/brandRecommend.vue", Sort: 2, Meta: Meta{Title: "品牌推荐", Icon: "Sell"}},
-		//{MenuLevel: 0, Hidden: false, ParentId: "35", Path: "recommendProduct", Name: "RecommendProduct", Component: "view/marketing/recommend/RecommendProduct.vue", Sort: 3, Meta: Meta{Title: "人气推荐", Icon: "Paperclip"}},
-		{MenuLevel: 0, Hidden: false, ParentId: "35", Path: "advertise", Name: "Advertise", Component: "view/marketing/advertise/Advertise.vue", Sort: 4, Meta: Meta{Title: "广告列表", Icon: "MagicStick"}},
-		//{MenuLevel: 0, Hidden: false, ParentId: "35", Path: "newRecommend", Name: "NewRecommend", Component: "view/marketing/newRecommend/NewRecommend.vue", Sort: 5, Meta: Meta{Title: "新品推荐", Icon: "Medal"}},
-
+		{MenuLevel: 0, Hidden: false, ParentId: "35", Path: "recommend", Name: "RecommendProduct", Component: "view/marketing/recommend/RecommendProduct.vue", Sort: 5, Meta: Meta{Title: "人气推荐", Icon: "Medal"}},
+		{MenuLevel: 0, Hidden: false, ParentId: "35", Path: "brandRecommend", Name: "BrandRecommend", Component: "view/marketing/brandRecommend/brandRecommend.vue", Sort: 6, Meta: Meta{Title: "品牌推荐", Icon: "Sell"}},
+		{MenuLevel: 0, Hidden: false, ParentId: "35", Path: "advertise", Name: "Advertise", Component: "view/marketing/advertise/Advertise.vue", Sort: 7, Meta: Meta{Title: "广告列表", Icon: "MagicStick"}},
+		{MenuLevel: 0, Hidden: false, ParentId: "35", Path: "newRecommend", Name: "NewRecommend", Component: "view/marketing/newRecommend/NewRecommend.vue", Sort: 8, Meta: Meta{Title: "新品推荐", Icon: "Medal"}},
 	}
 	if err = db.Create(&entities).Error; err != nil {
 		return ctx, errors.Wrap(err, SysBaseMenu{}.TableName()+"表数据初始化失败!")

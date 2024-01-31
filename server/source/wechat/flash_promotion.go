@@ -73,7 +73,7 @@ func (i *initFlashPromotion) DataInserted(ctx context.Context) bool {
 	if !ok {
 		return false
 	}
-	if errors.Is(db.Where("title = ?", "双11特卖活动").First(&wechatModel.FlashPromotion{}).Error, gorm.ErrRecordNotFound) { // 判断是否存在数据
+	if errors.Is(db.Where("title = ?", "春节特卖活动").First(&wechatModel.FlashPromotion{}).Error, gorm.ErrRecordNotFound) { // 判断是否存在数据
 		return false
 	}
 	return true
