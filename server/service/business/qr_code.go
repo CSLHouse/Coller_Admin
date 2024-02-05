@@ -23,8 +23,8 @@ func (exa *QrCodeService) GetQrCodeInfoList(info request.PageInfo, userId int) (
 	return list, total, err
 }
 
-func (exa *QrCodeService) GetQrCodeById(id int, userId int) (qrcode business.QrCode, err error) {
-	err = global.GVA_DB.Where("id = ? and sys_user_id = ?", id, userId).First(&qrcode).Error
+func (exa *QrCodeService) GetQrCodeById(id int) (qrcode business.QrCode, err error) {
+	err = global.GVA_DB.Where("id = ?", id).First(&qrcode).Error
 	return qrcode, err
 }
 
@@ -44,9 +44,9 @@ func (exa *QrCodeService) UpdateQrCode(e *business.QrCode) (err error) {
 	return err
 }
 
-func (exa *QrCodeService) UpdateQrCodeCount(id int, userId int) (err error) {
+func (exa *QrCodeService) UpdateQrCodeCount(id int) (err error) {
 	db := global.GVA_DB.Model(&business.QrCode{})
-	err = db.Where("id = ? and sys_user_id = ?", id, userId).Update("count", gorm.Expr("count+ ?", 1)).Error
+	err = db.Where("id = ?", id).Update("count", gorm.Expr("count+ ?", 1)).Error
 	return err
 }
 

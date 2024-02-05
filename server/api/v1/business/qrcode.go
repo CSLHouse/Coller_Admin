@@ -176,8 +176,7 @@ func (e *QrCodeApi) DownloadQrCodeFile(c *gin.Context) {
 		response.FailWithMessage(err.Error(), c)
 		return
 	}
-	userId := utils.GetUserID(c)
-	qrcodeInfo, err := qrcodeService.GetQrCodeById(reqId.ID, userId)
+	qrcodeInfo, err := qrcodeService.GetQrCodeById(reqId.ID)
 	if err != nil {
 		global.GVA_LOG.Error("获取失败!", zap.Error(err))
 		response.FailWithMessage("获取失败"+err.Error(), c)
@@ -241,8 +240,7 @@ func (e *QrCodeApi) ScanQrCodeFile(c *gin.Context) {
 		response.FailWithMessage(err.Error(), c)
 		return
 	}
-	userId := utils.GetUserID(c)
-	qrcodeInfo, err := qrcodeService.GetQrCodeById(reqId.ID, userId)
+	qrcodeInfo, err := qrcodeService.GetQrCodeById(reqId.ID)
 	if err != nil {
 		global.GVA_LOG.Error("获取失败!", zap.Error(err))
 		response.FailWithMessage("获取失败"+err.Error(), c)
@@ -253,7 +251,7 @@ func (e *QrCodeApi) ScanQrCodeFile(c *gin.Context) {
 		"group": qrcodeInfo.RemoteUrl,
 	})
 
-	err = qrcodeService.UpdateQrCodeCount(reqId.ID, userId)
+	err = qrcodeService.UpdateQrCodeCount(reqId.ID)
 	if err != nil {
 		global.GVA_LOG.Error("更新识别二维码次数识别!", zap.Error(err))
 		return
