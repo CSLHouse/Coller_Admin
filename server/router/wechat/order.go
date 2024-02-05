@@ -26,6 +26,13 @@ func (s *OrderRouter) InitOrderRouter(Router *gin.RouterGroup) (R gin.IRoutes) {
 		wxOrderRouter.POST("update/moneyInfo", wxOrderApi.UpdateOrderMoneyInfo)
 		wxOrderRouter.POST("update/note", wxOrderApi.UpdateOrderNote)
 		wxOrderRouter.POST("update/complete", wxOrderApi.UpdateOrderCompletedStatus)
+		wxOrderRouter.POST("cart", wxOrderApi.CreateProductCart)
+		wxOrderRouter.PUT("cart", wxOrderApi.UpdateProductCartQuantity)
+		wxOrderRouter.DELETE("cart", wxOrderApi.DeleteProductCartById)
+		wxOrderRouter.DELETE("cart/clear", wxOrderApi.ClearProductCart)
+		wxOrderRouter.GET("cart/list", wxOrderApi.GetProductCartList)
+		wxOrderRouter.DELETE("carts", wxOrderApi.DeleteProductCartByIds)
+		wxOrderRouter.POST("tmpCart", wxOrderApi.CreateProductTmpCart)
 	}
 	return wxOrderRouter
 }

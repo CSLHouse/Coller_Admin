@@ -20,7 +20,7 @@ type OrderApi struct{}
 
 // GenerateConfirmOrder 生成确认单信息
 func (e *OrderApi) GenerateConfirmOrder(c *gin.Context) {
-	var reqIds request.IdsReq
+	var reqIds request.IdsTagReq
 	err := c.ShouldBindJSON(&reqIds)
 	if err != nil {
 		response.FailWithMessage(err.Error(), c)
@@ -34,37 +34,72 @@ func (e *OrderApi) GenerateConfirmOrder(c *gin.Context) {
 	cartItemList := make([]*wechatRes.CartPromotionItem, 0)
 	var totalAmount float32 = 0
 	var promotionAmount float32 = 0
-	productCartList, err := orderService.GetProductCartByIds(userId, reqIds.Ids)
-	if err != nil {
-		global.GVA_LOG.Error("获取购物车物品失败!", zap.Error(err))
-		response.FailWithMessage("获取购物车物品失败", c)
-		return
-	}
-
 	pickUp := 0
-	for _, cart := range productCartList {
-		var cartPromotionItem wechatRes.CartPromotionItem
-		cartPromotionItem.ID = cart.ID
-		cartPromotionItem.CreatedAt = cart.CreatedAt
-		cartPromotionItem.CartItem = &cart
 
-		product, err := wechatService.GetProductByID(cart.ProductId)
-		promotionProduct, promotionMessage, reduceAmount := CalculateProductPromotionPrice(product, nil)
-		cartPromotionItem.ReduceAmount = reduceAmount
-		cartPromotionItem.CartItem.Price = promotionProduct.Price
-		cartPromotionItem.PromotionMessage = promotionMessage
-		skuStock, err := wechatService.GetProductSKUStockById(cart.ProductSkuId)
+	if reqIds.Tag == 1 {
+		productCartList, err := orderService.GetProductTmpCartByIds(userId, reqIds.Ids)
 		if err != nil {
-			global.GVA_LOG.Error("获取SKU库存失败!", zap.Error(err))
+			global.GVA_LOG.Error("获取购物车物品失败!", zap.Error(err))
+			response.FailWithMessage("获取购物车物品失败", c)
+			return
 		}
-		cartPromotionItem.RealStock = skuStock.Stock
-		cartItemList = append(cartItemList, &cartPromotionItem)
-		totalAmount += cartPromotionItem.CartItem.Price
-		promotionAmount += cartPromotionItem.ReduceAmount
-		if promotionProduct.SelfPickup > 0 {
-			pickUp = 1
+		for _, cart := range productCartList {
+			var cartPromotionItem wechatRes.CartPromotionItem
+			cartPromotionItem.ID = cart.ID
+			cartPromotionItem.CreatedAt = cart.CreatedAt
+			cartPromotionItem.Quantity = cart.Quantity
+			cartPromotionItem.ProductPic = cart.SkuStock.Pic
+			cartPromotionItem.ProductName = cart.Product.Name
+			product, err := wechatService.GetProductByID(cart.ProductId)
+			promotionProduct, promotionMessage, reduceAmount := CalculateProductPromotionPrice(product, nil)
+			cartPromotionItem.ReduceAmount = reduceAmount
+			cartPromotionItem.Price = promotionProduct.Price
+			cartPromotionItem.PromotionMessage = promotionMessage
+			skuStock, err := wechatService.GetProductSKUStockById(cart.SkuStockId)
+			if err != nil {
+				global.GVA_LOG.Error("获取SKU库存失败!", zap.Error(err))
+			}
+			cartPromotionItem.RealStock = skuStock.Stock
+			cartItemList = append(cartItemList, &cartPromotionItem)
+			totalAmount += cartPromotionItem.Price
+			promotionAmount += cartPromotionItem.ReduceAmount
+			if promotionProduct.SelfPickup > 0 {
+				pickUp = 1
+			}
+		}
+	} else if reqIds.Tag == 2 {
+		productCartList, err := orderService.GetProductCartByIds(userId, reqIds.Ids)
+		if err != nil {
+			global.GVA_LOG.Error("获取购物车物品失败!", zap.Error(err))
+			response.FailWithMessage("获取购物车物品失败", c)
+			return
+		}
+		for _, cart := range productCartList {
+			var cartPromotionItem wechatRes.CartPromotionItem
+			cartPromotionItem.ID = cart.ID
+			cartPromotionItem.CreatedAt = cart.CreatedAt
+			cartPromotionItem.Quantity = cart.Quantity
+			cartPromotionItem.ProductPic = cart.SkuStock.Pic
+			cartPromotionItem.ProductName = cart.Product.Name
+			product, err := wechatService.GetProductByID(cart.ProductId)
+			promotionProduct, promotionMessage, reduceAmount := CalculateProductPromotionPrice(product, nil)
+			cartPromotionItem.ReduceAmount = reduceAmount
+			cartPromotionItem.Price = promotionProduct.Price
+			cartPromotionItem.PromotionMessage = promotionMessage
+			skuStock, err := wechatService.GetProductSKUStockById(cart.SkuStockId)
+			if err != nil {
+				global.GVA_LOG.Error("获取SKU库存失败!", zap.Error(err))
+			}
+			cartPromotionItem.RealStock = skuStock.Stock
+			cartItemList = append(cartItemList, &cartPromotionItem)
+			totalAmount += cartPromotionItem.Price
+			promotionAmount += cartPromotionItem.ReduceAmount
+			if promotionProduct.SelfPickup > 0 {
+				pickUp = 1
+			}
 		}
 	}
+
 	address, err := accountService.GetMemberReceiveAddressList(userId)
 
 	var order wechatRes.GenerateOrderResModel
@@ -117,26 +152,26 @@ func (e *OrderApi) GenerateOrder(c *gin.Context) {
 		orderItem.PromotionAmount = reduceAmount
 		orderItem.PromotionName = fmt.Sprintf("满减优惠：%s", promotionMessage)
 		// 计算优惠前总金额
-		order.TotalAmount += order.TotalAmount + cartItem.Price*float32(cartItem.Quantity)
+		order.TotalAmount += order.TotalAmount + cartItem.Product.Price*float32(cartItem.Quantity)
 		// 该商品经过优惠后的实际金额
-		realAmount := cartItem.Price*float32(cartItem.Quantity) - reduceAmount
+		realAmount := cartItem.Product.Price*float32(cartItem.Quantity) - reduceAmount
 
 		//orderItem.OrderId = order.ID
 		orderItem.ProductId = cartItem.ProductId
-		orderItem.ProductSkuId = cartItem.ProductSkuId
+		orderItem.ProductSkuId = cartItem.SkuStock.SkuCode
 		orderItem.UserId = cartItem.UserId
 		orderItem.Quantity = cartItem.Quantity
-		orderItem.Price = cartItem.Price
-		orderItem.ProductPic = cartItem.ProductPic
-		orderItem.ProductName = cartItem.ProductName
-		orderItem.ProductSubTitle = cartItem.ProductSubTitle
-		orderItem.ProductSkuCode = cartItem.ProductSkuCode
-		orderItem.MemberNickname = cartItem.MemberNickname
-		orderItem.DeleteStatus = cartItem.DeleteStatus
-		orderItem.ProductCategoryId = cartItem.ProductCategoryId
-		orderItem.ProductBrand = cartItem.ProductBrand
-		orderItem.ProductSn = cartItem.ProductSn
-		orderItem.ProductAttr = cartItem.ProductAttr
+		orderItem.Price = cartItem.Product.Price
+		orderItem.ProductPic = cartItem.Product.Pic
+		orderItem.ProductName = cartItem.Product.Name
+		orderItem.ProductSubTitle = cartItem.Product.SubTitle
+		orderItem.ProductSkuCode = ""
+		orderItem.MemberNickname = utils.GetUserName(c)
+		orderItem.DeleteStatus = 0
+		orderItem.ProductCategoryId = cartItem.Product.ProductCategoryId
+		orderItem.ProductBrand = cartItem.Product.BrandName
+		orderItem.ProductSn = cartItem.Product.ProductSN
+		orderItem.ProductAttr = cartItem.SkuStock.SpData
 		orderItem.CouponAmount = 0
 		orderItem.IntegrationAmount = 0
 		orderItem.RealAmount = realAmount
@@ -426,4 +461,120 @@ func (e *OrderApi) UpdateOrderSetting(c *gin.Context) {
 		return
 	}
 	response.OkWithMessage("更新成功", c)
+}
+
+func (e *OrderApi) GetProductCartList(c *gin.Context) {
+	cartList, err := wechatService.GetProductCartList()
+	if err != nil {
+		global.GVA_LOG.Error("获取商品sku库存失败!", zap.Error(err))
+		response.FailWithMessage("获取sku库存失败", c)
+		return
+	}
+	response.OkWithData(cartList, c)
+}
+
+// CreateProductCart 创建商品购物车
+func (e *OrderApi) CreateProductCart(c *gin.Context) {
+	var cart wechat.CartItem
+	err := c.ShouldBindJSON(&cart)
+	if err != nil {
+		response.FailWithMessage(err.Error(), c)
+		return
+	}
+	cart.UserId = utils.GetUserID(c)
+	err = wechatService.CreateProductCart(&cart)
+	if err != nil {
+		global.GVA_LOG.Error("创建失败!", zap.Error(err))
+		response.FailWithMessage("创建失败", c)
+		return
+	}
+	response.OkWithMessage("创建成功", c)
+}
+
+// UpdateProductCartQuantity 更新商品购物车数量
+func (e *OrderApi) UpdateProductCartQuantity(c *gin.Context) {
+	var quantityInfo request.QuantityInfo
+	err := c.ShouldBindQuery(&quantityInfo)
+	if err != nil {
+		response.FailWithMessage(err.Error(), c)
+		return
+	}
+	userId := utils.GetUserID(c)
+	err = wechatService.UpdateProductCartQuantity(userId, quantityInfo.ID, quantityInfo.Quantity)
+	if err != nil {
+		global.GVA_LOG.Error("更新失败!", zap.Error(err))
+		response.FailWithMessage("更新失败", c)
+		return
+	}
+	response.OkWithMessage("更新成功", c)
+}
+
+// DeleteProductCartById 删除商品购物车
+func (e *OrderApi) DeleteProductCartById(c *gin.Context) {
+	var reqId request.GetById
+	err := c.ShouldBindQuery(&reqId)
+	if err != nil {
+		response.FailWithMessage(err.Error(), c)
+		return
+	}
+	userId := utils.GetUserID(c)
+	err = wechatService.DeleteProductCartById(userId, reqId.ID)
+	if err != nil {
+		global.GVA_LOG.Error("删除失败!", zap.Error(err))
+		response.FailWithMessage("删除失败", c)
+		return
+	}
+
+	response.OkWithMessage("删除成功", c)
+}
+
+func (e *OrderApi) DeleteProductCartByIds(c *gin.Context) {
+	var reqIds request.IdsReq
+	err := c.ShouldBindQuery(&reqIds)
+	if err != nil {
+		response.FailWithMessage(err.Error(), c)
+		return
+	}
+	userId := utils.GetUserID(c)
+	err = wechatService.DeleteProductCartByIds(userId, reqIds.Ids)
+	if err != nil {
+		global.GVA_LOG.Error("删除失败!", zap.Error(err))
+		response.FailWithMessage("删除失败", c)
+		return
+	}
+
+	response.OkWithMessage("删除成功", c)
+}
+
+// ClearProductCart 清空商品购物车
+func (e *OrderApi) ClearProductCart(c *gin.Context) {
+	userId := utils.GetUserID(c)
+	err := wechatService.ClearProductCartUserId(userId)
+	if err != nil {
+		global.GVA_LOG.Error("删除失败!", zap.Error(err))
+		response.FailWithMessage("删除失败", c)
+		return
+	}
+
+	response.OkWithMessage("删除成功", c)
+}
+
+// CreateProductTmpCart 创建商品购物车
+func (e *OrderApi) CreateProductTmpCart(c *gin.Context) {
+	var cart wechat.CartTmpItem
+	err := c.ShouldBindJSON(&cart)
+	if err != nil {
+		response.FailWithMessage(err.Error(), c)
+		return
+	}
+	cart.UserId = utils.GetUserID(c)
+	err = wechatService.CreateProductTmpCart(&cart)
+	if err != nil {
+		global.GVA_LOG.Error("创建失败!", zap.Error(err))
+		response.FailWithMessage("创建失败", c)
+		return
+	}
+	data := make(map[string]int)
+	data["id"] = cart.ID
+	response.OkWithData(data, c)
 }

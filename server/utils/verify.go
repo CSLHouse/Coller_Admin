@@ -19,7 +19,7 @@ var (
 	ChangePasswordVerify   = Rules{"Password": {NotEmpty()}, "NewPassword": {NotEmpty()}}
 	SetUserAuthorityVerify = Rules{"AuthorityId": {NotEmpty()}}
 	ComboVerify            = Rules{"ComboName": {NotEmpty()}, "ComboType": {NotEmpty()}, "ComboPrice": {Gt("0")}, "Amount": {Ge("0")}}
-	MemberVerify           = Rules{"CardID": {NotEmpty()}, "Telephone": {NotEmpty()}, "MemberName": {NotEmpty()}, "ComboID": {NotEmpty()}, "GiftNum": {NotEmpty()}, "Amount": {NotEmpty()}}
+	MemberVerify           = Rules{"CardId": {NotEmpty()}, "Telephone": {Eq("11")}, "UserName": {NotEmpty()}}
 	ConsumeVerify          = Rules{"CardID": {NotEmpty()}, "ComboId": {NotEmpty()}, "Deadline": {NotEmpty()}, "State": {NotEmpty()}, "Number": {NotEmpty()}}
 	CardVerify             = Rules{"OnlyId": {NotEmpty()}}
 	WxRegisterVerify       = Rules{"OpenID": {NotEmpty()}, "Code": {NotEmpty()}}

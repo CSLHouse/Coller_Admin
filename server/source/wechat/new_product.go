@@ -28,6 +28,7 @@ func (i *initNewProduct) MigrateTable(ctx context.Context) (context.Context, err
 		&wechatModel.ProductLadder{},
 		&wechatModel.SkuStock{},
 		&wechatModel.CartItem{},
+		&wechatModel.CartTmpItem{},
 	)
 }
 

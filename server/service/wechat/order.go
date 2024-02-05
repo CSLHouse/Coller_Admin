@@ -21,7 +21,13 @@ func (o *OrderService) GetProductCartById(userId int, id int) (cartItem wechat.C
 
 func (o *OrderService) GetProductCartByIds(userId int, ids []int) (cartItem []wechat.CartItem, err error) {
 	db := global.GVA_DB.Model(&wechat.CartItem{})
-	db.Debug().Where("user_id = ? and id in ?", userId, ids).First(&cartItem)
+	db.Debug().Preload("Product").Preload("SkuStock").Where("user_id = ? and id in ?", userId, ids).First(&cartItem)
+	return cartItem, err
+}
+
+func (o *OrderService) GetProductTmpCartByIds(userId int, ids []int) (cartItem []wechat.CartTmpItem, err error) {
+	db := global.GVA_DB.Model(&wechat.CartTmpItem{})
+	db.Debug().Preload("Product").Preload("SkuStock").Where("user_id = ? and id in ?", userId, ids).First(&cartItem)
 	return cartItem, err
 }
 

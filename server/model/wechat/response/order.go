@@ -6,16 +6,15 @@ import (
 )
 
 type CartPromotionItem struct {
-	ID        int              `json:"id"`
-	CreatedAt time.Time        // 创建时间
-	CartItem  *wechat.CartItem `json:"cartItem" gorm:"null;default null"`
+	ID        int       `json:"id"`
+	CreatedAt time.Time // 创建时间
 	//ProductId         int       `json:"productId" gorm:"null;default null"`
 	//ProductSkuId      int       `json:"productSkuId" gorm:"null;default null;comment:商品sku编号;"`
 	//UserId            int       `json:"user_id" gorm:" not null;"`
-	//Quantity          int       `json:"quantity" gorm:"null;default null;comment:购买数量;"`
-	//Price             float32   `json:"price" gorm:"null;default null;comment:销售价格;"`
-	//ProductPic        string    `json:"productPic" gorm:"null;default null;comment:商品主图;"`
-	//ProductName       string    `json:"productName" gorm:"null;default null;comment:商品名称;"`
+	Quantity    int     `json:"quantity" gorm:"null;default null;comment:购买数量;"`
+	Price       float32 `json:"price" gorm:"null;default null;comment:销售价格;"`
+	ProductPic  string  `json:"productPic" gorm:"null;default null;comment:商品主图;"`
+	ProductName string  `json:"productName" gorm:"null;default null;comment:商品名称;"`
 	//ProductSubTitle   string    `json:"productSubTitle" gorm:"null;default null;comment:商品副标题（卖点）;"`
 	//ProductSkuCode    string    `json:"productSkuCode" gorm:"null;default null;comment:商品sku条码;"`
 	//MemberNickname    string    `json:"memberNickname" gorm:"null;default null;comment:会员昵称;"`

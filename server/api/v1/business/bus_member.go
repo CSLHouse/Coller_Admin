@@ -25,20 +25,20 @@ type MemberApi struct{}
 // @Success   200   {object}  response.Response{msg=string}  "创建客户"
 // @Router    /customer/customer [post]
 func (e *MemberApi) CreateVIPMember(c *gin.Context) {
-	var member businessReq.CreateCardRequest
-	err := c.ShouldBindJSON(&member)
+	var card business.VIPCard
+	err := c.ShouldBindJSON(&card)
 	if err != nil {
 		response.FailWithMessage(err.Error(), c)
 		return
 	}
 	userId := utils.GetUserID(c)
 	isTmp := false
-	if len(member.UserName) < 1 && member.ComboId < 1 && member.RemainTimes < 1 {
+	if len(card.UserName) < 1 && card.ComboId < 1 && card.RemainTimes < 1 {
 		isTmp = true
 	}
 	var customer business.Customer
-	customer.Telephone = member.Telephone
-	customer.UserName = member.UserName
+	customer.Telephone = card.Telephone
+	customer.UserName = card.UserName
 	customer.SysUserId = userId
 	err = memberService.CreateCustomerFormWeb(&customer)
 	if err != nil {
@@ -47,24 +47,18 @@ func (e *MemberApi) CreateVIPMember(c *gin.Context) {
 		return
 	}
 
-	comboData, err := comboService.GetVIPComboById(member.ComboId, userId)
-	var card business.VIPCard
-	card.CardId = member.CardID
-	card.UserName = member.UserName
-	card.Telephone = member.Telephone
-	card.StartDate = member.StartDate
-	card.Deadline = date_conversion.DateYearLater(member.StartDate, 1)
+	comboData, err := comboService.GetVIPComboById(card.ComboId, userId)
+	card.Deadline = date_conversion.DateYearLater(card.StartDate, 1)
 	card.State = 1
 	card.RemainTimes += comboData.Times
 	card.IsNew = true
-	card.ComboId = member.ComboId
-	card.Collection = member.Collection
+
 	card.SysUserId = userId
 	card.CustomerId = customer.ID
 	card.StoreName = utils.GetNickName(c)
 
 	var certificate business.VIPCertificate
-	certificate.Telephone = member.Telephone
+	certificate.Telephone = card.Telephone
 	certificate.StoreName = utils.GetNickName(c)
 	certificate.SysUserId = utils.GetUserID(c)
 	err = memberService.CreateVIPCertificate(&certificate)
@@ -76,6 +70,7 @@ func (e *MemberApi) CreateVIPMember(c *gin.Context) {
 
 	// 临时会员
 	if isTmp {
+		card.Tmp = 1
 		err = memberService.CreateVIPCard(&card)
 		if err != nil {
 			global.GVA_LOG.Error("创建会员卡失败!", zap.Error(err))
@@ -86,6 +81,7 @@ func (e *MemberApi) CreateVIPMember(c *gin.Context) {
 		return
 	}
 
+	card.Tmp = 0
 	var order business.VIPOrder
 	n, err := snowflake.NewNode(1)
 	if err != nil {
@@ -93,14 +89,10 @@ func (e *MemberApi) CreateVIPMember(c *gin.Context) {
 	}
 	id := n.Generate()
 	order.OrderID = int64(id)
-	order.Telephone = member.Telephone
-	//order.MemberName = member.MemberName
-	//order.ComboId = member.ComboId
-	//order.BuyDate = member.StartDate
+	order.Telephone = card.Telephone
 	order.State = 1
 	order.IsNew = true
 	order.Type = 1
-	//order.Collection = member.Collection
 	order.SysUserId = userId
 	//err = memberService.CreateVIPMember(member)
 	//if err != nil {
@@ -117,7 +109,7 @@ func (e *MemberApi) CreateVIPMember(c *gin.Context) {
 	//}
 
 	var statement business.VIPStatement
-	statement.Recharge = member.Collection
+	statement.Recharge = card.Collection
 	statement.NewMember = 1
 	statement.SysUserId = userId
 	//err = orderService.CreateVIPStatement(statement)
@@ -128,7 +120,7 @@ func (e *MemberApi) CreateVIPMember(c *gin.Context) {
 	//}
 	// TODO: 事务处理，错误回退
 	var statistics business.VIPStatistics
-	statistics.TotalStream = float64(member.Collection)
+	statistics.TotalStream = float64(card.Collection)
 	statistics.TotalOrder = 1
 	statistics.TotalMember = 1
 	statistics.SysUserId = userId
@@ -189,40 +181,40 @@ func (e *MemberApi) DeleteVIPMemberById(c *gin.Context) {
 // @Success   200   {object}  response.Response{msg=string}  "更新客户信息"
 // @Router    /customer/customer [put]
 func (e *MemberApi) UpdateVIPMember(c *gin.Context) {
-	var member businessReq.CreateCardRequest
+	var member business.VIPCard
 	err := c.ShouldBindJSON(&member)
 	if err != nil {
 		response.FailWithMessage(err.Error(), c)
 		return
 	}
-	err = utils.Verify(member, utils.MemberVerify)
-	if err != nil {
-		response.FailWithMessage(err.Error(), c)
-		return
-	}
-	userId := utils.GetUserID(c)
-	var customer business.Customer
-	customer.Telephone = member.Telephone
-	customer.UserName = member.UserName
-	err = memberService.CreateCustomerFormWeb(&customer)
-	if err != nil {
-		global.GVA_LOG.Error("更新失败!", zap.Error(err))
-		response.FailWithMessage("更新失败", c)
+	if len(member.Telephone) < 11 || len(member.UserName) < 1 {
+		response.FailWithMessage("请检查手机号或名字是否为空", c)
 		return
 	}
 
-	comboData, err := comboService.GetVIPComboById(member.ComboId, userId)
-	var card business.VIPCard
-	card.SysUserId = userId
-	card.CardId = member.CardID
-	card.StartDate = member.StartDate
-	card.Deadline = date_conversion.DateYearLater(member.StartDate, 1)
-	card.RemainTimes += comboData.Times
-	card.ComboId = member.ComboId
-	card.Collection = member.Collection
-	card.CustomerId = customer.ID
+	//userId := utils.GetUserID(c)
+	//var customer business.Customer
+	//customer.Telephone = member.Telephone
+	//customer.UserName = member.UserName
+	//err = memberService.CreateCustomerFormWeb(&customer)
+	//if err != nil {
+	//	global.GVA_LOG.Error("更新失败!", zap.Error(err))
+	//	response.FailWithMessage("更新失败", c)
+	//	return
+	//}
+	//
+	//comboData, err := comboService.GetVIPComboById(member.ComboId, userId)
+	//var card business.VIPCard
+	//card.SysUserId = userId
+	//card.CardId = member.CardID
+	//card.StartDate = member.StartDate
+	//card.Deadline = date_conversion.DateYearLater(member.StartDate, 1)
+	//card.RemainTimes += comboData.Times
+	//card.ComboId = member.ComboId
+	//card.Collection = member.Collection
+	//card.CustomerId = customer.ID
 
-	err = memberService.UpdateVIPCard(&card)
+	err = memberService.UpdateVIPCard(&member)
 	if err != nil {
 		global.GVA_LOG.Error("更新失败!", zap.Error(err))
 		response.FailWithMessage("更新失败", c)
@@ -318,6 +310,7 @@ func (e *MemberApi) SearchVIPMember(c *gin.Context) {
 	}, "获取成功", c)
 }
 
+// SearchVIPCard 仅根据会员卡号或手机号获取会员数据
 func (e *MemberApi) SearchVIPCard(c *gin.Context) {
 	var cardInfo request.CardInfo
 	err := c.ShouldBindQuery(&cardInfo)
@@ -405,8 +398,7 @@ func (e *MemberApi) GetVipCardList(c *gin.Context) {
 		response.FailWithMessage(err.Error(), c)
 		return
 	}
-	userId := utils.GetUserID(c)
-	memberList, err := memberService.GetVIPCardByTelephone(cardInfo.OnlyId, userId)
+	memberList, err := memberService.GetVIPCardByTelephone(cardInfo.OnlyId)
 	if err != nil {
 		global.GVA_LOG.Error("获取失败!", zap.Error(err))
 		response.FailWithMessage("获取失败"+err.Error(), c)

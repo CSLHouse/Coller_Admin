@@ -385,25 +385,27 @@ func (e *HomeApi) CreateProduct(c *gin.Context) {
 		return
 	}
 	// 新品
-	if product.NewStatus == 1 {
-		var newProduct wechat.NewProduct
-		newProduct.ProductId = product.ID
-		newProduct.ProductName = product.Name
-		newProduct.RecommendStatus = product.PublishStatus
-		err = wechatService.CreateNewProduct(&newProduct)
-		if err != nil {
-			global.GVA_LOG.Error("创建新品失败!", zap.Error(err))
-			response.FailWithMessage("创建新品失败", c)
-			return
-		}
-	}
+	//if product.NewStatus == 1 {
+	//	var newProduct wechat.NewProduct
+	//	newProduct.ProductId = product.ID
+	//	newProduct.ProductName = product.Name
+	//	newProduct.RecommendStatus = product.PublishStatus
+	//	err = wechatService.CreateNewProduct(&newProduct)
+	//	if err != nil {
+	//		global.GVA_LOG.Error("创建新品失败!", zap.Error(err))
+	//		response.FailWithMessage("创建新品失败", c)
+	//		return
+	//	}
+	//}
 	// 推荐
 	if product.RecommandStatus == 1 {
-		var ewcommendProduct wechat.RecommendProduct
-		ewcommendProduct.ProductId = product.ID
-		ewcommendProduct.ProductName = product.Name
-		ewcommendProduct.RecommendStatus = product.PublishStatus
-		err = wechatService.CreateRecommendProduct(&ewcommendProduct)
+		var recommendProduct []wechat.RecommendProduct
+		var recommend wechat.RecommendProduct
+		recommend.ProductId = product.ID
+		recommend.ProductName = product.Name
+		recommend.RecommendStatus = product.PublishStatus
+		recommendProduct = append(recommendProduct, recommend)
+		err = wechatService.CreateRecommendProduct(&recommendProduct)
 		if err != nil {
 			global.GVA_LOG.Error("创建推荐商品失败!", zap.Error(err))
 			response.FailWithMessage("创建推荐商品失败", c)
@@ -722,19 +724,11 @@ func (e *HomeApi) CreateRecommendProducts(c *gin.Context) {
 		return
 	}
 
-	hots := recommendProducts.Products
-	for _, hotProduct := range hots {
-		product := wechat.RecommendProduct{}
-		product.ProductId = hotProduct.ProductId
-		product.ProductName = hotProduct.ProductName
-		product.RecommendStatus = 0
-		product.Sort = 0
-		err = wechatService.CreateRecommendProduct(&product)
-		if err != nil {
-			global.GVA_LOG.Error("创建失败!", zap.Error(err))
-			response.FailWithMessage("创建失败", c)
-			return
-		}
+	err = wechatService.CreateRecommendProduct(&recommendProducts.Products)
+	if err != nil {
+		global.GVA_LOG.Error("创建失败!", zap.Error(err))
+		response.FailWithMessage("创建失败", c)
+		return
 	}
 	response.OkWithMessage("创建成功", c)
 }
@@ -1112,16 +1106,6 @@ func (e *HomeApi) UpdateSKUStock(c *gin.Context) {
 	response.OkWithMessage("更新成功", c)
 }
 
-func (e *HomeApi) GetProductCartList(c *gin.Context) {
-	cartList, err := wechatService.GetProductCartList()
-	if err != nil {
-		global.GVA_LOG.Error("获取商品sku库存失败!", zap.Error(err))
-		response.FailWithMessage("获取sku库存失败", c)
-		return
-	}
-	response.OkWithData(cartList, c)
-}
-
 // GetFlashPromotionProductList 获取当前活动中的商品关联表
 func GetFlashPromotionProductList() (list []wechat.FlashPromotionProductRelation) {
 	promotionValidList := FindValidFlashPromotion()
@@ -1150,8 +1134,8 @@ func CalculateProductPromotionPrice(product wechat.Product, list []wechat.FlashP
 	} else if promotion == 1 {
 		promotionMessage = "特惠促销"
 		now := time.Now().Unix()
-		startTime := product.PromotionStartDate.Unix()
-		endTime := product.PromotionEndDate.Unix()
+		startTime := product.PromotionStartTime.Unix()
+		endTime := product.PromotionEndTime.Unix()
 		if now >= startTime && now <= endTime {
 			product.Price = product.PromotionPrice
 		}
@@ -1191,90 +1175,4 @@ func CalculateProductPromotionPrice(product wechat.Product, list []wechat.FlashP
 	}
 
 	return product, promotionMessage, reduceAmount
-}
-
-// CreateProductCart 创建商品购物车
-func (e *HomeApi) CreateProductCart(c *gin.Context) {
-	var cart wechat.CartItem
-	err := c.ShouldBindJSON(&cart)
-	if err != nil {
-		response.FailWithMessage(err.Error(), c)
-		return
-	}
-	cart.UserId = utils.GetUserID(c)
-	err = wechatService.CreateProductCart(&cart)
-	if err != nil {
-		global.GVA_LOG.Error("创建失败!", zap.Error(err))
-		response.FailWithMessage("创建失败", c)
-		return
-	}
-	response.OkWithMessage("创建成功", c)
-}
-
-// UpdateProductCartQuantity 更新商品购物车数量
-func (e *HomeApi) UpdateProductCartQuantity(c *gin.Context) {
-	var quantityInfo request.QuantityInfo
-	err := c.ShouldBindQuery(&quantityInfo)
-	if err != nil {
-		response.FailWithMessage(err.Error(), c)
-		return
-	}
-	userId := utils.GetUserID(c)
-	err = wechatService.UpdateProductCartQuantity(userId, quantityInfo.ID, quantityInfo.Quantity)
-	if err != nil {
-		global.GVA_LOG.Error("更新失败!", zap.Error(err))
-		response.FailWithMessage("更新失败", c)
-		return
-	}
-	response.OkWithMessage("更新成功", c)
-}
-
-// DeleteProductCartById 删除商品购物车
-func (e *HomeApi) DeleteProductCartById(c *gin.Context) {
-	var reqId request.QuantityInfo
-	err := c.ShouldBindQuery(&reqId)
-	if err != nil {
-		response.FailWithMessage(err.Error(), c)
-		return
-	}
-	userId := utils.GetUserID(c)
-	err = wechatService.DeleteProductCartById(userId, reqId.ID)
-	if err != nil {
-		global.GVA_LOG.Error("删除失败!", zap.Error(err))
-		response.FailWithMessage("删除失败", c)
-		return
-	}
-
-	response.OkWithMessage("删除成功", c)
-}
-
-func (e *HomeApi) DeleteProductCartByIds(c *gin.Context) {
-	var reqIds request.IdsReq
-	err := c.ShouldBindQuery(&reqIds)
-	if err != nil {
-		response.FailWithMessage(err.Error(), c)
-		return
-	}
-	userId := utils.GetUserID(c)
-	err = wechatService.DeleteProductCartByIds(userId, reqIds.Ids)
-	if err != nil {
-		global.GVA_LOG.Error("删除失败!", zap.Error(err))
-		response.FailWithMessage("删除失败", c)
-		return
-	}
-
-	response.OkWithMessage("删除成功", c)
-}
-
-// ClearProductCart 清空商品购物车
-func (e *HomeApi) ClearProductCart(c *gin.Context) {
-	userId := utils.GetUserID(c)
-	err := wechatService.ClearProductCartUserId(userId)
-	if err != nil {
-		global.GVA_LOG.Error("删除失败!", zap.Error(err))
-		response.FailWithMessage("删除失败", c)
-		return
-	}
-
-	response.OkWithMessage("删除成功", c)
 }

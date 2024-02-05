@@ -6,8 +6,8 @@ import (
 
 type VIPCard struct {
 	global.GVA_MODEL
-	CardId      string   `json:"cardId" form:"cardId" gorm:"primaryKey;comment:会员卡号"` // 会员卡号
-	Telephone   string   `json:"telephone" form:"telephone" gorm:"primaryKey;comment:用户手机号"`
+	CardId      string   `json:"cardId" form:"cardId" gorm:"comment:会员卡号"` // 会员卡号
+	Telephone   string   `json:"telephone" form:"telephone" gorm:"comment:用户手机号"`
 	UserName    string   `json:"userName" gorm:"index;comment:会员卡用户名"`       // 用户登录名
 	ComboId     int      `json:"comboId" form:"comboId" gorm:"comment:套餐ID"` // 管理ID
 	Combo       VIPCombo `json:"combo" gorm:"foreignKey:ComboId;references:ID;comment:套餐"`
@@ -21,6 +21,7 @@ type VIPCard struct {
 	Customer    Customer `json:"customer" gorm:"foreignKey:CustomerId;comment:消费者"`
 	CustomerId  int      `json:"customerId" form:"customerId" gorm:"comment:消费者ID"`
 	StoreName   string   `json:"storeName" form:"storeName" gorm:"comment:所在商店名称"`
+	Tmp         int      `json:"tmp" form:"tmp" gorm:"comment:是否是临时会员，0不是，1是"`
 }
 
 func (VIPCard) TableName() string {

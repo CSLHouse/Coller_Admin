@@ -1,7 +1,7 @@
 package request
 
 import (
-	wechatModel "cooller/server/model/wechat"
+	"cooller/server/model/wechat"
 )
 
 type UpdateIdsKeywordRequest struct {
@@ -11,7 +11,7 @@ type UpdateIdsKeywordRequest struct {
 }
 
 type AddRecommendProductRequest struct {
-	Products []wechatModel.RecommendProduct `json:"products" gorm:"not null"`
+	Products []wechat.RecommendProduct `json:"products" gorm:"not null"`
 }
 
 type MemberLevel struct {

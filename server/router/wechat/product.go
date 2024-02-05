@@ -46,12 +46,6 @@ func (e *WechatRouter) InitWechatRouter(Router *gin.RouterGroup, RouterPub *gin.
 		wechatRouter.PUT("sku", homeApi.UpdateSKUStock)
 	}
 	{
-		wechatRouterWithoutRecord.POST("cart", homeApi.CreateProductCart)
-		wechatRouterWithoutRecord.PUT("cart", homeApi.UpdateProductCartQuantity)
-		wechatRouterWithoutRecord.DELETE("cart", homeApi.DeleteProductCartById)
-		wechatRouterWithoutRecord.DELETE("cart/clear", homeApi.ClearProductCart)
-		wechatRouterWithoutRecord.GET("cart/list", homeApi.GetProductCartList)
-		wechatRouterWithoutRecord.DELETE("carts", homeApi.DeleteProductCartByIds)
 		wechatRouterWithoutRecord.DELETE("deletes", homeApi.DeleteProducts)
 	}
 	{

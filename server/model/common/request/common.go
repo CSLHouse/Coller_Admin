@@ -30,6 +30,11 @@ type IdsReq struct {
 	Ids []int `json:"ids" form:"ids"`
 }
 
+type IdsTagReq struct {
+	Ids []int `json:"ids" form:"ids"`
+	Tag int   `json:"tag" form:"tag"`
+}
+
 // GetAuthorityId Get role by id structure
 type GetAuthorityId struct {
 	AuthorityId int `json:"authorityId" form:"authorityId"` // 角色ID
@@ -38,12 +43,13 @@ type GetAuthorityId struct {
 type Empty struct{}
 
 type MemberSearchInfo struct {
-	Telephone  int    `json:"telephone" form:"telephone"`   // 联系电话
+	Telephone  string `json:"telephone" form:"telephone"`   // 联系电话
 	MemberName string `json:"memberName" form:"memberName"` // 姓名
 	Deadline   string `json:"deadline" form:"deadline"`     // 截止时间
 	State      int    `json:"state" form:"state"`           // 状态
-	Page       int    `json:"page" form:"page"`             // 页码
-	PageSize   int    `json:"pageSize" form:"pageSize"`     // 每页大小
+	Tmp        int    `json:"tmp" form:"tmp"`
+	Page       int    `json:"page" form:"page"`         // 页码
+	PageSize   int    `json:"pageSize" form:"pageSize"` // 每页大小
 }
 
 type CardInfo struct {

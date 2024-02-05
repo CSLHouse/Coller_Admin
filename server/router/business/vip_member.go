@@ -24,8 +24,7 @@ func (e *MemberRouter) InitMemberRouter(Router *gin.RouterGroup, RouterPub *gin.
 		//businessRouterWithoutRecord.GET("member", vipMemberApi.GetVIPMember)         // 获取单一客户信息
 		businessRouterWithoutRecord.GET("memberList", vipMemberApi.GetVIPMemberList) // 获取客户列表
 		businessRouterWithoutRecord.POST("memberSearch", vipMemberApi.SearchVIPMember)
-		businessRouterWithoutRecord.POST("searchCard", vipMemberApi.SearchVIPCard)
-		//businessRouterWithoutRecord.GET("cardList", vipMemberApi.GetVipCardList)
+		businessRouterWithoutRecord.POST("searchCard", vipMemberApi.SearchVIPCard) //仅根据会员卡号或手机号获取会员数据
 	}
 	{
 

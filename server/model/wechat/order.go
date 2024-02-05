@@ -64,7 +64,7 @@ type OrderItem struct {
 	OrderId int `json:"orderId" gorm:"null;default null;comment:订单id;"`
 	//OrderSn           string  `json:"orderSn" gorm:"null;default null;comment:订单编号;"`
 	ProductId         int     `json:"productId" gorm:"null;default null"`
-	ProductSkuId      int     `json:"productSkuId" gorm:"null;default null;comment:商品sku编号;"`
+	ProductSkuId      string  `json:"productSkuId" gorm:"null;default null;comment:商品sku编号;"`
 	UserId            int     `json:"user_id" gorm:" not null;"`
 	Quantity          int     `json:"quantity" gorm:"null;default null;comment:购买数量;"`
 	Price             float32 `json:"price" gorm:"null;default null;comment:销售价格;"`

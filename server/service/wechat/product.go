@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"go.uber.org/zap"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 	"strings"
 	"time"
 )
@@ -109,7 +110,7 @@ func (exa *HomeService) GetOnlineNewProductInfoList() (list []wechat.NewProduct,
 	return list, err
 }
 
-func (exa *HomeService) CreateRecommendProduct(e *wechat.RecommendProduct) (err error) {
+func (exa *HomeService) CreateRecommendProduct(e *[]wechat.RecommendProduct) (err error) {
 	err = global.GVA_DB.Create(&e).Error
 	return err
 }
@@ -137,7 +138,7 @@ func (exa *HomeService) GetOnlineRecommendProductListInfoList(pageInfo request.P
 
 	db := global.GVA_DB.Model(&wechat.RecommendProduct{})
 
-	err = db.Limit(limit).Offset(offset).Where("recommend_status = 1").Order("sort desc").Preload("Product").Find(&recommendProductList).Error
+	err = db.Limit(limit).Offset(offset).Where("recommend_status = 1").Preload("Product").Order("sort desc").Find(&recommendProductList).Error
 	return recommendProductList, err
 }
 
@@ -316,8 +317,13 @@ func (exa *HomeService) GetProductListByOnlyID(searchInfo *request.KeySearchInfo
 }
 
 func (exa *HomeService) DeleteProducts(ids []int) (err error) {
-	var product wechat.Product
-	err = global.GVA_DB.Where("id in ?", ids).Delete(&product).Error
+	var products []wechat.Product
+	db := global.GVA_DB
+	if err := db.Where("id in ?", ids).Preload("ProductLadderList").Preload("ProductFullReductionList").Preload("SkuStockList").Find(&products).Error; err != nil {
+		return err
+	}
+
+	db.Where("id in ?", ids).Select(clause.Associations).Delete(&products)
 	return err
 }
 
@@ -589,7 +595,7 @@ func (exa *HomeService) UpdateSKUStock(e *wechat.SkuStock) (err error) {
 }
 
 func (exa *HomeService) GetProductCartList() (list []wechat.CartItem, err error) {
-	db := global.GVA_DB.Model(&wechat.CartItem{})
+	db := global.GVA_DB.Preload("Product").Preload("SkuStock").Model(&wechat.CartItem{})
 	err = db.Find(&list).Error
 	return list, err
 }
@@ -597,7 +603,7 @@ func (exa *HomeService) GetProductCartList() (list []wechat.CartItem, err error)
 func (exa *HomeService) CreateProductCart(e *wechat.CartItem) (err error) {
 	db := global.GVA_DB.Model(&wechat.CartItem{})
 	var cart wechat.CartItem
-	result := db.Where("user_id = ? and product_id = ? and product_sku_id = ?", e.UserId, e.ProductId, e.ProductSkuId).First(&cart)
+	result := db.Where("user_id = ? and product_id = ? and sku_stock_id = ?", e.UserId, e.ProductId, e.SkuStockId).First(&cart)
 	if result.Error != nil {
 		if result.Error == gorm.ErrRecordNotFound {
 			err = global.GVA_DB.Create(&e).Error
@@ -632,6 +638,11 @@ func (exa *HomeService) DeleteProductCartByIds(userId int, ids []int) (err error
 func (exa *HomeService) ClearProductCartUserId(id int) (err error) {
 	var cart wechat.CartItem
 	err = global.GVA_DB.Where("user_id = ?", id).Delete(&cart).Error
+	return err
+}
+
+func (exa *HomeService) CreateProductTmpCart(e *wechat.CartTmpItem) (err error) {
+	err = global.GVA_DB.Create(&e).Error
 	return err
 }
 

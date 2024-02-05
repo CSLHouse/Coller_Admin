@@ -43,8 +43,70 @@ func (e *PayApi) GenerateOrder(c *gin.Context) {
 	order.TotalAmount = 0
 	order.PayAmount = 0
 	order.PromotionAmount = 0
+	if len(orderReq.Ids) < 1 {
+		global.GVA_LOG.Error("下单ids不可为空!", zap.Error(err))
+		response.FailWithMessage("下单ids不可为空", c)
+		return
+	}
+	if orderReq.BuyType == 1 { // 直接购买
+		productCartList, err := orderService.GetProductTmpCartByIds(userId, orderReq.Ids)
+		if err != nil || len(productCartList) < 1 {
+			global.GVA_LOG.Error("获取购物车物品失败!", zap.Error(err))
+			response.FailWithMessage("获取购物车物品失败", c)
+			return
+		}
+		for _, cartItem := range productCartList {
+			var goodDetail payRequest.GoodsDetail
+			goodDetail.MerchantGoodsId = utils.String(cartItem.Product.ProductSN)
+			goodDetail.GoodsName = utils.String(cartItem.Product.Name)
+			goodDetail.Quantity = utils.Int64(int64(cartItem.Quantity))
+			goodDetail.UnitPrice = utils.Int64(int64(cartItem.SkuStock.PromotionPrice * 100))
 
-	if orderReq.BuyType == 1 {
+			var orderItem wechat.OrderItem
+			_, promotionMessage, reduceAmount := wechatApi.CalculateProductPromotionPrice(cartItem.Product, nil)
+
+			order.PromotionAmount += reduceAmount
+			order.PromotionInfo = promotionMessage
+			orderItem.PromotionAmount = reduceAmount
+			orderItem.PromotionName = promotionMessage
+
+			// 计算优惠前总金额
+			order.TotalAmount += order.TotalAmount + cartItem.SkuStock.PromotionPrice*float32(cartItem.Quantity)
+			// 该商品经过优惠后的实际金额
+			realAmount := cartItem.SkuStock.PromotionPrice*float32(cartItem.Quantity) - reduceAmount
+			if realAmount < 0 {
+				global.GVA_LOG.Error("[GenerateOrder]获取价格计算失败!", zap.Error(err))
+				response.FailWithMessage("[GenerateOrder]获取价格计算失败", c)
+				return
+			}
+			orderItem.OrderId = order.ID
+			orderItem.ProductId = cartItem.ProductId
+			orderItem.ProductSkuId = cartItem.SkuStock.SkuCode
+			orderItem.UserId = cartItem.UserId
+			orderItem.Quantity = cartItem.Quantity
+			orderItem.Price = cartItem.SkuStock.PromotionPrice
+			orderItem.ProductPic = cartItem.Product.Pic
+			orderItem.ProductName = cartItem.Product.Name
+			orderItem.ProductSubTitle = cartItem.Product.SubTitle
+			orderItem.ProductSkuCode = ""
+			orderItem.MemberNickname = utils.GetUserName(c)
+			orderItem.DeleteStatus = 0
+			orderItem.ProductCategoryId = cartItem.Product.ProductCategoryId
+			orderItem.ProductBrand = cartItem.Product.BrandName
+			orderItem.ProductSn = cartItem.Product.ProductSN
+			orderItem.ProductAttr = cartItem.SkuStock.SpData
+			orderItem.CouponAmount = 0
+			orderItem.IntegrationAmount = 0
+			orderItem.RealAmount = realAmount
+			orderItem.GiftIntegration = 0
+			orderItem.GiftGrowth = 0
+			order.OrderItemList = append(order.OrderItemList, &orderItem)
+
+			orderDescription = fmt.Sprintf("%s x%d ", cartItem.Product.Name, cartItem.Quantity)
+
+			goodsDetail = append(goodsDetail, goodDetail)
+		}
+	} else if orderReq.BuyType == 2 {
 		productCartList, err := orderService.GetProductCartByIds(userId, orderReq.Ids)
 		if err != nil || len(productCartList) < 1 {
 			global.GVA_LOG.Error("获取购物车物品失败!", zap.Error(err))
@@ -62,7 +124,7 @@ func (e *PayApi) GenerateOrder(c *gin.Context) {
 			goodDetail.MerchantGoodsId = utils.String(product.ProductSN)
 			goodDetail.GoodsName = utils.String(product.Name)
 			goodDetail.Quantity = utils.Int64(int64(cartItem.Quantity))
-			goodDetail.UnitPrice = utils.Int64(int64(cartItem.Price * 100))
+			goodDetail.UnitPrice = utils.Int64(int64(product.Price * 100))
 
 			var orderItem wechat.OrderItem
 			_, promotionMessage, reduceAmount := wechatApi.CalculateProductPromotionPrice(product, nil)
@@ -73,9 +135,9 @@ func (e *PayApi) GenerateOrder(c *gin.Context) {
 			orderItem.PromotionName = promotionMessage
 
 			// 计算优惠前总金额
-			order.TotalAmount += order.TotalAmount + cartItem.Price*float32(cartItem.Quantity)
+			order.TotalAmount += order.TotalAmount + product.Price*float32(cartItem.Quantity)
 			// 该商品经过优惠后的实际金额
-			realAmount := cartItem.Price*float32(cartItem.Quantity) - reduceAmount
+			realAmount := product.Price*float32(cartItem.Quantity) - reduceAmount
 			if realAmount < 0 {
 				global.GVA_LOG.Error("[GenerateOrder]获取价格计算失败!", zap.Error(err))
 				response.FailWithMessage("[GenerateOrder]获取价格计算失败", c)
@@ -83,20 +145,20 @@ func (e *PayApi) GenerateOrder(c *gin.Context) {
 			}
 			orderItem.OrderId = order.ID
 			orderItem.ProductId = cartItem.ProductId
-			orderItem.ProductSkuId = cartItem.ProductSkuId
+			orderItem.ProductSkuId = cartItem.SkuStock.SkuCode
 			orderItem.UserId = cartItem.UserId
 			orderItem.Quantity = cartItem.Quantity
-			orderItem.Price = cartItem.Price
-			orderItem.ProductPic = cartItem.ProductPic
-			orderItem.ProductName = cartItem.ProductName
-			orderItem.ProductSubTitle = cartItem.ProductSubTitle
-			orderItem.ProductSkuCode = cartItem.ProductSkuCode
-			orderItem.MemberNickname = cartItem.MemberNickname
-			orderItem.DeleteStatus = cartItem.DeleteStatus
-			orderItem.ProductCategoryId = cartItem.ProductCategoryId
-			orderItem.ProductBrand = cartItem.ProductBrand
-			orderItem.ProductSn = cartItem.ProductSn
-			orderItem.ProductAttr = cartItem.ProductAttr
+			orderItem.Price = product.Price
+			orderItem.ProductPic = product.Pic
+			orderItem.ProductName = product.Name
+			orderItem.ProductSubTitle = product.SubTitle
+			orderItem.ProductSkuCode = ""
+			orderItem.MemberNickname = utils.GetUserName(c)
+			orderItem.DeleteStatus = 0
+			orderItem.ProductCategoryId = product.ProductCategoryId
+			orderItem.ProductBrand = product.BrandName
+			orderItem.ProductSn = product.ProductSN
+			orderItem.ProductAttr = cartItem.SkuStock.SpData
 			orderItem.CouponAmount = 0
 			orderItem.IntegrationAmount = 0
 			orderItem.RealAmount = realAmount
@@ -104,34 +166,17 @@ func (e *PayApi) GenerateOrder(c *gin.Context) {
 			orderItem.GiftGrowth = 0
 			order.OrderItemList = append(order.OrderItemList, &orderItem)
 
-			orderDescription = fmt.Sprintf("%s x%d ", cartItem.ProductName, cartItem.Quantity)
+			orderDescription = fmt.Sprintf("%s x%d ", product.Name, cartItem.Quantity)
 
 			goodsDetail = append(goodsDetail, goodDetail)
 		}
-	} else if orderReq.BuyType == 2 {
-		if len(orderReq.Ids) < 1 {
-			global.GVA_LOG.Error("下单ids不可为空!", zap.Error(err))
-			response.FailWithMessage("下单ids不可为空", c)
-			return
-		}
-		product, err := wechatService.GetProductByID(orderReq.Ids[0])
-		if err != nil {
-			global.GVA_LOG.Error("获取商品数据失败!", zap.Error(err))
-			response.FailWithMessage("获取商品数据失败", c)
-			return
-		}
-		var goodDetail payRequest.GoodsDetail
-		goodDetail.MerchantGoodsId = utils.String(product.ProductSN)
-		goodDetail.GoodsName = utils.String(product.Name)
-		//goodDetail.Quantity = utils.Int64(int64(cartItem.Quantity))
-		//goodDetail.UnitPrice = utils.Int64(int64(cartItem.Price * 100))
 	}
 
-	//address, err := accountService.GetMemberReceiveAddressById(orderReq.MemberReceiveAddressId)
-	//if err != nil {
-	//	response.FailWithMessage(err.Error(), c)
-	//	return
-	//}
+	address, err := accountService.GetMemberReceiveAddressById(orderReq.MemberReceiveAddressId)
+	if err != nil {
+		response.FailWithMessage(err.Error(), c)
+		return
+	}
 
 	n, err := snowflake.NewNode(1)
 	if err != nil {
@@ -159,13 +204,13 @@ func (e *PayApi) GenerateOrder(c *gin.Context) {
 	order.AutoConfirmDay = 7
 	order.Integration = 0
 	order.Growth = 0
-	//order.ReceiverPhone = address.PhoneNumber
-	//order.ReceiverName = address.Name
-	//order.ReceiverPostCode = address.PostCode
-	//order.ReceiverProvince = address.Province
-	//order.ReceiverCity = address.City
-	//order.ReceiverRegion = address.Region
-	//order.ReceiverDetailAddress = address.DetailAddress
+	order.ReceiverPhone = address.PhoneNumber
+	order.ReceiverName = address.Name
+	order.ReceiverPostCode = address.PostCode
+	order.ReceiverProvince = address.Province
+	order.ReceiverCity = address.City
+	order.ReceiverRegion = address.Region
+	order.ReceiverDetailAddress = address.DetailAddress
 	order.Note = orderReq.Note
 	order.ConfirmStatus = 0
 	order.DeleteStatus = 0

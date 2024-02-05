@@ -177,8 +177,8 @@ type Product struct {
 	DetailDesc                 string                   `json:"detailDesc" form:"detailDesc" gorm:"comment:详情描述"`
 	DetailHTML                 string                   `json:"detailHTML" form:"detailHTML" gorm:"type:text;comment:产品详情网页内容"`
 	DetailMobileHTML           string                   `json:"detailMobileHTML" form:"detailMobileHTML" gorm:"type:text;comment:移动端网页详情"`
-	PromotionStartDate         time.Time                `json:"promotionStartDate" form:"promotionStartDate" gorm:"comment:促销开始日期"`
-	PromotionEndDate           time.Time                `json:"promotionEndDate" form:"promotionEndDate" gorm:"comment:促销结束日期"`
+	PromotionStartTime         time.Time                `json:"promotionStartTime" form:"promotionStartTime" gorm:"comment:促销开始日期"`
+	PromotionEndTime           time.Time                `json:"promotionEndTime" form:"promotionEndTime" gorm:"comment:促销结束日期"`
 	PromotionPerLimit          int                      `json:"promotionPerLimit" form:"promotionPerLimit" gorm:"comment:活动限购数量"`
 	PromotionType              int                      `json:"promotionType" form:"promotionType" gorm:"comment:促销类型：0->没有促销使用原价;1->使用促销价；2->使用会员价；3->使用阶梯价格；4->使用满减价格；5->限时购"`
 	BrandName                  string                   `json:"brandName" form:"brandName" gorm:"comment:品牌名称"`
@@ -312,23 +312,30 @@ func (SkuStock) TableName() string {
 // CartItem 购物车表
 type CartItem struct {
 	global.GVA_MODEL
-	ProductId         int     `json:"productId" gorm:"null;default null"`
-	ProductSkuId      int     `json:"productSkuId" gorm:"null;default null;"`
-	UserId            int     `json:"user_id" gorm:" not null;"`
-	Quantity          int     `json:"quantity" gorm:"null;default null;comment:购买数量;"`
-	Price             float32 `json:"price" gorm:"null;default null;comment:添加到购物车的价格;"`
-	ProductPic        string  `json:"productPic" gorm:"null;default null;comment:商品主图;"`
-	ProductName       string  `json:"productName" gorm:"null;default null;comment:商品名称;"`
-	ProductSubTitle   string  `json:"productSubTitle" gorm:"null;default null;comment:商品副标题（卖点）;"`
-	ProductSkuCode    string  `json:"productSkuCode" gorm:"null;default null;comment:商品sku条码;"`
-	MemberNickname    string  `json:"memberNickname" gorm:"null;default null;comment:会员昵称;"`
-	DeleteStatus      int     `json:"deleteStatus" gorm:"null;default null;comment:是否删除;"`
-	ProductCategoryId int     `json:"productCategoryId" gorm:"null;default null;comment:商品分类;"`
-	ProductBrand      string  `json:"productBrand" gorm:"null;default null;comment:品牌;"`
-	ProductSn         string  `json:"productSn" gorm:"null;default null;"`
-	ProductAttr       string  `json:"productAttr" gorm:"null;default null;comment:商品销售属性:[{\"key\":\"颜色\",\"value\":\"颜色\"},{\"key\":\"容量\",\"value\":\"4G\"}];"`
+	ProductId  int      `json:"productId" gorm:"null;default null"`
+	SkuStockId int      `json:"skuStockId" gorm:"null;default null;"`
+	UserId     int      `json:"user_id" gorm:" not null;"`
+	Quantity   int      `json:"quantity" gorm:"null;default null;comment:购买数量;"`
+	Product    Product  `json:"product" gorm:"foreignKey:ProductId;"`
+	SkuStock   SkuStock `json:"skuStock" gorm:"foreignKey:SkuStockId;"`
+	Price      float32  `json:"price" gorm:"null;default null;comment:添加到购物车的价格;"`
 }
 
 func (CartItem) TableName() string {
 	return "oms_cart_item"
+}
+
+// CartTmpItem 直接购买的虚拟购物车表
+type CartTmpItem struct {
+	global.GVA_MODEL
+	ProductId  int      `json:"productId" gorm:"null;default null"`
+	SkuStockId int      `json:"skuStockId" gorm:"null;default null;"`
+	UserId     int      `json:"user_id" gorm:" not null;"`
+	Quantity   int      `json:"quantity" gorm:"null;default null;comment:购买数量;"`
+	Product    Product  `json:"product" gorm:"foreignKey:ProductId;"`
+	SkuStock   SkuStock `json:"skuStock" gorm:"foreignKey:SkuStockId;"`
+}
+
+func (CartTmpItem) TableName() string {
+	return "oms_cart_tmp_item"
 }

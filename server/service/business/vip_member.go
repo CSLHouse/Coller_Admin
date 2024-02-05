@@ -27,7 +27,7 @@ func (exa *VIPMemberService) CreateCustomerFormWeb(e *business.Customer) (err er
 	if result.Error != nil {
 		if result.Error == gorm.ErrRecordNotFound {
 			e.UUID = uuid.Must(uuid.NewV4())
-			err = global.GVA_DB.Create(&e).Error
+			err = global.GVA_DB.Create(e).Error
 			return err
 		}
 		err = result.Error
@@ -194,7 +194,7 @@ func (exa *VIPMemberService) GetVIPMemberInfoList(userId int, info request.PageI
 	if err != nil {
 		return list, total, err
 	} else {
-		err = db.Limit(limit).Offset(offset).Where("sys_user_id = ?", userId).Preload("Customer").Preload("Combo").Find(&list).Error
+		err = db.Limit(limit).Offset(offset).Where("sys_user_id = ? and tmp = 0", userId).Preload("Customer").Preload("Combo").Find(&list).Error
 	}
 	return list, total, err
 }
@@ -205,7 +205,7 @@ func (exa *VIPMemberService) SearchVIPMember(userId int, searchInfo request.Memb
 	offset := searchInfo.PageSize * (searchInfo.Page - 1)
 
 	cmd := fmt.Sprintf("sys_user_id = %d", userId)
-	if searchInfo.Telephone >= 1000 {
+	if len(searchInfo.Telephone) > 1 {
 		cmd += fmt.Sprintf(" and telephone like '%%%d%%'", searchInfo.Telephone)
 	}
 	if len(searchInfo.MemberName) > 1 {
@@ -217,15 +217,15 @@ func (exa *VIPMemberService) SearchVIPMember(userId int, searchInfo request.Memb
 	if searchInfo.State > 0 {
 		cmd += fmt.Sprintf(" and state = %d", searchInfo.State)
 	}
-	if limit > 0 && offset > 0 {
-		cmd += fmt.Sprintf(" limit %d offset %d", limit, offset)
+	if searchInfo.Tmp > 0 {
+		cmd += fmt.Sprintf(" and tmp = %d", searchInfo.Tmp-100)
 	}
 	db := global.GVA_DB.Model(&business.VIPCard{})
 	err = db.Where(cmd).Count(&total).Error
 	if err != nil {
 		return list, total, err
 	} else {
-		err = db.Limit(limit).Offset(offset).Debug().Preload("Customer").Preload("Combo").Where(cmd).Find(&list).Error
+		err = db.Limit(limit).Offset(offset).Preload("Customer").Preload("Combo").Where(cmd).Find(&list).Error
 	}
 	return list, total, err
 }
@@ -233,7 +233,7 @@ func (exa *VIPMemberService) SearchVIPMember(userId int, searchInfo request.Memb
 // 根据卡号、联系方式搜索会员
 func (exa *VIPMemberService) SearchVipCard(userId int, cardInfo request.CardInfo) (list []business.VIPCard, err error) {
 	db := global.GVA_DB.Model(&business.VIPCard{})
-	cmd := fmt.Sprintf("sys_user_id = %d and telephone like '%%%d%%' or card_id like '%%%d%%'", userId, cardInfo.OnlyId, cardInfo.OnlyId)
+	cmd := fmt.Sprintf("sys_user_id = %d and telephone like '%%%d%%' or card_id like '%%%d%%' and tmp = 0", userId, cardInfo.OnlyId, cardInfo.OnlyId)
 	err = db.Where(cmd).Preload("Customer").Preload("Combo").Find(&list).Error
 	return list, err
 }
@@ -266,8 +266,8 @@ func (exa *VIPMemberService) GetVIPCardById(id int) (card business.VIPCard, err 
 	return card, err
 }
 
-func (exa *VIPMemberService) GetVIPCardByTelephone(id int, userId int) (card []business.VIPCard, err error) {
-	err = global.GVA_DB.Where("telephone = ? and sys_user_id = ?", id, userId).Preload("Combo").Find(&card).Error
+func (exa *VIPMemberService) GetVIPCardByTelephone(id int) (card []business.VIPCard, err error) {
+	err = global.GVA_DB.Where("telephone = ?", id).Preload("Combo").Find(&card).Error
 	return card, err
 }
 
