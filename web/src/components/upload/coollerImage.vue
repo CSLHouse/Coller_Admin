@@ -13,7 +13,7 @@
         :limit="maxCount"
         multiple
         ref="uploadRef"
-        :file-list="fileDetailList"
+        :file-list="fileList"
       >
       <!-- :auto-upload="false" -->
         <el-icon><Plus /></el-icon>
@@ -28,12 +28,11 @@
   
   <script setup>
   import ImageCompress from '@/utils/image'
-  import { ref, toRefs, defineExpose, computed } from 'vue'
+  import { ref, toRef, toRefs, defineExpose, computed, watch, watchEffect } from 'vue'
   import { ElMessage } from 'element-plus'
   import { useUserStore } from '@/pinia/modules/user'
   import { deleteFile } from '@/api/fileUploadAndDownload'
 
-  const emit = defineEmits(['change'])
   const props = defineProps({
     imageUrl: {
       type: String,
@@ -60,18 +59,21 @@
       type: String,
       default: "picture-card"
     },
-    fileList: Array
+    modelValue: Object
   })
 
   const path = ref(import.meta.env.VITE_BASE_API)
   const userStore = useUserStore()
-  const fileDetailList = toRefs(props.fileList)
+  const modelValue = toRef(props.modelValue)
 
-  computed: {
-      for(let i=0; i< fileDetailList.length; i++){
-        fileDetailList[i] = {url: props.fileList[i]}
-      }
-  }
+  const fileList = computed(() => {
+    let list = []
+    for(let i=0; i< modelValue.value.length; i++){
+      list[i] = {url: modelValue.value[i]}
+    }
+    return list
+  })
+  
 
   const beforeImageUpload = (file) => {
     const isJPG = file.type === 'image/jpeg'
@@ -90,27 +92,30 @@
     return isRightSize
   }
   
+  const emit = defineEmits(['update:modelValue'])
+
   const handleImageSuccess = (res) => {
+    console.log("----------res:", res)
     const { data } = res
     if (data.file) {
-      fileDetailList.push({url: data.file.url})
-      // console.log("==[handleImageSuccess]===fileDetailList:", fileDetailList)
-      emit('change', fileDetailList)
+      fileList.value.push({url: data.file.url})
+      modelValue.value.push(data.file.url)
+      emit('update:modelValue', fileList.value)
     }
   }
   
-  const handleRemove = async(res) => {
-    console.log("-----res-----", res)
-    const { response } = res
-    if (response.data) {
-      const res = await deleteFile(response.data.file)
+  const handleRemove = async(response) => {
+    // console.log("-----res-----", response)
+    // const { response } = res
+    if (response) {
+      const res = await deleteFile(response)
       if (res.code === 0) {
         ElMessage({
           type: 'success',
           message: '删除成功!',
         })
-        emit('change', fileDetailList)
-        console.log("----[handleRemove]------fileList:", fileDetailList)
+        emit('update:modelValue', fileList.value)
+        // console.log("----[handleRemove]------fileList:", fileList)
       }
     }
   }

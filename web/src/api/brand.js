@@ -1,6 +1,6 @@
 import request from '@/utils/request'
 export function fetchList(params) {
-  return service({
+  return request({
     url: '/product/brand',
     method: 'get',
     params

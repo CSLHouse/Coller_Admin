@@ -32,6 +32,17 @@
               />
             </el-select>
           </el-form-item>
+          <el-form-item label="会员形式：" class="form-item">
+            <el-select v-model="searchData.tmp" value-key="id" class="m-2" 
+              placeholder="请选择会员形式" size="large" clearable @clear="onSearch">
+              <el-option
+              v-for="item in memberType"
+              :key="item.id"
+              :label="item.label"
+              :value="item.value"
+              />
+            </el-select>
+          </el-form-item>
           <el-form-item class="form-item">
             <el-button type="primary" @click="onSearch">搜索</el-button>
           </el-form-item>
@@ -100,7 +111,7 @@
           <el-input v-model="memberForm.cardId" autocomplete="off" />
         </el-form-item>
         <el-form-item label="联系电话">
-          <el-input v-model.number="memberForm.telephone" autocomplete="off" />
+          <el-input v-model="memberForm.telephone" autocomplete="off" />
         </el-form-item>
         <el-form-item label="姓名">
           <el-input v-model="memberForm.userName" autocomplete="off" />
@@ -174,6 +185,7 @@ const searchData = reactive({
   deadline: '',
   state: null,
   stateStr: "",
+  tmp: null,
 })
 
 const onTriggerSearch = () => {
@@ -184,7 +196,7 @@ const onTriggerSearch = () => {
 
 const onSearch = async() => {
   const res = await searchVIPMembers({ telephone: searchData.telephone, memberName: searchData.memberName, 
-      deadline: searchData.deadline, state: searchData.state, page: page.value, pageSize: pageSize.value})
+      deadline: searchData.deadline, state: searchData.state, tmp: searchData.tmp, page: page.value, pageSize: pageSize.value})
   if ('code' in res && res.code === 0) {
     if (res.data.list) {
       tableData.value = res.data.list
@@ -259,7 +271,6 @@ const getTableData = async() => {
         }
       })
     });
-    console.log("------getTableData---", tableData)
     total.value = table.data.total
     page.value = table.data.page
     pageSize.value = table.data.pageSize
@@ -363,6 +374,18 @@ const closeDialog = () => {
   dialogFormVisible.value = false
 }
 
+const memberType = ref([
+    {
+      id: 1,
+      label: '会员',
+      value: 100
+    },
+    {
+      id: 2,
+      label: '临时会员',
+      value: 101
+    }
+  ])
 </script>
 
 <style scoped>

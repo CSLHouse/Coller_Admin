@@ -139,10 +139,8 @@
   getComboData()
   
   watch(() => comboOption.value, () => {
-    console.log("--------watch------comboOption:", comboOption.value)
     memberForm.value.comboId = comboOption.value.key
     memberForm.value.comboName = comboOption.value.value
-    console.log("--------watch------memberForm:", memberForm.value)
   })
 
   const memberForm = ref({

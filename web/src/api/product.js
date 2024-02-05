@@ -27,7 +27,7 @@ export const getProductDetail = (params) => {
 export const updateProductKeyword = (data) => {
     return service({
         url: '/product/updateKeyword',
-        method: 'post',
+        method: 'put',
         data
     })
 }

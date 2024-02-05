@@ -45,6 +45,7 @@
         >
           <el-table-column type="selection" width="40" />
           <el-table-column align="left" label="编号" prop="id" width="60"></el-table-column>
+          <el-table-column align="left" label="商品编号" prop="productId" width="120" />
           <el-table-column align="left" label="商品名称" prop="productName" width="460" />
           <el-table-column align="left" label="是否推荐" prop="state" width="120" >
             <template #default="scope">
@@ -115,6 +116,7 @@
           @selection-change="handleSelectionProductChange"
         >
           <el-table-column type="selection" width="40" />
+          <el-table-column align="left" label="商品编号" prop="id" width="200" />
           <el-table-column align="left" label="商品名称" prop="name" width="200" />
           <el-table-column align="left" label="货号" prop="productSN" width="200" />
           <el-table-column align="left" label="价格" prop="price" width="80" />
@@ -291,10 +293,20 @@
   const getProductListTableData = async() => {
     const res = await getProductList({ keyword: productSearchData.name, page: page.value, pageSize: pageSize.value })
     if ('code' in res && res.code === 0) {
-        productData.value = res.data.list
-        productData.value.forEach(element => {
+        productData.value = []
+        res.data.list.forEach(element => {
+          let isExit = false
+          hotProductData.value.forEach(item => {
+            if (item.productId == element.id) {
+              isExit = true
+            }
+          })
+          if (!isExit) {
             element.productSN = "NO." + element.productSN
             element.price = "￥" + element.price
+            productData.value.push(element)
+          }
+            
         });
         total.value = res.data.total
         page.value = res.data.page

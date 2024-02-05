@@ -1,189 +1,222 @@
 <template>
-    <div style="margin-top: 50px">
-        <el-form
-            ref="ruleFormRef"
-            :model="productInfoForm"
-            status-icon
-            label-width="120px"
-            class="demo-ruleForm"
-            :rules="rules"
-            style="max-width: 860px;margin-left: 20px;"
-            >
-            <el-form-item label="商品分类" prop="productCategoryName">
-                    <el-cascader v-model="productType" :options="productCategoryOptions" 
-                        placeholder="请选择" clearable @change="handleProductTypeChange"/>
-                </el-form-item>
-                <el-form-item label="商品名称" prop="name">
-                    <el-input v-model="productInfoForm.name" type="tel" autocomplete="off" />
-                </el-form-item>
-                <el-form-item label="副标题" prop="subTitle">
-                    <el-input v-model="productInfoForm.subTitle" type="text" autocomplete="off" />
-                </el-form-item>
-                <el-form-item label="商品品牌" prop="brand">
-                    <el-select v-model="productBrandOption" class="m-2" placeholder="请选择品牌" size="large">
-                        <el-option
-                            v-for="item in productBrandOptions"
-                            :key="item.key"
-                            :label="item.value"
-                            :value="item"
-                        />
-                    </el-select>
-                </el-form-item>
-                <el-form-item label="商品介绍" prop="gift">
-                    <el-input v-model="productInfoForm.description" type="textarea" autocomplete="off" />
-                </el-form-item>
-                <el-form-item label="商品货号" prop="collection">
-                    <el-input v-model="productInfoForm.productSN" type="text" autocomplete="off" />
-                </el-form-item>
-                <el-form-item label="商品售价" prop="date">
-                    <el-input-number v-model="productInfoForm.price" :precision="2"></el-input-number>
-                </el-form-item>
-                <el-form-item label="市场价" prop="cardId">
-                    <el-input-number v-model="productInfoForm.originalPrice" :precision="2"></el-input-number>
-                </el-form-item>
-                <el-form-item label="商品库存" prop="telephone">
-                    <el-input v-model.number="productInfoForm.stock" type="number" autocomplete="off" style="width: 100px"/>
-                </el-form-item>
-                <el-form-item label="计量单位" prop="name">
-                    <el-input v-model="productInfoForm.unit" type="text" autocomplete="off" />
-                </el-form-item>
-                <el-form-item label="商品重量" prop="name">
-                    <el-col :span="8">
-                        <el-input-number v-model="productInfoForm.weight" :precision="2"></el-input-number>
-                    </el-col>
-                    <a style=" margin-left: 10px;">克</a>
-                </el-form-item>
-                <el-form-item label="排序" prop="name">
-                    <el-input v-model="productInfoForm.sort" autocomplete="off" />
-                </el-form-item>
-        </el-form>
-    </div>
+  <div style="margin-top: 50px">
+    <el-form :model="modelValue" :rules="rules" ref="productInfoForm" label-width="120px" class="form-inner-container" size="small">
+      <el-form-item label="商品分类：" prop="productCategoryId">
+        <el-cascader
+          v-model="selectProductCateValue"
+          :options="productCateOptions"
+          placeholder="请选择" clearable @change="handleProductTypeChange">
+        </el-cascader>
+      </el-form-item>
+      <el-form-item label="商品名称：" prop="name">
+        <el-input v-model="modelValue.name"></el-input>
+      </el-form-item>
+      <el-form-item label="副标题：" prop="subTitle">
+        <el-input v-model="modelValue.subTitle"></el-input>
+      </el-form-item>
+      <el-form-item label="商品品牌：" prop="brandId">
+        <el-select
+          v-model="modelValue.brandId"
+          @change="handleBrandChange"
+          placeholder="请选择品牌">
+          <el-option
+            v-for="item in brandOptions"
+            :key="item.value"
+            :label="item.label"
+            :value="item.value">
+          </el-option>
+        </el-select>
+      </el-form-item>
+      <el-form-item label="商品介绍：">
+        <el-input
+          :autoSize="true"
+          v-model="modelValue.description"
+          type="textarea"
+          placeholder="请输入内容"></el-input>
+      </el-form-item>
+      <el-form-item label="商品货号：">
+        <el-input v-model="modelValue.productSn"></el-input>
+      </el-form-item>
+      <el-form-item label="商品售价：">
+        <el-input-number v-model="modelValue.price" :precision="2"></el-input-number>
+      </el-form-item>
+      <el-form-item label="市场价：">
+        <el-input-number v-model="modelValue.originalPrice" :precision="2"></el-input-number>
+      </el-form-item>
+      <el-form-item label="商品库存：">
+        <el-input v-model.number="modelValue.stock"></el-input>
+      </el-form-item>
+      <el-form-item label="计量单位：">
+        <el-input v-model="modelValue.unit"></el-input>
+      </el-form-item>
+      <el-form-item label="商品重量：">
+        <el-input-number v-model="modelValue.weight" :precision="2" ></el-input-number>
+        <span style="margin-left: 20px">克</span>
+      </el-form-item>
+      <el-form-item label="排序">
+        <el-input v-model.number="modelValue.sort"></el-input>
+      </el-form-item>
+      <el-form-item style="text-align: center">
+        <el-button type="primary" size="small" @click="handleNext('productInfoForm')">下一步，填写商品促销</el-button>
+      </el-form-item>
+    </el-form>
+  </div>
 </template>
 
-<script lang="ts" setup>
-    import { createProduct, getProductAttributeList, getProductDetail } from '@/api/product'
-    import { reactive, ref, onBeforeMount, watch, toRefs } from 'vue'
-    import { FormInstance, FormRules, ElMessage } from 'element-plus'
-    import { ProductStore } from '@/pinia/modules/product' 
-    const productStore = ProductStore()
-    export interface Form {
-        albumPics: string,
-            brandId: number,
-            brandName: string,
-            deleteStatus: number,
-            description: string,
-            detailDesc: string,
-            detailHTML: string,
-            detailMobileHTML: string,
-            detailTitle: string,
-            feightTemplateId: number,    // ??
-            flashPromotionCount: number,
-            flashPromotionId: number,
-            flashPromotionPrice: number,
-            flashPromotionSort: number,
-            giftPoint: number,
-            giftGrowth: number,
-            keywords: string,
-            lowStock: number,
-            name: string,
-            newStatus: number,
-            note: string,
-            originalPrice: number,
-            pic: string,
-            prefrenceAreaProductRelationList: [],
-            previewStatus: number,
-            price: number,
-            productAttributeCategoryId: number,
-            productCategoryId: number,
-            productCategoryName: string,
-            
-            productSN: string,
-            promotionEndTime: string,
-            promotionPerLimit: number,
-            promotionPrice: null,
-            promotionStartTime: string,
-            promotionType: number,
-            publishStatus: number,
-            recommandStatus: number,
-            sale: number,
-            serviceIds: string,
-            skuStockList: [],
-            sort: number,
-            stock: number,
-            subTitle: string,
-            subjectProductRelationList: [],
-            unit: string,
-            usePointLimit: number,
-            verifyStatus: number,
-            weight: number,
-    }
-    const props = defineProps<{
-        //子组件接收父组件传递过来的值
-        productInfoForm: Form,
-        isEdit: Boolean,
-    }>()
-    //使用父组件传递过来的值
-    const { isEdit, productInfoForm } = toRefs(props)
+<script setup lang="ts">
+// import {fetchListWithChildren} from '@/api/productCate'
+// import {fetchList as fetchBrandList} from '@/api/brand'
+import { ref, computed, onBeforeMount, watch, toRefs, getCurrentInstance } from 'vue'
+import { ElMessage } from 'element-plus';
+import { ProductStore } from '@/pinia/modules/product'
+const productStore = ProductStore()
 
-    const ruleFormRef = ref<FormInstance>()
-    const rules = reactive<FormRules>({
-        productCategoryName: [
-            { required: true, message: "请选择分类", trigger: "blur" }
-        ],
-        name: [
-            { required: true, message: "请输入商品名称", trigger: "blur" }
-        ],
-        brand: [
-            { required: true, message: "请选择品牌", trigger: "blur" }
-        ],
-    })
+let prop = defineProps({
+  modelValue: Object as () => ({
+    id: number,
+    productCategoryId: number,
+    cateParentId: number,
+    name: string,
+    subTitle: string,
+    brandId: number,
+    description: string,
+    productSn: string,
+    price: number,
+    originalPrice: number,
+    stock: number,
+    unit: string,
+    weight: number,
+    sort: number,
+    brandName: string,
+    productCategoryName: string,
+  }),
+  isEdit: Boolean
+})
+// 要响应式
+const {modelValue, isEdit} = toRefs(prop);
 
-    onBeforeMount(async() => {
-        if (isEdit.value) {
-            getProductCategoryData()
-            getProductBrandData()
-        }
-    })
+const hasEditCreated = ref(false)
+//选中商品分类的值
+const selectProductCateValue = ref([])
+const productCateOptions = ref([])
+const brandOptions = ref([])
+const rules = {
+  name: [
+    {required: true, message: '请输入商品名称', trigger: 'blur'},
+    {min: 2, max: 140, message: '长度在 2 到 140 个字符', trigger: 'blur'}
+  ],
+  subTitle: [{required: true, message: '请输入商品副标题', trigger: 'blur'}],
+  productCategoryId: [{required: true, message: '请选择商品分类', trigger: 'blur'}],
+  brandId: [{required: true, message: '请选择商品品牌', trigger: 'blur'}],
+  description: [{required: true, message: '请输入商品介绍', trigger: 'blur'}],
+  requiredProp: [{required: true, message: '该项为必填项', trigger: 'blur'}]
+}
 
-    const productAttributeOption = ref<elementItem>()
-    const productAttributeOptions = ref<elementItem[]>([])
-    const productCategoryOptions = ref([])
+onBeforeMount(() => {
+  getProductCateList();
+  getBrandList();
+})
 
-    const getProductCategoryData = async() => {
-        await productStore.BuildProductAttributeData()
-        productCategoryOptions.value = productStore.ProductCategoryOptions
-        let productAttributeCategoryList = productStore.ProductAttributeCategoryList
-        
-        productAttributeOptions.value = productAttributeCategoryList.map((item) => {
-            return {key: item.id, value: item.name}
-        })
+const productId = computed(() => modelValue.value.id)
+
+// watch(() => selectProductCateValue.value, (newValue) => {
+//   if (newValue != null && newValue.length === 2) {
+//     modelValue.value.productCategoryId = newValue[1];
+//     modelValue.value.productCategoryName = getCateNameById(modelValue.value.productCategoryId);
+//   } else {
+//     modelValue.value.productCategoryId = null;
+//     modelValue.value.productCategoryName = null;
+//   }
+// })
+
+watch(() => productId.value, (newValue) => {
+  if(!isEdit.value)return;
+  if(hasEditCreated)return;
+  if(newValue===undefined||newValue==null||newValue===0)return;
+  handleEditCreated();
+})
+
+const handleProductTypeChange = () => {
+  modelValue.value.productCategoryId = selectProductCateValue.value.at(-1)
+  modelValue.value.productCategoryName = getCateNameById(modelValue.value.productCategoryId)
+}
+
+
+const handleEditCreated = () => {
+  if(modelValue.value.productCategoryId != null){
+    selectProductCateValue.value.push(modelValue.value.cateParentId);
+    selectProductCateValue.value.push(modelValue.value.productCategoryId);
+  }
+  hasEditCreated.value = true;
+}
+
+const getProductCateList = async() => {
+  await productStore.BuildProductCategoryData()
+  productCateOptions.value = productStore.ProductCategoryOptions
+
+  // fetchListWithChildren().then(response => {
+  //   let list = response.data;
+  //   productCateOptions.value = [];
+  //   for (let i = 0; i < list.length; i++) {
+  //     let children = [];
+  //     if (list[i].children != null && list[i].children.length > 0) {
+  //       for (let j = 0; j < list[i].children.length; j++) {
+  //         children.push({label: list[i].children[j].name, value: list[i].children[j].id});
+  //       }
+  //     }
+  //     productCateOptions.value.push({label: list[i].name, value: list[i].id, children: children});
+  //   }
+  // });
+}
+const getBrandList = async() => {
+  await productStore.BuildBrandData()
+  let brandList = productStore.RandData['list']
+  for (let i = 0; i < brandList.length; i++) {
+    brandOptions.value.push({label: brandList[i].name, value: brandList[i].id});
+  }
+}
+const getCateNameById = (id) => {
+  let name=null;
+  for(let i=0; i<productCateOptions.value.length; i++){
+    for(let j=0; j<productCateOptions.value[i].children.length;j++){
+      if(productCateOptions.value[i].children[j].value===id){
+        name = productCateOptions.value[i].children[j].label;
+        return name;
+      }
     }
-    const productType = ref()
-    const handleProductTypeChange = (value) => {
-        productInfoForm.value.productAttributeCategoryId = value.at(-1)
+  }
+  return name;
+}
+
+const emits = defineEmits(["nextStep"]);
+const productInfoForm = ref(null)
+const handleNext = (formName) => {
+  productInfoForm.value.validate((valid) => {
+    if (valid) {
+      emits('nextStep');
+    } else {
+      ElMessage({
+        message: '验证失败',
+        type: 'error',
+        duration:1000
+      });
+      return false;
     }
-    watch(() => productAttributeOption.value, () => {
-        productInfoForm.value.productAttributeCategoryId = productAttributeOption.value.key
-    })
-    
-    interface elementItem {
-        key: number,
-        value: string,
+  });
+}
+const handleBrandChange = (val) => {
+  let brandName = '';
+  for (let i = 0; i < brandOptions.value.length; i++) {
+    if (brandOptions.value[i].value === val) {
+      brandName = brandOptions.value[i].label;
+      break;
     }
-    const productBrandOption = ref<elementItem>()
-    const productBrandOptions = ref<elementItem[]>([])
-    const getProductBrandData = async() => {
-        await productStore.BuildBrandData()
-        let productBrandList = productStore.RandData['list']
-        
-        productBrandOptions.value = productBrandList.map((item) => {
-        return {key: item.id, value: item.name}
-        })
-    }
-    
-    watch(() => productBrandOption.value, () => {
-        productInfoForm.value.brandId = productBrandOption.value.key
-        productInfoForm.value.brandName = productBrandOption.value.value
-    })
+  }
+  modelValue.value.brandName = brandName;
+}
 
 </script>
+
+
+<style scoped>
+</style>

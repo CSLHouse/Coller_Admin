@@ -39,7 +39,7 @@
   // import { genFileId } from 'element-plus'
   // import type { UploadInstance, UploadProps, UploadRawFile } from 'element-plus'
 
-  const emit = defineEmits(['change'])
+  const emits = defineEmits(["update:modelValue"])
   const props = defineProps({
     imageUrl: {
       type: String,
@@ -100,7 +100,7 @@
     if (data.file) {
         fileDetailList = []
         fileDetailList[0] = {url: data.file.url, name: data.file.name}
-        emit('update:modelValue', data.file.url)
+        emits('update:modelValue', data.file.url)
     }
   }
   
@@ -140,8 +140,6 @@
         message: '更新成功!',
       })
     }
-
-    
   }
   </script>
   
