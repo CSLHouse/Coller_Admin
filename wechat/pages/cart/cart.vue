@@ -18,14 +18,14 @@
 				<block v-for="(item, index) in cartList" :key="item.id">
 					<view class="cart-item" :class="{'b-b': index!==cartList.length-1}">
 						<view class="image-wrapper">
-							<image :src="item.productPic" :class="[item.loaded]" mode="aspectFill" lazy-load @load="onImageLoad('cartList', index)"
+							<image :src="item.product.pic" :class="[item.loaded]" mode="aspectFill" lazy-load @load="onImageLoad('cartList', index)"
 							 @error="onImageError('cartList', index)"></image>
 							<view class="yticon icon-xuanzhong2 checkbox" :class="{checked: item.checked}" @click="check('item', index)"></view>
 						</view>
 						<view class="item-right">
-							<text class="clamp title">{{item.productName}}</text>
+							<text class="clamp title">{{item.product.Name}}</text>
 							<text class="attr">{{item.spDataStr}}</text>
-							<text class="price">¥{{item.price}}</text>
+							<text class="price">¥{{item.skuStock.promotionPrice}}</text>
 							<uni-number-box class="step" :min="0" :max="100" :value="item.quantity" :index="index" @eventChange="numberChange"></uni-number-box>
 						</view>
 						<text class="del-btn yticon icon-fork" @click="handleDeleteCartItem(index)"></text>
@@ -118,6 +118,7 @@
 						return item;
 					});
 					this.cartList = cartList;
+					console.log("======cartList====", this.cartList)
 					this.calcTotal(); //计算总价
 				});
 			},
@@ -195,7 +196,7 @@
 				let checked = true;
 				list.forEach(item => {
 					if (item.checked === true) {
-						total += item.price * item.quantity;
+						total += item.skuStock.promotionPrice * item.quantity;
 					} else if (checked === true) {
 						checked = false;
 					}
@@ -217,7 +218,7 @@
 					return;
 				}
 				uni.navigateTo({
-					url: `/subpages/order/createOrder?cartIds=${JSON.stringify(cartIds)}`
+					url: `/subpages/order/createOrder?type=2&&cartIds=${JSON.stringify(cartIds)}`
 				})
 			}
 		}

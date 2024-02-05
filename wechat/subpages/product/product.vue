@@ -16,13 +16,13 @@
 			<view class="price-box">
 				<text class="price-tip">¥</text>
 				<text class="price">{{product.price}}</text>
-				<text class="m-price">¥{{product.originalPrice}}</text>
+				<text class="m-price" v-if="product.originalPrice > 0">¥{{product.originalPrice}}</text>
 				<!-- <text class="coupon-tip">7折</text> -->
 			</view>
 			<view class="bot-row">
 				<text>销量: {{product.sale}}</text>
 				<text>库存: {{product.stock}}</text>
-				<text>浏览量: 768</text>
+				<!-- <text>浏览量: 768</text> -->
 			</view>
 		</view>
 
@@ -41,37 +41,48 @@
 		</view>
 
 		<view class="c-list">
-			<view class="c-row b-b" @click="toggleSpec">
-				<text class="tit">购买类型</text>
-				<view class="con">
-					<text class="selected-text" v-for="(sItem, sIndex) in specSelected" :key="sIndex">
-						{{sItem.name}}
-					</text>
+			<view v-if="(specList !== undefined && specList !== null) && specList.length > 0">
+				<view class="c-row b-b" @click="buy_before(0)">
+					<text class="tit">购买类型</text>
+					<view class="con">
+						<text class="selected-text" v-for="(sItem, sIndex) in specSelected" :key="sIndex">
+							{{sItem.name}}
+						</text>
+					</view>
+					<text class="yticon icon-you"></text>
 				</view>
-				<text class="yticon icon-you"></text>
 			</view>
-			<view class="c-row b-b" @click="toggleAttr">
+			
+			<!-- <view class="c-row b-b" @click="toggleAttr">
 				<text class="tit">商品参数</text>
 				<view class="con">
 					<text class="con t-r">查看</text>
 				</view>
 				<text class="yticon icon-you"></text>
-			</view>
-			<!-- <view class="c-row b-b" @click="toggleCoupon('show')">
-				<text class="tit">优惠券</text>
-				<text class="con t-r red">领取优惠券</text>
-				<text class="yticon icon-you"></text>
 			</view> -->
-			<view class="c-row b-b">
-				<text class="tit">促销活动</text>
-				<view class="con-list">
-					<text v-for="item in promotionTipList" :key="item">{{item}}</text>
+			<!-- <view v-if="product.couponName != ''">
+				<view class="c-row b-b" @click="toggleCoupon('show')">
+					<text class="tit">优惠券</text>
+					<text class="con t-r red">领取优惠券</text>
+					<text class="yticon icon-you"></text>
+				</view>
+			</view> -->
+			
+			<view v-if="promotionTipList.length > 0">
+				<view class="c-row b-b">
+					<text class="tit">促销活动</text>
+					<view class="con-list">
+						<text v-for="item in promotionTipList" :key="item">{{item}}</text>
+					</view>
 				</view>
 			</view>
-			<view class="c-row b-b">
-				<text class="tit">服务</text>
-				<view class="bz-list con">
-					<text v-for="item in serviceList" :key="item">{{item}} ·</text>
+			
+			<view v-if="serviceList.length > 0">
+				<view class="c-row b-b">
+					<text class="tit">服务</text>
+					<view class="bz-list con">
+						<text v-for="item in serviceList" :key="item">{{item}} ·</text>
+					</view>
 				</view>
 			</view>
 		</view>
@@ -117,6 +128,13 @@
 			<view class="d-header">
 				<text>图文详情</text>
 			</view>
+			<!-- <div style="width:100%">
+				<video style="width:100%;display:block;" v-for="(item, index) in info.vdDetail" :key="index" :src="item" controls="controls"
+				 mode="widthFix"></video>
+				<img style="width: 100%;display:block;" v-for="(item, index) in info.imgDetail" :key="index" :src="item" mode="widthFix"
+				 @tap="_previewImage(item)" />
+			</div>
+			<rich-text :nodes="info.richText"></rich-text> -->
 			<rich-text :nodes="desc"></rich-text>
 		</view>
 
@@ -136,14 +154,13 @@
 			</navigator>
 			
 			<view class="action-btn-group">
-				<button type="primary" class=" action-btn no-border buy-now-btn" @click="buy">立即购买</button>
-				<button type="primary" class=" action-btn no-border add-cart-btn" @click="addToCart">加入购物车</button>
+				<button type="primary" class=" action-btn no-border buy-now-btn" @click="buy_before(1)">立即购买</button>
+				<button type="primary" class=" action-btn no-border add-cart-btn" @click="buy_before(2)">加入购物车</button>
 			</view>
 		</view>
 
-
 		<!-- 规格-模态层弹窗 -->
-		<view class="popup spec" :class="specClass" @touchmove.stop.prevent="stopPrevent" @click="toggleSpec">
+		<view class="popup spec" :class="specClass" @touchmove.stop.prevent="stopPrevent" @click="buy_before(0)">
 			<!-- 遮罩层 -->
 			<view class="mask"></view>
 			<view class="layer attr-content" @click.stop="stopPrevent">
@@ -169,12 +186,15 @@
 						</text>
 					</view>
 				</view>
-				<button class="btn" @click="toggleSpec">完成</button>
+				<view class="item-list-number">
+					<text>购买数量:</text>
+					<uni-number-box :min="1" :max="100" :value="number" :isMax="false" :isMin="number===1" @eventChange="numberChange"></uni-number-box>
+				</view>
+				<button class="btn" @click="buy_after">{{ buyTag }}</button>
 			</view>
 		</view>
 		<!-- 属性-模态层弹窗 -->
-		<view class="popup spec" :class="attrClass" @touchmove.stop.prevent="stopPrevent" @click="toggleAttr">
-			<!-- 遮罩层 -->
+		<!-- <view class="popup spec" :class="attrClass" @touchmove.stop.prevent="stopPrevent" @click="toggleAttr">
 			<view class="mask"></view>
 			<view class="layer attr-content no-padding" @click.stop="stopPrevent">
 				<view class="c-list">
@@ -186,7 +206,7 @@
 					</view>
 				</view>
 			</view>
-		</view>
+		</view> -->
 		<!-- 优惠券面板 -->
 		<view class="mask" :class="couponState===0 ? 'none' : couponState===1 ? 'show' : ''" @click="toggleCoupon">
 			<view class="mask-content" @click.stop.prevent="stopPrevent">
@@ -209,49 +229,21 @@
 				</view>
 			</view>
 		</view>
-		
-		<view v-if='!isCloseModel'>
-			<div class="modal-mask" @click="closePop">
-			</div>
-			<div class="modal-dialog">
-			  <div class="modal-content">
-			    <image class="img" src="/static/pop.jpg"></image>
-			    <image class="qr-code" :show-menu-by-longpress="true" src="/static/my.jpg" @click="previewImage"></image>
-				<image style="width:402rpx;height:94rpx;" src="/static/longbtn.jpg"></image>
-			  </div>
-			  
-			</div>
-		</view>
 	</view>
 </template>
 
 <script>
 	// import share from '@/components/share';
-	import {
-		fetchProductDetail
-	} from '@/api/product.js';
-	import {
-		addCartItem
-	} from '@/api/cart.js';
-	import {
-		fetchProductCouponList,
-		addMemberCoupon
-	} from '@/api/coupon.js';
-	import {
-		createReadHistory
-	} from '@/api/memberReadHistory.js';
-	import {
-		createProductCollection,
-		deleteProductCollection,
-		productCollectionDetail
-	} from '@/api/memberProductCollection.js';
-	import {
-		mapState
-	} from 'vuex';
-	import {
-		formatDate
-	} from '@/utils/date';
+	import { fetchProductDetail } from '@/api/product.js';
+	import { addCartItem } from '@/api/cart.js';
+	import { fetchProductCouponList, addMemberCoupon } from '@/api/coupon.js';
+	import { createReadHistory } from '@/api/memberReadHistory.js';
+	import { createProductCollection, deleteProductCollection, productCollectionDetail } from '@/api/memberProductCollection.js';
+	import { mapState } from 'vuex';
+	import { formatDate } from '@/utils/date';
 	import { numFilter } from '@/utils/common';
+	import uniNumberBox from '@/subpages/components/uni-number-box-new.vue'
+	import { addCartTmpItem } from '@/api/cart.js';
 	
 	const defaultServiceList = [{
 		id: 0,
@@ -270,6 +262,7 @@
 	export default {
 		components: {
 			// share
+			uniNumberBox
 		},
 		data() {
 			return {
@@ -290,7 +283,9 @@
 				promotionTipList: [],
 				couponState: 0,
 				couponList: [],
-				isCloseModel: true,
+				buyTag: "完成",
+				buyType: 0,
+				number: 1,
 			};
 		},
 		async onLoad(options) {
@@ -322,7 +317,7 @@
 		methods: {
 			async loadData(id) {
 				fetchProductDetail(id).then(response => {
-					// console.log("---productDetail--", response)
+					console.log("---productDetail--", response)
 					this.product = response.data;
 					this.skuStockList = response.data.skuStockList;
 					this.brandId = response.data.brandId;
@@ -336,6 +331,10 @@
 					// this.handleReadHistory();
 					// this.initProductCollection();
 				});
+			},
+			//数量
+			numberChange(data) {
+				this.number = data.number;
 			},
 			//规格弹窗开关
 			toggleSpec() {
@@ -409,7 +408,6 @@
 			},
 			//收藏
 			toFavorite() {
-				this.isCloseModel = false
 				// if (!this.checkForLogin()) {
 				// 	return;
 				// }
@@ -442,8 +440,65 @@
 				// 	});
 				// }
 			},
+			buy_before(tag) {
+				if (!this.checkForLogin()) {
+					return;
+				}
+				if (tag == 0) {
+					this.buyType = 0
+					this.buyTag = "完成";
+					this.toggleSpec();
+				}
+				if (tag == 1) { // 立即购买
+					this.buyType = 1
+					this.buyTag = "立即购买";
+					this.toggleSpec();
+				}
+				if (tag == 2) { // 加入购物车
+					this.buyType = 2
+					this.buyTag = "加入购物车";
+					this.toggleSpec();
+				}
+			},
+			async buy_after() {
+				this.toggleSpec();
+				if (this.buyType == 0) { // 关闭遮罩
+				}
+				if (this.buyType == 1) { // 立即购买
+					this.buy();
+				}
+				if (this.buyType == 2) { // 加入购物车
+					this.addToCart();
+				}
+			},
 			buy() {
-				this.$api.msg("暂时只支持从购物车下单！")
+				let productSkuStock = this.getSkuStock();
+				// console.log("---productSkuStock---", productSkuStock)
+				let skuId = null
+				if (productSkuStock) {
+					skuId = productSkuStock.id
+				}
+				let cartItem = {
+					productId: this.product.id,
+					skuStockId: skuId,
+					quantity: this.number
+				};
+				addCartTmpItem(cartItem).then(response => {
+					if (response.code == 0) {
+						let id = response.data.id
+						if (id && id > 0) {
+							uni.navigateTo({
+								url: `/subpages/order/createOrder?type=1&&cartIds=${JSON.stringify([id])}`
+							})
+						}
+					} else {
+						uni.showToast({
+							title: "商品内部错误，请稍后重试",
+							icon: 'none'
+						});
+					}
+				});
+				
 			},
 			stopPrevent() {},
 			//设置头图信息
@@ -555,8 +610,8 @@
 					this.promotionTipList.push("暂无优惠");
 				} else if (promotionType == 1) {
 					let now = Date.parse(new Date());
-					let startTime = new Date(this.product.promotionStartDate)
-					let endTime = new Date(this.product.promotionEndDate)
+					let startTime = new Date(this.product.promotionStartTime)
+					let endTime = new Date(this.product.promotionEndTime)
 					let start = Date.parse(startTime)
 					let end = Date.parse(endTime)
 					if (now >= start && now <= end) {
@@ -641,32 +696,16 @@
 			},
 			//将商品加入到购物车
 			addToCart() {
-				if (!this.checkForLogin()) {
-					return;
-				}
 				let productSkuStock = this.getSkuStock();
 				// console.log("---productSkuStock---", productSkuStock)
-				let spData = null
-				let skuCode = null
 				let skuId = null
 				if (productSkuStock) {
-					spData = productSkuStock.spData
-					skuCode = productSkuStock.skuCode
 					skuId = productSkuStock.id
 				}
 				let cartItem = {
-					price: this.product.price,
-					productAttr: spData,
-					productBrand: this.product.brandName,
-					productCategoryId: this.product.productCategoryId,
 					productId: this.product.id,
-					productName: this.product.name,
-					productPic: this.product.pic,
-					productSkuCode: skuCode,
-					productSkuId: skuId,
-					productSn: this.product.productSn,
-					productSubTitle: this.product.subTitle,
-					quantity: 1
+					skuStockId: skuId,
+					quantity: this.number
 				};
 				addCartItem(cartItem).then(response => {
 					if (response.code == 0) {
@@ -715,9 +754,6 @@
 				uni.navigateTo({
 					url: `/subpages/brand/brandDetail?id=${id}`
 				})
-			},
-			closePop() {
-				this.isCloseModel = true
 			},
 			previewImage(e) {
 				uni.previewImage({

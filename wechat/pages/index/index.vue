@@ -295,7 +295,7 @@
 			this.loadingType = 'loading';
 			fetchRecommendProductList(this.recommendParams).then(response => {
 				let addProductList = response.data.list;
-				if(!response.data.list){
+				if(!addProductList){
 					//没有更多了
 					this.recommendParams.page;
 					this.loadingType = 'nomore';
@@ -433,6 +433,7 @@
 					this.groupBuyProducts = response.data.groupBuy
 					fetchRecommendProductList(this.recommendParams).then(response => {
 						this.recommendProductList = response.data.list;
+						console.log("------recommendProductList---", this.recommendProductList)
 						uni.stopPullDownRefresh();
 					})
 				});

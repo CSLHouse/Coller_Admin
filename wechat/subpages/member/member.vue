@@ -11,9 +11,6 @@
 					<view class="navigator" @click="navToLogin">去登陆></view>
 				</view>
 			</view>
-			<view class="title">
-				会员列表
-			</view>
 			<view class="list b-b" v-for="(item, index) in cardList" :key="index" @click="showDitail(item)">
 				<view class="wrapper">
 					<view class="address-box">
@@ -111,7 +108,7 @@
 	}
 </script>
 
-<style lang='scss'>
+<style lang='scss' scoped>
 	page {
 		padding-bottom: 120upx;
 	}
@@ -128,7 +125,7 @@
 		justify-content: center;
 		flex-direction: column;
 		align-items: center;
-		background: #fff;
+		/* background: #fff; */
 		background-size: cover;
 		
 		image {
@@ -139,8 +136,8 @@
 	
 		.empty-tips {
 			display: flex;
-			font-size: $font-sm+2upx;
-			color: $font-color-disabled;
+			font-size: $font-sm+12upx;
+			color: $font-color-dark;
 	
 			.navigator {
 				color: $uni-color-primary;
@@ -159,17 +156,6 @@
 		width: 100%;
 		height: 100%;
 		opacity: 0.5;
-	}
-	.title {
-		display: flex;
-		position: relative;
-		font-size: 36upx;
-		color: rgba(255, 105, 112, 1);
-		align-items: center;
-		top: 10upx;
-		justify-content: center;
-		flex-direction: column;
-		font-weight: 5upx;
 	}
 	.content {
 		position: relative;
@@ -193,22 +179,10 @@
 	.address-box {
 		display: flex;
 		align-items: center;
-
-		.tag {
-			font-size: 24upx;
-			color: $font-color-dark;
-			margin-right: 10upx;
-			background: #fffafb;
-			border: 1px solid #ffb4c7;
-			border-radius: 4upx;
-			padding: 4upx 10upx;
-			line-height: 2;
-		}
-
+		
 		.address {
 			color: black;
 			font-size: 30upx;
-			color: $font-color-dark;
 		}
 	}
 

@@ -32,14 +32,14 @@
 			</view>
 			<!-- 商品列表 -->
 			<view class="g-item" v-for="item in cartPromotionItemList" :key="item.id">
-				<image :src="item.cartItem.productPic"></image>
+				<image :src="item.productPic"></image>
 				<view class="right">
-					<text class="title clamp">{{item.cartItem.productName}}</text>
-					<text class="spec">{{item.cartItem.productAttr | formatProductAttr}}</text>
+					<text class="title clamp">{{item.productName}}</text>
+					<text class="spec">{{item.productAttr | formatProductAttr}}</text>
 					<text class="promotion clamp">{{item.promotionMessage}}</text>
 					<view class="price-box">
-						<text class="price">￥{{item.cartItem.price}}</text>
-						<text class="number">x {{item.cartItem.quantity}}</text>
+						<text class="price">￥{{item.price}}</text>
+						<text class="number">x {{item.quantity}}</text>
 					</view>
 				</view>
 			</view>
@@ -167,6 +167,7 @@
 		onLoad(option) {
 			//商品数据
 			this.cartIds = JSON.parse(option.cartIds);
+			this.type = JSON.parse(option.type)
 			this.loadData();
 		},
 		filters: {
@@ -204,7 +205,8 @@
 		methods: {
 			//生成确认单信息
 			async loadData() {
-				generateConfirmOrder({'ids': this.cartIds}).then(response => {
+				
+				generateConfirmOrder({'ids': this.cartIds, 'tag': this.type}).then(response => {
 					this.memberReceiveAddressList = response.data.memberReceiveAddressList;
 					this.currentAddress = this.getDefaultAddress();
 					this.cartPromotionItemList = response.data.cartPromotionItemList;
@@ -256,7 +258,7 @@
 							ids: _this.cartIds,
 							memberReceiveAddressId: _this.currentAddress.id,
 							useIntegration: _this.useIntegration,
-							buyType: 1,    // 购物车购买
+							buyType: _this.type,    // 购物车购买
 						}
 						if(_this.currCoupon != null){
 							orderParam.couponId = _this.currCoupon.id;
