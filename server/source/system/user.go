@@ -2,9 +2,9 @@ package system
 
 import (
 	"context"
-	sysModel "github.com/flipped-aurora/gin-vue-admin/server/model/system"
-	"github.com/flipped-aurora/gin-vue-admin/server/service/system"
-	"github.com/flipped-aurora/gin-vue-admin/server/utils"
+	sysModel "cooller/server/model/system"
+	"cooller/server/service/system"
+	"cooller/server/utils"
 	"github.com/gofrs/uuid/v5"
 	"github.com/pkg/errors"
 	"gorm.io/gorm"
@@ -44,8 +44,8 @@ func (i *initUser) InitializeData(ctx context.Context) (next context.Context, er
 	if !ok {
 		return ctx, system.ErrMissingDBContext
 	}
-	password := utils.BcryptHash("123456")
-	adminPassword := utils.BcryptHash("123456")
+	password := utils.BcryptHash("cooller@123")
+	adminPassword := utils.BcryptHash("cooller@123")
 
 	entities := []sysModel.SysUser{
 		{
@@ -57,7 +57,6 @@ func (i *initUser) InitializeData(ctx context.Context) (next context.Context, er
 			AuthorityId: 888,
 			Phone:       "17611111111",
 			Email:       "333333333@qq.com",
-			StoreName:   "总部",
 		},
 		{
 			UUID:        uuid.Must(uuid.NewV4()),
@@ -68,7 +67,6 @@ func (i *initUser) InitializeData(ctx context.Context) (next context.Context, er
 			AuthorityId: 9528,
 			Phone:       "17611111111",
 			Email:       "333333333@qq.com",
-			StoreName:   "酷儿乐分店",
 			Position:    1,
 		},
 	}
@@ -95,7 +93,7 @@ func (i *initUser) DataInserted(ctx context.Context) bool {
 		return false
 	}
 	var record sysModel.SysUser
-	if errors.Is(db.Where("user_name = ?", "a303176530").
+	if errors.Is(db.Where("user_name = ?", "admin").
 		Preload("Authorities").First(&record).Error, gorm.ErrRecordNotFound) { // 判断是否存在数据
 		return false
 	}

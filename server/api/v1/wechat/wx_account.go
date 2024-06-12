@@ -1,16 +1,16 @@
 package wechat
 
 import (
+	"cooller/server/global"
+	"cooller/server/middleware"
+	"cooller/server/model/common/request"
+	"cooller/server/model/common/response"
+	systemReq "cooller/server/model/system/request"
+	"cooller/server/model/wechat"
+	wechatReq "cooller/server/model/wechat/request"
+	wechatRes "cooller/server/model/wechat/response"
+	"cooller/server/utils"
 	"fmt"
-	"github.com/flipped-aurora/gin-vue-admin/server/global"
-	"github.com/flipped-aurora/gin-vue-admin/server/middleware"
-	"github.com/flipped-aurora/gin-vue-admin/server/model/common/request"
-	"github.com/flipped-aurora/gin-vue-admin/server/model/common/response"
-	systemReq "github.com/flipped-aurora/gin-vue-admin/server/model/system/request"
-	"github.com/flipped-aurora/gin-vue-admin/server/model/wechat"
-	wechatReq "github.com/flipped-aurora/gin-vue-admin/server/model/wechat/request"
-	wechatRes "github.com/flipped-aurora/gin-vue-admin/server/model/wechat/response"
-	"github.com/flipped-aurora/gin-vue-admin/server/utils"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 )
@@ -119,71 +119,6 @@ func (b *WXAccountApi) GetUserInfo(c *gin.Context) {
 	}
 
 	response.OkWithData(wxUser, c)
-}
-
-func (b *WXAccountApi) ParsePhoneNumber(c *gin.Context) {
-	var loginInfo wechatReq.WXPhoneNumber
-	err := c.ShouldBindJSON(&loginInfo)
-	if err != nil {
-		response.FailWithMessage(err.Error(), c)
-		return
-	}
-	wxUser, err := accountService.GetWXAccountByOpenID(loginInfo.OpenID)
-	if len(wxUser.SessionKey) < 1 {
-		fmt.Println("----login:", loginInfo)
-		response.FailWithMessage(err.Error(), c)
-		return
-	}
-	fmt.Println("----SessionKey:", wxUser.SessionKey)
-	//发送jscode，获得用户的open_id
-	wechatClient, err := middleware.DecryptWXOpenData(wxUser.SessionKey, loginInfo.EncryptedData, loginInfo.Iv)
-
-	if err != nil {
-		global.GVA_LOG.Error("解密失败!", zap.Error(err))
-		response.FailWithMessage("解密失败", c)
-		return
-	}
-	fmt.Println("----wechatClient:", wechatClient)
-	var phoneNumber = wechatClient["phoneNumber"].(string)
-	if len(phoneNumber) < 1 {
-		global.GVA_LOG.Error("登录失败!", zap.Error(err))
-		response.FailWithMessage("登录失败", c)
-		return
-	}
-	err = accountService.UpdateWXAccountPhone(loginInfo.OpenID, phoneNumber)
-	if err != nil {
-		response.FailWithMessage(err.Error(), c)
-		return
-	}
-	response.OkWithDetailed(wechatRes.WXPhoneNum{
-		PhoneNumber: phoneNumber,
-	}, "获取成功", c)
-}
-
-// CheckPhoneNumber 查询是否有手机号 true 有 false 无
-func (b *WXAccountApi) CheckPhoneNumber(c *gin.Context) {
-	var loginInfo wechatReq.UserTag
-	err := c.ShouldBindQuery(&loginInfo)
-	if err != nil {
-		response.FailWithMessage(err.Error(), c)
-		return
-	}
-	if len(loginInfo.OpenID) < 1 {
-		fmt.Println("----login:", loginInfo)
-		response.FailWithMessage(err.Error(), c)
-		return
-	}
-
-	userInfo, err := accountService.CheckWXAccountPhone(loginInfo.OpenID)
-	if err != nil {
-		response.FailWithMessage(err.Error(), c)
-		return
-	}
-	if len(userInfo.PhoneNumber) < 11 {
-		response.OkWithData(false, c)
-		return
-	}
-	response.OkWithData(true, c)
 }
 
 func (b *WXAccountApi) CreateMemberReceiveAddress(c *gin.Context) {

@@ -11,7 +11,7 @@
           tooltip-effect="dark"
           row-key="Id"
         >
-          <el-table-column align="left" label="编号" prop="ID" width="60"/>
+          <el-table-column align="left" label="编号" prop="id" width="60"/>
           <el-table-column align="left" label="属性名称" prop="name" width="100" />
           <el-table-column align="left" label="商品类型" prop="productType" width="100" />
           <el-table-column align="left" label="属性是否可选" prop="selectType" width="120" />
@@ -39,7 +39,7 @@
             :current-page="page"
             :page-size="pageSize"
             :page-sizes="[10, 30, 50, 100]"
-            :total="total"
+            :total.number="+total"
             layout="total, sizes, prev, pager, next, jumper"
             @current-change="handleCurrentChange"
             @size-change="handleSizeChange"
@@ -117,10 +117,12 @@
     getProductAttributeList
   } from '@/api/product'
   import WarningBar from '@/components/warningBar/warningBar.vue'
-  import { ref } from 'vue'
+  import { ref, onBeforeMount } from 'vue'
   import { ElMessage } from 'element-plus'
   import { formatDate } from '@/utils/format'
   import { useRoute } from 'vue-router'
+import { number } from 'echarts'
+
   const route = useRoute()
 
   const attributeForm = ref({
@@ -152,17 +154,24 @@
     getTableData()
   }
   
+  const categoriesId = route.query.cid
+  const attributeTypeName = route.query.cname
+  const attributeType = route.query.ctype
+  // onBeforeMount(() => {
+
+  // })
+
   // 查询
   const getTableData = async() => {
-    let id = route.query.cid
-    let typeName = route.query.cname
-    let type = route.query.ctype
-    const table = await getProductAttributeList({ tag: id, page: page.value, pageSize: pageSize.value, state: type })
+    // let id = route.query.cid
+    // let typeName = route.query.cname
+    // let type = route.query.ctype
+    const table = await getProductAttributeList({ tag: categoriesId, page: page.value, pageSize: pageSize.value, state: attributeType })
     if (table.code === 0) {
       tableData.value = table.data.list
 
       tableData.value.forEach((element)=>{
-        element.productType = typeName
+        element.productType = attributeTypeName
       })
     }
       total.value = table.data.total
@@ -199,6 +208,7 @@
         relatedStatus: 0,
         handAddStatus: 0,
         type: 0,
+        productAttributeCategoryId: 0,
     }
   }
   const deleteAttribute = async(row) => {
@@ -237,6 +247,8 @@
   const openDialog = () => {
     type.value = 'create'
     dialogFormVisible.value = true
+    attributeForm.value.productType = attributeTypeName
+    attributeForm.value.productAttributeCategoryId = Number(categoriesId)
   }
   
   const filterTypeState = ref("0")

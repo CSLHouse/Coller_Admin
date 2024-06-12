@@ -36,11 +36,11 @@ export const updateVIPMember = (data) => {
 // @Produce application/json
 // @Param data body dbModel.ExaCustomer true "删除套餐"
 // @Success 200 {string} string "{"success":true,"data":{},"msg":"获取成功"}"
-export const deleteVIPMember = (data) => {
+export const deleteVIPMember = (params) => {
   return service({
     url: '/business/member',
     method: 'delete',
-    data
+    params: params
   })
 }
 
@@ -111,7 +111,7 @@ export const consumeVIPCard = (params) => {
   return service({
     url: '/business/consume',
     method: 'post',
-    params
+    params: params
   })
 }
 

@@ -9,7 +9,7 @@ import (
 	"net/url"
 	"time"
 
-	"github.com/flipped-aurora/gin-vue-admin/server/global"
+	"cooller/server/global"
 
 	"github.com/tencentyun/cos-go-sdk-v5"
 	"go.uber.org/zap"
@@ -18,7 +18,7 @@ import (
 type TencentCOS struct{}
 
 // UploadFile upload file to COS
-func (*TencentCOS) UploadFile(file *multipart.FileHeader) (string, string, error) {
+func (*TencentCOS) UploadFile(file *multipart.FileHeader, userId int) (string, string, error) {
 	client := NewClient()
 	f, openError := file.Open()
 	if openError != nil {
@@ -47,6 +47,13 @@ func (*TencentCOS) DeleteFile(key string) error {
 	return nil
 }
 
+// DeleteFile delete file form COS
+func (*TencentCOS) DeleteFiles(files []string) error {
+
+	// TODO: 待完善
+	return nil
+}
+
 // NewClient init COS client
 func NewClient() *cos.Client {
 	urlStr, _ := url.Parse("https://" + global.GVA_CONFIG.TencentCOS.Bucket + ".cos." + global.GVA_CONFIG.TencentCOS.Region + ".myqcloud.com")
@@ -58,4 +65,8 @@ func NewClient() *cos.Client {
 		},
 	})
 	return client
+}
+
+func (*TencentCOS) UploadFileWithLocationPath(localPath string, fileName string, userId int) (string, string, error) {
+	return "", "", fmt.Errorf("")
 }

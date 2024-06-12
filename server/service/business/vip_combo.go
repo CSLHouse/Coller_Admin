@@ -1,11 +1,9 @@
 package business
 
 import (
-	"github.com/flipped-aurora/gin-vue-admin/server/global"
-	"github.com/flipped-aurora/gin-vue-admin/server/model/business"
-	"github.com/flipped-aurora/gin-vue-admin/server/model/common/request"
-	"github.com/flipped-aurora/gin-vue-admin/server/model/system"
-	systemService "github.com/flipped-aurora/gin-vue-admin/server/service/system"
+	"cooller/server/global"
+	"cooller/server/model/business"
+	"cooller/server/model/common/request"
 )
 
 type VIPComboService struct{}
@@ -22,13 +20,14 @@ func (exa *VIPComboService) CreateVIPCombo(e business.VIPCombo) (err error) {
 }
 
 //@author: [piexlmax](https://github.com/piexlmax)
-//@function: DeleteVIPCombo
+//@function: DeleteVIPComboById
 //@description: 删除套餐
 //@param: e model.VIPCombo
 //@return: err error
 
-func (exa *VIPComboService) DeleteVIPCombo(e business.VIPCombo) (err error) {
-	err = global.GVA_DB.Delete(&e).Error
+func (exa *VIPComboService) DeleteVIPComboById(id int, userId int) (err error) {
+	var combo business.VIPCombo
+	err = global.GVA_DB.Where("id = ? and sys_user_id = ?", id, userId).Delete(&combo).Error
 	return err
 }
 
@@ -49,8 +48,8 @@ func (exa *VIPComboService) UpdateVIPCombo(e *business.VIPCombo) (err error) {
 //@param: id int
 //@return: customer model.VIPCombo, err error
 
-func (exa *VIPComboService) GetVIPCombo(id int) (customer business.VIPCombo, err error) {
-	err = global.GVA_DB.Where("combo_id = ?", id).First(&customer).Error
+func (exa *VIPComboService) GetVIPComboById(id int, userId int) (customer business.VIPCombo, err error) {
+	err = global.GVA_DB.Where("id = ?  and sys_user_id = ?", id, userId).First(&customer).Error
 	return
 }
 
@@ -60,43 +59,21 @@ func (exa *VIPComboService) GetVIPCombo(id int) (customer business.VIPCombo, err
 //@param: sysUserAuthorityID string, info request.PageInfo
 //@return: list interface{}, total int64, err error
 
-func (exa *VIPComboService) GetVIPComboInfoList(sysUserAuthorityID int, info request.PageInfo) (list interface{}, total int64, err error) {
+func (exa *VIPComboService) GetVIPComboInfoList(sysUserId int, info request.PageInfo) (list []business.VIPCombo, total int64, err error) {
 	limit := info.PageSize
 	offset := info.PageSize * (info.Page - 1)
 	db := global.GVA_DB.Model(&business.VIPCombo{})
-	var a system.SysAuthority
-	a.AuthorityId = sysUserAuthorityID
-	auth, err := systemService.AuthorityServiceApp.GetAuthorityInfo(a)
+	err = db.Where("sys_user_id = ?", sysUserId).Count(&total).Error
 	if err != nil {
-		return
-	}
-	var dataId []int
-	for _, v := range auth.DataAuthorityId {
-		dataId = append(dataId, v.AuthorityId)
-	}
-	var ComboList []business.VIPCombo
-	err = db.Where("authority_id in ?", dataId).Count(&total).Error
-	if err != nil {
-		return ComboList, total, err
+		return list, total, err
 	} else {
-		err = db.Limit(limit).Offset(offset).Where("authority_id in ?", dataId).Find(&ComboList).Error
+		err = db.Limit(limit).Offset(offset).Where("sys_user_id = ?", sysUserId).Find(&list).Error
 	}
-	return ComboList, total, err
+	return list, total, err
 }
 
-func (exa *VIPComboService) GetAllVIPComboInfoList(sysUserAuthorityID int) (list interface{}, err error) {
+func (exa *VIPComboService) GetAllVIPComboInfoList(sysUserId int) (list []business.VIPCombo, err error) {
 	db := global.GVA_DB.Model(&business.VIPCombo{})
-	var a system.SysAuthority
-	a.AuthorityId = sysUserAuthorityID
-	auth, err := systemService.AuthorityServiceApp.GetAuthorityInfo(a)
-	if err != nil {
-		return
-	}
-	var dataId []int
-	for _, v := range auth.DataAuthorityId {
-		dataId = append(dataId, v.AuthorityId)
-	}
-	var ComboList []business.VIPCombo
-	err = db.Where("authority_id in ?", dataId).Find(&ComboList).Error
-	return ComboList, err
+	err = db.Where("sys_user_id = ?", sysUserId).Find(&list).Error
+	return list, err
 }

@@ -2,8 +2,8 @@ package wechat
 
 import (
 	"context"
-	wechatModel "github.com/flipped-aurora/gin-vue-admin/server/model/wechat"
-	"github.com/flipped-aurora/gin-vue-admin/server/service/system"
+	wechatModel "cooller/server/model/wechat"
+	"cooller/server/service/system"
 	"github.com/pkg/errors"
 	"gorm.io/gorm"
 )
@@ -23,7 +23,7 @@ func (i *initHomeProductAttributeCategory) MigrateTable(ctx context.Context) (co
 		return ctx, system.ErrMissingDBContext
 	}
 	return ctx, db.AutoMigrate(
-		&wechatModel.HomeProductAttributeCategory{},
+		&wechatModel.ProductAttributeCategory{},
 	)
 }
 
@@ -32,11 +32,11 @@ func (i *initHomeProductAttributeCategory) TableCreated(ctx context.Context) boo
 	if !ok {
 		return false
 	}
-	return db.Migrator().HasTable(&wechatModel.HomeProductAttributeCategory{})
+	return db.Migrator().HasTable(&wechatModel.ProductAttributeCategory{})
 }
 
 func (i initHomeProductAttributeCategory) InitializerName() string {
-	return wechatModel.HomeProductAttributeCategory{}.TableName()
+	return wechatModel.ProductAttributeCategory{}.TableName()
 }
 
 func (i *initHomeProductAttributeCategory) InitializeData(ctx context.Context) (next context.Context, err error) {
@@ -45,70 +45,35 @@ func (i *initHomeProductAttributeCategory) InitializeData(ctx context.Context) (
 		return ctx, system.ErrMissingDBContext
 	}
 
-	entities := []wechatModel.HomeProductAttributeCategory{
+	entities := []wechatModel.ProductAttributeCategory{
 		{
-			Name:           "服装-T恤",
-			AttributeCount: 2,
-			ParamCount:     5,
-		},
-		{
-			Name:           "服装-裤装",
-			AttributeCount: 2,
-			ParamCount:     4,
-		},
-		{
-			Name:           "手机数码-手机通讯",
-			AttributeCount: 2,
-			ParamCount:     4,
-		},
-		{
-			Name:           "配件",
-			AttributeCount: 0,
-			ParamCount:     0,
-		},
-		{
-			Name:           "居家",
-			AttributeCount: 0,
-			ParamCount:     0,
-		},
-		{
-			Name:           "洗护",
-			AttributeCount: 0,
-			ParamCount:     0,
-		},
-		{
-			Name:           "测试分类",
-			AttributeCount: 0,
-			ParamCount:     0,
-		},
-		{
-			Name:           "服装-鞋帽",
-			AttributeCount: 4,
-			ParamCount:     0,
-		},
-		{
-			Name:           "家用电器-电视",
-			AttributeCount: 2,
-			ParamCount:     4,
-		},
-		{
-			Name:           "电脑办公-笔记本",
-			AttributeCount: 2,
-			ParamCount:     3,
-		},
-		{
-			Name:           "家用电器-厨卫大电",
+			Name:           "体验卡",
 			AttributeCount: 1,
-			ParamCount:     3,
+			ParamCount:     0,
 		},
 		{
-			Name:           "电脑办公-硬盘",
-			AttributeCount: 2,
-			ParamCount:     5,
+			Name:           "单人票",
+			AttributeCount: 1,
+			ParamCount:     0,
+		},
+		{
+			Name:           "会员卡",
+			AttributeCount: 1,
+			ParamCount:     0,
+		},
+		{
+			Name:           "挖宝",
+			AttributeCount: 1,
+			ParamCount:     0,
+		},
+		{
+			Name:           "饮品",
+			AttributeCount: 1,
+			ParamCount:     0,
 		},
 	}
 	if err = db.Create(&entities).Error; err != nil {
-		return ctx, errors.Wrap(err, wechatModel.HomeProductAttributeCategory{}.TableName()+"表数据初始化失败!")
+		return ctx, errors.Wrap(err, wechatModel.ProductAttributeCategory{}.TableName()+"表数据初始化失败!")
 	}
 	next = context.WithValue(ctx, i.InitializerName(), entities)
 
@@ -120,7 +85,7 @@ func (i *initHomeProductAttributeCategory) DataInserted(ctx context.Context) boo
 	if !ok {
 		return false
 	}
-	if errors.Is(db.Where("name = ?", "配件").First(&wechatModel.HomeProductAttributeCategory{}).Error, gorm.ErrRecordNotFound) { // 判断是否存在数据
+	if errors.Is(db.Where("name = ?", "饮品").First(&wechatModel.ProductAttributeCategory{}).Error, gorm.ErrRecordNotFound) { // 判断是否存在数据
 		return false
 	}
 	return true

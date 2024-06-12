@@ -3,27 +3,15 @@
 		<view class="user-section">
 			<image class="bg" src="/static/user-bg.jpg"></image>
 			<view class="user-info-box">
-				<view class="portrait-box">
+				<view class="portrait-box" @click="handleUserInfo">
 					<image class="portrait" :src="userInfo.avatarUrl || '/static/missing-face.png'"></image>
 				</view>
 				<view class="info-box">
-					<text class="username" @click="goLogin">{{hasLogin ? userInfo.nickName || '未设置昵称' : '立即登录'}}</text>
+					<text class="username" @click="goLogin">{{hasLogin ? userInfo.nickName || userInfo.telephone : '立即登录'}}</text>
 				</view>
-			</view>
-			<view class="vip-card-box">
-				<image class="card-bg" src="/static/vip-card-bg.png" mode=""></image>
-				<view class="b-btn" @click="showPhonePopModel">
-					立即开通
-				</view>
-				<view class="tit" @click="showPhonePopModel">
-					<text class="yticon icon-iLinkapp-"></text>
-					黄金会员
-				</view>
-				<text class="e-m">mall移动端商城</text>
-				<text class="e-b">黄金及以上会员可享有会员价优惠商品。</text>
 			</view>
 		</view>
-		
+		<!-- 积分、成长值、优惠券 -->
 		<view 
 			class="cover-container"
 			:style="[{
@@ -45,45 +33,90 @@
 					<text class="num">{{userInfo.growth || '暂无'}}</text>
 					<text>成长值</text>
 				</view>
-				<view class="tj-item" @click="navTo('/pages/coupon/couponList')">
+				<!-- <view class="tj-item" @click="navTo('/subpages/coupon/couponList')">
 					<text class="num">{{couponCount || '暂无'}}</text>
 					<text>优惠券</text>
-				</view>
+				</view> -->
 			</view>
-			<!-- 订单 -->
 			<view class="order-section">
-				<view class="order-item" @click="navTo('/pages/order/order?state=0')" hover-class="common-hover"  :hover-stay-time="50">
+				<view class="order-item" @click="navTo('/subpages/order/order?state=0')" hover-class="common-hover"  :hover-stay-time="50">
 					<text class="yticon icon-shouye"></text>
 					<text>全部订单</text>
 				</view>
-				<view class="order-item" @click="navTo('/pages/order/order?state=1')"  hover-class="common-hover" :hover-stay-time="50">
+				<view class="order-item" @click="navTo('/subpages/order/order?state=1')"  hover-class="common-hover" :hover-stay-time="50">
 					<text class="yticon icon-daifukuan"></text>
 					<text>待付款</text>
 				</view>
-				<view class="order-item" @click="navTo('/pages/order/order?state=2')" hover-class="common-hover"  :hover-stay-time="50">
+				<view class="order-item" @click="navTo('/subpages/order/order?state=2')" hover-class="common-hover"  :hover-stay-time="50">
 					<text class="yticon icon-yishouhuo"></text>
 					<text>待收货</text>
 				</view>
-				<view class="order-item" hover-class="common-hover"  :hover-stay-time="50">
+				<view class="order-item"  @click="navTo('/subpages/order/order?state=4')" hover-class="common-hover"  :hover-stay-time="50">
 					<text class="yticon icon-shouhoutuikuan"></text>
 					<text>退款/售后</text>
 				</view>
 			</view>
 			<!-- 浏览历史 -->
 			<view class="history-section icon">
-				<list-cell icon="icon-dizhi" iconColor="#5fcda2" title="地址管理" @eventClick="navTo('/pages/address/address')"></list-cell>
-				<list-cell icon="icon-lishijilu" iconColor="#e07472" title="我的足迹" @eventClick="navTo('/pages/user/readHistory')"></list-cell>
-				<list-cell icon="icon-shoucang" iconColor="#5fcda2" title="我的关注" @eventClick="navTo('/pages/user/brandAttention')"></list-cell>
-				<list-cell icon="icon-shoucang_xuanzhongzhuangtai" iconColor="#54b4ef" title="我的收藏" @eventClick="navTo('/pages/user/productCollection')"></list-cell>
-				<list-cell icon="icon-pingjia" iconColor="#ee883b" title="我的评价"></list-cell>
-				<list-cell icon="icon-shezhi1" iconColor="#e07472" title="设置" border="" @eventClick="navTo('/pages/set/set')"></list-cell>
+				<list-cell icon="icon-dizhi" iconColor="#5fcda2" title="会员管理" @eventClick="navTo('/subpages/member/member')"></list-cell>
+				<!-- <list-cell icon="icon-dizhi" iconColor="#5fcda2" title="地址管理" @eventClick="navTo('/subpages/address/address')"></list-cell> -->
+				<!-- <list-cell icon="icon-lishijilu" iconColor="#e07472" title="我的足迹" @eventClick="navTo('/subpages/user/readHistory')"></list-cell>
+				<list-cell icon="icon-shoucang" iconColor="#5fcda2" title="我的关注" @eventClick="navTo('/subpages/user/brandAttention')"></list-cell>
+				<list-cell icon="icon-shoucang_xuanzhongzhuangtai" iconColor="#54b4ef" title="我的收藏" @eventClick="navTo('/subpages/user/productCollection')"></list-cell>
+				<list-cell icon="icon-pingjia" iconColor="#ee883b" title="我的评价"></list-cell> -->
+				<list-cell icon="icon-shezhi1" iconColor="#e07472" title="设置" border="" @eventClick="navTo('/subpages/set/set')"></list-cell>
 			</view>
 		</view>
-		<view v-if='!isCloseLoginModel'>
-			<login-pop @close='handleLoginModelClose' @success='handleLoginSuccess'></login-pop>
+		<view v-if='!hasLogin && !isCloseModel'>
+			<div class="modal-mask" @click="closePop">
+			</div>
+			<div class="modal-dialog">
+			  <div class="modal-content">
+			    <image class="img" src="/static/pop.jpg"></image>
+			    <div class="content-text">
+			      <p class="key-bold-tip">注册会员</p>
+			      <p class="key-bold">注册成为会员享受更多优惠</p>
+			      <p class="little-tip">我们的生活圈：</p>
+			      <p class="little-content">
+			        注册成为会员，一店消费，多家优惠，欢迎体验
+			      </p>
+			    </div>
+			  </div>
+			  <div class="modal-footer">
+			    <button class='btn' open-type='getPhoneNumber' @getphonenumber="decryptPhoneNumber">
+			    	一键注册
+			    </button>
+			  </div>
+			</div>
 		</view>
-		<view v-if='hasLogin && !isClosePhoneModel'>
-			<phone-pop @close='handlePhoneModelClose' @success='handlePhoneSuccess'></phone-pop>
+		<view v-if='hasLogin && !hadNickName && !isCloseNickNameModel' >
+			<div class="modal-mask" @click="closeNickNamePop"/>
+			<div class="modal-dialog">
+			  <div class="modal-content">
+			    <image class="img" src="/static/pop.jpg"></image>
+			    <div class="content-text">
+			      <p class="info-bold-tip">完善信息可体验更多功能</p>
+			      <p class="key-bold">99%用户选择使用微信昵称</p>
+			    </div>
+			  </div>
+			  <view class="avatarUrl">
+				  <text >头像：</text>
+				  <button  open-type="chooseAvatar" @chooseavatar="handleChooseavatar">
+					<image :src="avatarUrl || '/static/missing-face.png'" class="avatar-img"></image>
+					<text class="yticon icon-you you-btn"></text>
+				  </button>
+			  </view>
+			  <view class="nickname">
+				  <text >昵称：</text>
+				  <input type="nickname" class="weui-input" placeholder="请输入昵称" maxlength="15" v-model="nickName"
+				   @change="getNickname" />
+			  </view>
+			  <div class="modal-footer">
+			    <button class='btn' @click="handleConfirmNickName">
+			    	确认
+			    </button>
+			  </div>
+			</div>
 		</view>
     </view>  
 </template>
@@ -93,17 +126,13 @@
 	import {
 		fetchMemberCouponList
 	} from '@/api/coupon.js';
-    import {  
-        mapState 
-    } from 'vuex';
-	import phonePop from '@/components/phone-pop.vue';
-	import loginPop from '@/components/login-pop.vue';
+	import { getWXPhoneNumber, wxRefreshLogin, WXResetNickName} from '@/api/member.js';
+	import common from '@/utils/common.js'
+    import { mapState, mapMutations } from 'vuex';
 	let startY = 0, moveY = 0, pageAtTop = true;
     export default {
 		components: {
 			listCell,
-			phonePop,
-			loginPop
 		},
 		data(){
 			return {
@@ -111,37 +140,21 @@
 				coverTransition: '0s',
 				moving: false,
 				couponCount:null,
-				// hasLogin: uni.getStorageSync('HadLogin') || false,
-				// userInfo: uni.getStorageSync('UserInfo'),
-				isClosePhoneModel: false,
-				isCloseLoginModel: false,
+				isCloseModel: false,
+				isCloseNickNameModel: false,
+				nickName: '',
+				avatarUrl: null,
 			}
 		},
 		onLoad(){
-			
 		},
-		// onReady(){
-		// 	if (!this.hasLogin) {
-		// 		this.$refs.popup.open('top')
-		// 	}
-		// },
 		onShow(){
-			if(this.hasLogin){
-				// 获取优惠券
-				// fetchMemberCouponList(0).then(response=>{
-				// 	if(response.data!=null&&response.data.length>0){
-				// 		this.couponCount = response.data.length;
-				// 	}
-				// });
-			}else{
-				this.couponCount=null;
-			}
 		},
 		// #ifndef MP
 		onNavigationBarButtonTap(e) {
 			const index = e.index;
 			if (index === 0) {
-				this.navTo('/pages/set/set');
+				this.navTo('/subpages/set/set');
 			}else if(index === 1){
 				// #ifdef APP-PLUS
 				const pages = getCurrentPages();
@@ -152,40 +165,117 @@
 				});
 				// #endif
 				uni.navigateTo({
-					url: '/pages/notice/notice'
+					url: '/subpages/notice/notice'
 				})
 			}
 		},
 		// #endif
         computed: {
-			...mapState(['hasLogin','userInfo'])
+			...mapState(['hasLogin','userInfo', 'hadNickName']),
 		},
         methods: {
-			goLogin() {
-				this.isCloseLoginModel = false
-			},
-			handleLoginModelClose(e) {
-				this.isCloseLoginModel = e
-			},
-			handleLoginSuccess(e) {
-				if (e) {
-					this.isCloseLoginModel = true
+			...mapMutations(['login', 'refreshLoginSession']),
+			getNickname(e) {
+				this.nickName = e.detail.value
+			},			
+			async handleConfirmNickName () {
+				let _this = this
+				let isUpload = false
+				if (_this.avatarUrl && _this.avatarUrl != '' ) {
+					uni.uploadFile({
+						url: common.baseUrl + "/fileUploadAndDownload/upload",
+						filePath: _this.avatarUrl,
+						name: 'file',
+						header: {
+							"x-token": _this.$store.state.token,
+							"x-user_id": _this.$store.state.userInfo.id,
+							"Access-Control-Allow-Origin": "*",
+							"Access-Control-Allow-Methods": "*"
+						},
+						success: res =>{
+							const response = JSON.parse(res.data)
+							if (response.code == 0) {
+								 _this.$store.state.userInfo.avatarUrl = response.data.file.url
+								_this.$store.state.hadNickName = true
+								uni.setStorage({ //缓存用户登陆状态
+									key: 'UserInfo',  
+									data: _this.$store.state.userInfo  
+								})
+								_this.isCloseNickNameModel = true
+								_this.isUpload = true
+								this.resetNick()
+							}
+						},
+						fail: (error) => {
+							this.$api.msg("设置失败", 2000)
+						}
+					})
 				}
 			},
-			showPhonePopModel() {
-				const isLogined = this.$store.hasLogin
-				if (isLogined) {
-					this.isClosePhoneModel = false
+			async resetNick() {
+				let _this = this
+				if (_this.$store.state.userInfo && _this.isUpload) {
+					_this.$store.state.userInfo.nickName = _this.nickName
+					WXResetNickName(_this.$store.state.userInfo).then(res=>{
+						if (res.code == 0) {
+							this.$api.msg("设置成功", 2000)
+							_this.$store.state.hadNickName = true
+							uni.setStorage({ //缓存用户登陆状态
+							    key: 'UserInfo',  
+							    data: _this.$store.state.userInfo  
+							})
+							_this.isCloseNickNameModel = true
+						}
+						else {
+							this.$api.msg("设置失败", 2000)
+						}
+					});
 				} else {
-					uni.showToast({ title: '请先登录', duration: 2000 })
-				}	
+					this.$api.msg("头像设置失败", 2000)
+				}
 			},
-			handlePhoneModelClose(e) {
-				this.isClosePhoneModel = e
+			closePop() {
+				this.isCloseModel = true
 			},
-			handlePhoneSuccess(e) {
-				console.log("------handleShowPhoneModel-----", e)
-				this.isClosePhoneModel = true
+			closeNickNamePop() {
+				this.isCloseNickNameModel = true
+			},
+			decryptPhoneNumber: function(e) {
+				let _this = this
+				if(e.detail.errMsg == "getPhoneNumber:ok"){
+					if (_this.$store.state.openId && _this.$store.state.openId.length > 0) {
+						getWXPhoneNumber({openId: _this.$store.state.openId, code: e.detail.code}).then(res=>{
+							if (res.code == 0) {
+								this.$api.msg("注册成功", 2000)
+								_this.getToken()
+							}
+							else {
+								this.$api.msg("注册会员失败", 2000)
+							}
+						});
+					}
+				}
+			},
+			getToken() {
+				let _this = this
+				wxRefreshLogin({openId: _this.$store.state.openId}).then(res => {
+					if (res.code == 0) {
+						const userinfo = res.data
+						wx.setStorageSync("Token", userinfo.token)
+						wx.setStorageSync("TokenTime", userinfo.expiresAt)
+						_this.$store.state.token = userinfo.token
+						this.login(userinfo.user);
+					}
+				}).catch(errors => {
+					uni.showModal({
+						title:'提示',
+						content:'网络错误',
+						showCancel:false
+					})
+				});
+			},
+			goLogin() {
+				this.isCloseModel = false
 			},
 			/**
 			 * 统一跳转接口,拦截未登录路由
@@ -193,7 +283,8 @@
 			 */
 			navTo(url){
 				if(!this.hasLogin){
-					url = '/pages/public/login';
+					this.$api.msg("请先登录", 2000)
+					return
 				}
 				uni.navigateTo({  
 					url
@@ -238,29 +329,18 @@
 				this.coverTransition = 'transform 0.3s cubic-bezier(.21,1.93,.53,.64)';
 				this.coverTransform = 'translateY(0px)';
 			},
-			handleConfirm () {
-				this.$refs.popup.close()
+			handleUserInfo(){
+				if(!this.hadNickName) {
+					this.isCloseNickNameModel = false
+				}
 			},
+			handleChooseavatar(e) {
+				this.avatarUrl = e.detail.avatarUrl;
+			}
         }  
     }  
 </script>  
 <style lang='scss'>
-	/* .content {
-		text-align: center;
-		margin: 50rpx 30rpx 50rpx 30rpx;
-	}
-	.content .content_text {
-		font-size: 30rpx;
-		padding: 8rpx;
-	}
-	.content text {
-		font-size: 30rpx;
-		display: block;
-		color: #f5f5f5;
-		margin-top: 10rpx;
-		float: left;
-	} */
-	
 	%flex-center {
 	 display:flex;
 	 flex-direction: column;
@@ -286,7 +366,7 @@
 			width: 100%;
 			height: 100%;
 			filter: blur(1px);
-			opacity: .7;
+			/* opacity: .9; */
 		}
 	}
 	.user-info-box{
@@ -302,7 +382,7 @@
 			border-radius: 50%;
 		}
 		.username{
-			font-size: $font-lg + 6upx;
+			font-size: 32upx;
 			color: $font-color-dark;
 			margin-left: 20upx;
 		}
@@ -436,5 +516,136 @@
 			}
 		}
 	}
-	
+	.modal-mask {
+	  width: 100%;
+	  height: 100%;
+	  position: fixed;
+	  top: 0;
+	  left: 0;
+	  background: #000;
+	  opacity: 0.5;
+	  overflow: hidden;
+	  z-index: 9000;
+	  color: #fff;
+	}
+	.modal-dialog {
+	  box-sizing: border-box;
+	  width: 560rpx;
+	  overflow: hidden;
+	  position: fixed;
+	  top: 40%;
+	  left: 0;
+	  z-index: 9999;
+	  background: #fff;
+	  margin: -150rpx 95rpx;
+	  border-radius: 16rpx;
+	}
+	.modal-content {
+	  box-sizing: border-box;
+	  display: flex;
+	  padding: 0rpx 53rpx 50rpx 53rpx;
+	  font-size: 32rpx;
+	  align-items: center;
+	  justify-content: center;
+	  flex-direction: column;
+	}
+	.content-tip {
+	  text-align: center;
+	  font-size: 36rpx;
+	  color: #333333;
+	}
+	.content-text {
+	  /* height:230px; */
+	  padding:10px 0px 10px 0px;
+	  font-size:14px;
+	}
+	.modal-footer {
+	  box-sizing: border-box;
+	  display: flex;
+	  flex-direction: row;
+	  border-top: 1px solid #e5e5e5;
+	  font-size: 16px;
+	  font-weight:bold;
+	  /* height: 45px; */
+	  line-height: 45px;
+	  text-align: center;
+	  background:#feb600;
+	}
+	.btn {
+	  width: 100%;
+	  height: 100%;
+	  background:#feb600;
+	  color:#FFFFFF;
+	  font-weight:bold;
+	}
+	.img {
+	  width: 560rpx;
+	  height:140rpx;
+	}
+	.little-tip {
+	  padding-top:15px;
+	  padding-bottom:3px;
+	  font-size: 14px;
+	  font-weight:bold;
+	  color: #feb600;
+	}
+	.little-content {
+	  padding-top:5px;
+	  font-size: 13px;
+	  color:#606060;
+	}
+	.key-bold-tip {
+	  padding-top:5px;
+	  font-size: 15px;
+	  font-weight:bold;
+	  color: #feb600;
+	}
+	.key-bold {
+	  padding-top:5px;
+	  font-size: 14px;
+	  /* font-weight:bold; */
+	}
+	.info-bold-tip {
+		padding-top:5px;
+		font-size: 15px;
+		font-weight:bold;
+		color: #feb600;
+		text-align: center;
+	}
+	.avatarUrl{
+		background: #fff;
+		padding: 20rpx 20rpx 10rpx;
+		/* display: flex; */
+		align-items: center;
+		justify-content: center;
+		border-bottom: 1px solid #f5f5f5;
+		height: 100rpx;
+		button {
+			background: rgba(0, 0, 0, 0);
+			float: right;
+			.avatar-img{
+				height: 60rpx;
+				width: 60rpx;
+				border-radius: 50%;
+			}
+		}
+		button::after {
+			border: none;
+		}
+		.you-btn {
+			margin-bottom: 10rpx;
+			float: right;
+		}
+	}
+	.nickname{
+		background: #fff;
+		padding: 20rpx 20rpx 10rpx;
+		align-items: center;
+		justify-content: center;
+		height: 100rpx;
+
+		.weui-input{
+			float: right;
+		}
+	}
 </style>

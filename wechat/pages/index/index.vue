@@ -12,8 +12,9 @@
 			<!-- 标题栏和状态栏占位符 -->
 			<view class="titleNview-placing"></view>
 			<!-- 背景色区域 -->
-			<view class="titleNview-background" :style="{backgroundColor:titleNViewBackground}"></view>
-			<swiper class="carousel" circular @change="swiperChange">
+			<view class="titleNview-background"></view>
+			<swiper class="carousel" circular indicator-dots autoplay :interval="5000"
+				:duration="500" >
 				<swiper-item v-for="(item, index) in advertiseList" :key="index" class="carousel-item" @click="navToAdvertisePage(item)">
 					<image :src="item.pic" />
 				</swiper-item>
@@ -26,7 +27,7 @@
 			</view>
 		</view>
 		<!-- 头部功能区 -->
-		<view class="cate-section">
+		<!-- <view class="cate-section">
 			<view class="cate-item">
 				<image src="/static/temp/c3.png"></image>
 				<text>专题</text>
@@ -43,7 +44,7 @@
 				<image src="/static/temp/c7.png"></image>
 				<text>特惠</text>
 			</view>
-		</view>
+		</view> -->
 
 		<!-- 品牌制造商直供 -->
 		<!-- <view class="f-header m-t" @click="navToRecommendBrandPage()">
@@ -54,7 +55,7 @@
 			</view>
 		</view> -->
 
-		<view class="guess-section">
+		<!-- <view class="guess-section">
 			<view v-for="(item, index) in brandList" :key="index" class="guess-item" @click="navToBrandDetailPage(item)">
 				<view class="image-wrapper-brand">
 					<image :src="item.logo" mode="aspectFit"></image>
@@ -62,28 +63,25 @@
 				<text class="title clamp">{{item.name}}</text>
 				<text class="title2">商品数量：{{item.productCount}}</text>
 			</view>
-		</view>
-
+		</view> -->
+		
 		<!-- 秒杀专区 -->
-		<!-- <view class="f-header m-t" v-if="homeFlashPromotion!==null">
+		<view class="f-header m-t" >
 			<image src="/static/icon_flash_promotion.png"></image>
 			<view class="tit-box">
 				<text class="tit">秒杀专区</text>
 				<text class="tit2">下一场 {{homeFlashPromotion.nextStartTime | formatTime}} 开始</text>
 			</view>
+			
 			<view class="tit-box">
 				<text class="tit2" style="text-align: right;">本场结束剩余：</text>
-				<view style="text-align: right;">
-					<text class="hour timer">{{cutDownTime.endHour}}</text>
-					<text>:</text>
-					<text class="minute timer">{{cutDownTime.endMinute}}</text>
-					<text>:</text>
-					<text class="second timer">{{cutDownTime.endSecond}}</text>
+				<view style="float: right;">
+					<view class="countdown">
+						<uni-countdown color="#f30079" background-color="#cccccc" :showDay="false" :hour="cutDownTime.endHour" :minute="cutDownTime.endMinute" :second="cutDownTime.endSecond"></uni-countdown>
+					</view>
 				</view>
 			</view>
-			<text class="yticon icon-you" v-show="false"></text>
-		</view> -->
-
+		</view>
 		<view class="guess-section">
 			<view v-for="(item, index) in homeFlashPromotion.productList" :key="index" class="guess-item" @click="navToDetailPage(item)">
 				<view class="image-wrapper">
@@ -94,7 +92,56 @@
 				<text class="price">￥{{item.price}}</text>
 			</view>
 		</view>
-
+		
+		<!-- 团购楼层 -->
+		<!-- <view class="f-header m-t" v-if="groupBuyProducts.groups != null && groupBuyProducts.groups.length > 0">
+			<image src="/static/temp/h1.png"></image>
+			<view class="tit-box">
+				<text class="tit">精品团购</text>
+			</view>
+			<text class="yticon icon-you"></text>
+		</view>
+		<view class="group-section" v-if="groupBuyProducts.groups != null && groupBuyProducts.groups.length > 0">
+			<swiper class="g-swiper" :duration="500">
+				<swiper-item class="g-swiper-item" v-for="(item, index) in groupBuyProducts.groups" :key="index">
+					<view class="g-item left" @click="navToDetailPageById(item.productId)" >
+						<image :src="item.pic" mode="aspectFill"></image>
+						<view class="t-box">
+							<text class="title clamp">{{item.name}}</text>
+							<view class="price-box">
+								<text class="price">￥{{item.price}}</text> 
+								<text class="m-price">￥{{item.originalPrice}}</text> 
+							</view>
+							
+							<view class="pro-box">
+							  	<view class="progress-box">
+							  		<progress :percent="item.percent" activeColor="#fa436a" active stroke-width="6" />
+							  	</view>
+								<text>火热团购</text>
+							</view>
+						</view>
+					</view>
+					<view class="g-item right" @click="navToDetailPageById(item.productId)">
+						<image :src="item.pic" mode="aspectFill"></image>
+						<view class="t-box">
+							<text class="title clamp">{{item.name}}</text>
+							<view class="price-box">
+								<text class="price">￥{{item.price}}</text> 
+								<text class="m-price">￥{{item.originalPrice}}</text> 
+							</view>
+							<view class="pro-box">
+							  	<view class="progress-box">
+							  		<progress :percent="item.percent" activeColor="#fa436a" active stroke-width="6" />
+							  	</view>
+								<text>热门推荐</text>
+							</view>
+						</view>
+					</view>
+				</swiper-item>
+		
+			</swiper>
+		</view> -->
+		
 		<!-- 新鲜好物 -->
 		<!-- <view class="f-header m-t" @click="navToNewProudctListPage()">
 			<image src="/static/icon_new_product.png"></image>
@@ -161,34 +208,53 @@
 			</view>
 		</view>
 		<uni-load-more :status="loadingType"></uni-load-more>
-		<view v-if='!isCloseModel'>
-			<login-pop @close='handleClose' @success='handleShowLoginModel'></login-pop>
+		
+		<view v-if='!hasLogin && !isCloseModel' >
+			<div class="modal-mask" @click="closePop">
+			</div>
+			<div class="modal-dialog">
+			  <div class="modal-content">
+			    <image class="img" src="/static/pop.jpg"></image>
+			    <div class="content-text">
+			      <p class="key-bold-tip">注册会员</p>
+			      <p class="key-bold">注册成为会员享受更多优惠</p>
+			      <p class="little-tip">我们的生活圈：</p>
+			      <p class="little-content">
+			        注册成为会员，一店消费，多家优惠，欢迎体验
+			      </p>
+			    </div>
+			  </div>
+			  <div class="modal-footer">
+			    <button class='btn' open-type='getPhoneNumber' @getphonenumber="decryptPhoneNumber">
+			    	一键注册
+			    </button>
+			  </div>
+			</div>
 		</view>
 	</view>
 </template>
 
 <script>
 	import {
-	    mapState 
+	    mapState, mapMutations
 	} from 'vuex';
 	import {
 		fetchContent,
-		fetchRecommendProductList
+		fetchRecommendProductList,
+		recordShareCount
 	} from '@/api/home.js';
-	import {
-		formatDate
-	} from '@/utils/date';
+	import { getWXPhoneNumber, wxRefreshLogin, WXResetNickName } from '@/api/member.js';
+	import { formatDate } from '@/utils/date';
 	import uniLoadMore from '@/components/uni-load-more/uni-load-more.vue';
-	import loginPop from '@/components/login-pop.vue';
+	import UniCountdown from '@/components/uni-countdown/uni-countdown.vue'
 	export default {
 		components: {
 			uniLoadMore,
-			loginPop
+			UniCountdown
 		},
 		data() {
 			return {
 				titleNViewBackground: '',
-				titleNViewBackgroundList: ['rgb(203, 87, 60)', 'rgb(205, 215, 218)'],
 				swiperCurrent: 0,
 				swiperLength: 0,
 				carouselList: [],
@@ -197,7 +263,7 @@
 				brandList: [],
 				homeFlashPromotion: [],
 				newProductList: [],
-				hotProductList: [],
+				// hotProductList: [],
 				recommendProductList: [],
 				recommendParams: {
 					page: 1,
@@ -205,10 +271,18 @@
 				},
 				loadingType:'more',
 				isCloseModel: false,
+				isCloseNickNameModel: false,
+				nickName: '',
+				groupBuyProducts: [],
 			};
 		},
-		onLoad() {
-			this.loadData();
+		onLoad(options) {
+			if (options.refCode && options.refCode.length > 0) {
+				recordShareCount({openId: options.refCode})
+			}
+			this.loadData(options);
+		},
+		onShow() {
 		},
 		//下拉刷新
 		onPullDownRefresh(){
@@ -221,8 +295,7 @@
 			this.loadingType = 'loading';
 			fetchRecommendProductList(this.recommendParams).then(response => {
 				let addProductList = response.data.list;
-				console.log("-addProductList--", addProductList)
-				if(response.data.list.length===0){
+				if(!addProductList){
 					//没有更多了
 					this.recommendParams.page;
 					this.loadingType = 'nomore';
@@ -242,6 +315,9 @@
 				endDateTime.setMinutes(endTime.getMinutes());
 				endDateTime.setSeconds(endTime.getSeconds());
 				let offsetTime = (endDateTime.getTime() - startDateTime.getTime());
+				if (offsetTime < 0) {
+					offsetTime = 0
+				}
 				let endHour = Math.floor(offsetTime / (60 * 60 * 1000));
 				let offsetMinute = offsetTime % (60 * 60 * 1000);
 				let endMinute = Math.floor(offsetMinute / (60 * 1000));
@@ -256,91 +332,156 @@
 		},
 		filters: {
 			formatTime(time) {
-				if (time == null || time === '') {
+				if (time == null || time === '0001-01-01T00:00:00Z') {
 					return 'N/A';
 				}
 				let date = new Date(time);
-				return formatDate(date, 'hh:mm:ss')
+				return formatDate(date, 'HH:mm:ss')
 			},
 		},
 		methods: {
-			handleClose(e) {
-				this.isCloseModel = e
+			...mapMutations(['login', 'refreshLoginSession']),
+			getNickname(e) {
+				this.nickName = e.detail.value
 			},
-			handleShowLoginModel(e) {
-				console.log("-------------e:", e)
-				this.isCloseModel = e
+			checkNickName() {
+				if (!this.nickName) {
+					this.$api.msg('请输入昵称')
+					return false
+				}
+				let str = this.nickName.trim();
+				if (str.length == 0) {
+					this.$api.msg('请输入正确的昵称')
+					return false
+				}
+				this.nickName = str
+				return true
+			},
+						
+			confirmNickName() {
+				let _this = this
+				if (this.$store.state.userInfo) {
+					_this.$store.state.userInfo.nickName = this.nickName
+					WXResetNickName(this.$store.state.userInfo).then(res=>{
+						if (res.code == 0) {
+							_this.$store.state.hadNickName = true
+							uni.setStorage({//缓存用户登陆状态
+							    key: 'UserInfo',
+							    data: _this.$store.state.userInfo  
+							})
+							_this.isCloseNickNameModel = true
+							this.$api.msg('设置成功')
+						}
+						else {
+							this.$api.msg('设置失败')
+						}
+					});
+				}
+				
+			},	
+			closePop() {
+				this.isCloseModel = true
+			},
+			closeNickNamePop() {
+				this.isCloseNickNameModel = true
+			},
+			decryptPhoneNumber: function(e) {
+				let _this = this
+				if(e.detail.errMsg == "getPhoneNumber:ok"){
+					if (_this.$store.state.openId && _this.$store.state.openId.length > 0) {
+						getWXPhoneNumber({openId: _this.$store.state.openId, code: e.detail.code}).then(res=>{
+							if (res.code == 0) {
+								_this.getToken()
+								this.$api.msg('注册成功')
+							}
+							else {
+								this.$api.msg('注册会员失败')
+							}
+						});
+					}
+				}
+			},
+			getToken() {
+				let _this = this
+				wxRefreshLogin({openId: _this.$store.state.openId}).then(res => {
+					if (res.code == 0) {
+						const userinfo = res.data
+						wx.setStorageSync("Token", userinfo.token)
+						wx.setStorageSync("TokenTime", userinfo.expiresAt)
+						_this.$store.state.token = userinfo.token
+						this.login(userinfo.customer);
+					}
+				}).catch(errors => {
+					uni.showModal({
+						title:'提示',
+						content:'网络错误',
+						showCancel:false
+					})
+				});
 			},
 			/**
 			 * 加载数据
 			 */
 			async loadData() {
 				fetchContent().then(response => {
-					console.log("onLoad", response.data);
 					this.advertiseList = response.data.advertiseList;
 					this.swiperLength = this.advertiseList.length;
-					this.titleNViewBackground = this.titleNViewBackgroundList[0];
 					this.brandList = response.data.brandList;
-					
 					this.homeFlashPromotion = response.data.homeFlashPromotion;
-					
 					this.newProductList = response.data.newProductList;
-					this.hotProductList = response.data.hotProductList;
+					// this.hotProductList = response.data.hotProductList;
+					this.groupBuyProducts = response.data.groupBuy
 					fetchRecommendProductList(this.recommendParams).then(response => {
 						this.recommendProductList = response.data.list;
-						console.log("this.recommendProductList", this.recommendProductList);
+						console.log("------recommendProductList---", this.recommendProductList)
 						uni.stopPullDownRefresh();
 					})
 				});
 			},
-			//轮播图切换修改背景色
-			swiperChange(e) {
-				const index = e.detail.current;
-				this.swiperCurrent = index;
-				let changeIndex = index % this.titleNViewBackgroundList.length;
-				this.titleNViewBackground = this.titleNViewBackgroundList[changeIndex];
-			},
+			
 			//商品详情页
 			navToDetailPage(item) {
-				console.log("---item:", item)
 				let id = item.id;
 				uni.navigateTo({
-					url: `/pages/product/product?id=${id}`
+					url: `/subpages/product/product?id=${id}`
+				})
+			},
+			navToDetailPageById(id) {
+				uni.navigateTo({
+					url: `/subpages/product/product?id=${id}`
 				})
 			},
 			//广告详情页
 			navToAdvertisePage(item) {
-				let id = item.id;
-				console.log("navToAdvertisePage",item)
 				uni.navigateTo({
-					url: item.url
+					url: '' + item.url
 				})
 			},
 			//品牌详情页
 			navToBrandDetailPage(item) {
 				let id = item.id;
 				uni.navigateTo({
-					url: `/pages/brand/brandDetail?id=${id}`
+					url: `/subpages/brand/brandDetail?id=${id}`
 				})
 			},
 			//推荐品牌列表页
 			navToRecommendBrandPage() {
 				uni.navigateTo({
-					url: `/pages/brand/list`
+					url: `/subpages/brand/list`
 				})
 			},
 			//新鲜好物列表页
 			navToNewProudctListPage() {
 				uni.navigateTo({
-					url: `/pages/product/newProductList`
+					url: `/subpages/product/newProductList`
 				})
 			},
 			//人气推荐列表页
-			navToHotProudctListPage() {
-				uni.navigateTo({
-					url: `/pages/product/hotProductList`
-				})
-			},
+			// navToHotProudctListPage() {
+			// 	uni.navigateTo({
+			// 		url: `/subpages/product/hotProductList`
+			// 	})
+			// },
 		},
 		// #ifndef MP
 		// 标题栏input搜索框点击
@@ -362,7 +503,7 @@
 				});
 				// #endif
 				uni.navigateTo({
-					url: '/pages/notice/notice'
+					url: '/subpages/notice/notice'
 				})
 			}
 		}
@@ -436,7 +577,7 @@
 	.carousel-section {
 		position: relative;
 		padding-top: 10px;
-
+		margin-bottom: 10px;
 		.titleNview-placing {
 			height: var(--status-bar-height);
 			padding-top: 44px;
@@ -667,8 +808,81 @@
 			border-radius: 2px;
 			background: rgba(0, 0, 0, .8);
 		}
+		.countdown {
+			display: inline-block;
+			float: right;
+			margin-right: 6%;
+			width: 140upx;
+			height: 36upx;
+			// background-color: green;
+		}
 	}
-
+	/* 团购楼层 */
+	.group-section{
+		background: #fff;
+		.g-swiper{
+			height: 650upx;
+			padding-bottom: 30upx;
+		}
+		.g-swiper-item{
+			width: 100%;
+			padding: 0 30upx;
+			display:flex;
+		}
+		image{
+			width: 100%;
+			height: 460upx;
+			border-radius: 4px;
+		}
+		.g-item{
+			display:flex;
+			flex-direction: column;
+			overflow:hidden;
+		}
+		.left{
+			flex: 1.2;
+			margin-right: 24upx;
+			.t-box{
+				padding-top: 20upx;
+			}
+		}
+		.right{
+			flex: 0.8;
+			flex-direction: column-reverse;
+			.t-box{
+				padding-bottom: 20upx;
+			}
+		}
+		.t-box{
+			height: 160upx;
+			font-size: $font-base+2upx;
+			color: $font-color-dark;
+			line-height: 1.6;
+		}
+		.price{
+			color:$uni-color-primary;
+		}
+		.m-price{
+			font-size: $font-sm+2upx;
+			text-decoration: line-through;
+			color: $font-color-light;
+			margin-left: 8upx;
+		}
+		.pro-box{
+			display:flex;
+			align-items:center;
+			margin-top: 10upx;
+			font-size: $font-sm;
+			color: $font-base;
+			padding-right: 10upx;
+		}
+		.progress-box{
+			flex: 1;
+			border-radius: 10px;
+			overflow: hidden;
+			margin-right: 8upx;
+		}
+	}
 	/* 分类推荐楼层 */
 	.hot-floor {
 		width: 100%;
@@ -757,13 +971,13 @@
 		flex-wrap: wrap;
 		padding: 0 30upx;
 		background: #fff;
-
+		
 		.guess-item {
 			display: flex;
 			flex-direction: column;
 			width: 48%;
 			padding-bottom: 40upx;
-
+			
 			&:nth-child(2n+1) {
 				margin-right: 4%;
 			}
@@ -787,7 +1001,9 @@
 			height: 150upx;
 			border-radius: 3px;
 			overflow: hidden;
-		
+			border-style:solid;
+			border-color: rgba(250, 250, 255, 0.9);
+			
 			image {
 				width: 100%;
 				height: 100%;
@@ -868,5 +1084,110 @@
 			flex-direction: column;
 			padding-left: 40upx;
 		}
+	}
+	
+	.modal-mask {
+	  width: 100%;
+	  height: 100%;
+	  position: fixed;
+	  top: 0;
+	  left: 0;
+	  background: #000;
+	  opacity: 0.5;
+	  overflow: hidden;
+	  z-index: 9000;
+	  color: #fff;
+	}
+	.modal-dialog {
+	  box-sizing: border-box;
+	  width: 560rpx;
+	  overflow: hidden;
+	  position: fixed;
+	  top: 40%;
+	  left: 0;
+	  z-index: 9999;
+	  background: #fff;
+	  margin: -150rpx 95rpx;
+	  border-radius: 16rpx;
+	}
+	.modal-content {
+	  box-sizing: border-box;
+	  display: flex;
+	  padding: 0rpx 53rpx 50rpx 53rpx;
+	  font-size: 32rpx;
+	  align-items: center;
+	  justify-content: center;
+	  flex-direction: column;
+	}
+	.content-tip {
+	  text-align: center;
+	  font-size: 36rpx;
+	  color: #333333;
+	}
+	.content-text {
+	  /* height:230px; */
+	  padding:10px 0px 10px 0px;
+	  font-size:14px;
+	}
+	.modal-footer {
+	  box-sizing: border-box;
+	  display: flex;
+	  flex-direction: row;
+	  border-top: 1px solid #e5e5e5;
+	  font-size: 16px;
+	  font-weight:bold;
+	  /* height: 45px; */
+	  line-height: 45px;
+	  text-align: center;
+	  background:#feb600;
+	}
+	.btn {
+	  width: 100%;
+	  height: 100%;
+	  background:#feb600;
+	  color:#FFFFFF;
+	  font-weight:bold;
+	}
+	.img {
+	  width: 560rpx;
+	  height:140rpx;
+	}
+	.little-tip {
+	  padding-top:15px;
+	  padding-bottom:3px;
+	  font-size: 14px;
+	  font-weight:bold;
+	  color: #feb600;
+	}
+	.little-content {
+	  padding-top:5px;
+	  font-size: 13px;
+	  color:#606060;
+	}
+	.key-bold-tip {
+	  padding-top:5px;
+	  font-size: 15px;
+	  font-weight:bold;
+	  color: #feb600;
+	}
+	.key-bold {
+	  padding-top:5px;
+	  font-size: 14px;
+	  /* font-weight:bold; */
+	}
+	.info-bold-tip {
+		padding-top:5px;
+		font-size: 15px;
+		font-weight:bold;
+		color: #feb600;
+		text-align: center;
+	}
+	.weui-input {
+		margin-top: 40px;
+		// width: 200px;
+		height: 40px;
+		background: #f4f4f6;
+		line-height: 40px;
+		text-align: center;
 	}
 </style>

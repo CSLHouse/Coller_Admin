@@ -4,7 +4,7 @@
       <el-card class="box-card">
         <el-form :inline="true" :model="searchData" class="demo-form-inline">
           <el-form-item label="联系电话：" class="form-item">
-            <el-input v-model.number="searchData.telephone" placeholder="按联系电话搜索" clearable 
+            <el-input v-model="searchData.telephone" placeholder="按联系电话搜索" clearable 
               @input="onTriggerSearch" @clear="onSearch"/>
           </el-form-item>
           <el-form-item label="姓名：" class="form-item">
@@ -29,6 +29,17 @@
               :key="item.id"
               :label="item.label"
               :value="item"
+              />
+            </el-select>
+          </el-form-item>
+          <el-form-item label="会员形式：" class="form-item">
+            <el-select v-model="searchData.tmp" value-key="id" class="m-2" 
+              placeholder="请选择会员形式" size="large" clearable @clear="onSearch">
+              <el-option
+              v-for="item in memberType"
+              :key="item.id"
+              :label="item.label"
+              :value="item.value"
               />
             </el-select>
           </el-form-item>
@@ -57,9 +68,9 @@
         @cell-dblclick="updateMember"
       >
         <!-- <el-table-column type="selection" width="55" /> -->
-        <el-table-column align="left" label="序号" prop="Id" width="60"></el-table-column>
+        <el-table-column align="left" label="序号" prop="id" width="60"></el-table-column>
         <el-table-column align="left" label="会员卡号" prop="cardId" width="120" />
-        <el-table-column align="left" label="姓名" prop="memberName" width="120" />
+        <el-table-column align="left" label="姓名" prop="userName" width="120" />
         <el-table-column align="left" label="联系方式" prop="telephone" width="120" />
         <el-table-column align="left" label="会员类型" prop="comboType" width="100" />
         <el-table-column align="left" label="剩余次数/金额" prop="remainTimes" width="90" />
@@ -87,7 +98,7 @@
           :current-page="page"
           :page-size="pageSize"
           :page-sizes="[10, 30, 50, 100]"
-          :total="total"
+          :total.number="+total"
           layout="total, sizes, prev, pager, next, jumper"
           @current-change="handleCurrentChange"
           @size-change="handleSizeChange"
@@ -100,10 +111,10 @@
           <el-input v-model="memberForm.cardId" autocomplete="off" />
         </el-form-item>
         <el-form-item label="联系电话">
-          <el-input v-model.number="memberForm.telephone" autocomplete="off" />
+          <el-input v-model="memberForm.telephone" autocomplete="off" />
         </el-form-item>
         <el-form-item label="姓名">
-          <el-input v-model="memberForm.memberName" autocomplete="off" />
+          <el-input v-model="memberForm.userName" autocomplete="off" />
         </el-form-item>
         <el-form-item label="会员类型">
           <el-select v-model="comboOption" value-key="key" class="m-2" placeholder="请选择会员卡" size="large">
@@ -174,6 +185,7 @@ const searchData = reactive({
   deadline: '',
   state: null,
   stateStr: "",
+  tmp: null,
 })
 
 const onTriggerSearch = () => {
@@ -184,7 +196,7 @@ const onTriggerSearch = () => {
 
 const onSearch = async() => {
   const res = await searchVIPMembers({ telephone: searchData.telephone, memberName: searchData.memberName, 
-      deadline: searchData.deadline, state: searchData.state, page: page.value, pageSize: pageSize.value})
+      deadline: searchData.deadline, state: searchData.state, tmp: searchData.tmp, page: page.value, pageSize: pageSize.value})
   if ('code' in res && res.code === 0) {
     if (res.data.list) {
       tableData.value = res.data.list
@@ -220,7 +232,7 @@ const memberForm = ref({
   Id: 0,
   cardId: null,
   telephone: null,
-  memberName: '',
+  userName: '',
   comboType: '',
   remainTimes: null,
   startDate: '',
@@ -259,7 +271,6 @@ const getTableData = async() => {
         }
       })
     });
-    console.log("------getTableData---", tableData)
     total.value = table.data.total
     page.value = table.data.page
     pageSize.value = table.data.pageSize
@@ -324,7 +335,7 @@ const updateMember = async(row) => {
 
 const deleteMember = async(row) => {
   row.visible = false
-  const res = await deleteVIPMember({ Id: row.Id })
+  const res = await deleteVIPMember({ id: row.id })
   if ("code" in res && res.code === 0) {
     ElMessage({
       type: 'success',
@@ -363,6 +374,18 @@ const closeDialog = () => {
   dialogFormVisible.value = false
 }
 
+const memberType = ref([
+    {
+      id: 1,
+      label: '会员',
+      value: 100
+    },
+    {
+      id: 2,
+      label: '临时会员',
+      value: 101
+    }
+  ])
 </script>
 
 <style scoped>

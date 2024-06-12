@@ -10,7 +10,7 @@
       <el-icon>
         <edit />
       </el-icon>
-      重新上传</span>
+      选择图片</span>
   </div>
   <div v-else class="multiple-img">
     <div
@@ -51,6 +51,7 @@
         :file-size="512"
         :max-w-h="1080"
         class="upload-btn-media-library"
+        @on-error="handleUploadError"
         @on-success="getImageList"
       />
       <el-form ref="searchForm" :inline="true" :model="search">
@@ -86,7 +87,7 @@
     <el-pagination
       :current-page="page"
       :page-size="pageSize"
-      :total="total"
+      :total.number="+total"
       :style="{'justify-content':'center'}"
       layout="total, prev, pager, next, jumper"
       @current-change="handleCurrentChange"
@@ -180,6 +181,7 @@ const drawer = ref(false)
 const picList = ref([])
 
 const chooseImg = (url) => {
+  console.log("--------url:", url)
   if (props.multiple) {
     multipleValue.value.push(url)
     emits('update:modelValue', multipleValue.value)
@@ -203,6 +205,18 @@ const getImageList = async() => {
   }
 }
 
+const handleUploadError = async(res) => {
+  console.log("-[handleUploadError]--error upload", res)
+}
+</script>
+<script>
+
+export default {
+  name: 'SelectImage',
+  methods: {
+
+  }
+}
 </script>
 
 <style scoped lang="scss">

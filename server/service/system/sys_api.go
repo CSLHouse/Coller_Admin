@@ -1,11 +1,11 @@
 package system
 
 import (
+	"cooller/server/global"
+	"cooller/server/model/common/request"
+	"cooller/server/model/system"
 	"errors"
 	"fmt"
-	"github.com/flipped-aurora/gin-vue-admin/server/global"
-	"github.com/flipped-aurora/gin-vue-admin/server/model/common/request"
-	"github.com/flipped-aurora/gin-vue-admin/server/model/system"
 
 	"gorm.io/gorm"
 )

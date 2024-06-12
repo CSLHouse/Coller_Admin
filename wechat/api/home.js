@@ -1,9 +1,10 @@
 import request from '@/utils/requestUtil'
 
-export function fetchContent() {
+export function fetchContent(params) {
 	return request({
 		method: 'GET',
-		url: '/product/content'
+		url: '/product/content',
+		params: params
 	})
 }
 
@@ -36,5 +37,13 @@ export function fetchHotProductList(params) {
 		method: 'GET',
 		url: '/product/hotProductList',
 		params:params
+	})
+}
+
+export function recordShareCount(data) {
+	return request({
+		method: 'POST',
+		url: '/base/recordShare',
+		data: data
 	})
 }

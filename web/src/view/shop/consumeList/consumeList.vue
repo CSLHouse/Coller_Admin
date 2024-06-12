@@ -4,7 +4,7 @@
         <el-card class="box-card">
           <el-form :inline="true" :model="searchData" class="demo-form-inline">
             <el-form-item label="会员电话：" class="form-item">
-              <el-input v-model.number="searchData.telephone" placeholder="按会员电话搜索" clearable 
+              <el-input v-model="searchData.telephone" placeholder="按会员电话搜索" clearable 
                 @input="onTriggerSearch" @clear="onSearch"/>
             </el-form-item>
             <!-- <el-form-item label="状态：" class="form-item">
@@ -83,7 +83,7 @@
             :current-page="page"
             :page-size="pageSize"
             :page-sizes="[10, 30, 50, 100]"
-            :total="total"
+            :total.number="+total"
             layout="total, sizes, prev, pager, next, jumper"
             @current-change="handleCurrentChange"
             @size-change="handleSizeChange"

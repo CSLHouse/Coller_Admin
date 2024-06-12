@@ -18,15 +18,15 @@
 				<block v-for="(item, index) in cartList" :key="item.id">
 					<view class="cart-item" :class="{'b-b': index!==cartList.length-1}">
 						<view class="image-wrapper">
-							<image :src="item.productPic" :class="[item.loaded]" mode="aspectFill" lazy-load @load="onImageLoad('cartList', index)"
+							<image :src="item.product.pic" :class="[item.loaded]" mode="aspectFill" lazy-load @load="onImageLoad('cartList', index)"
 							 @error="onImageError('cartList', index)"></image>
 							<view class="yticon icon-xuanzhong2 checkbox" :class="{checked: item.checked}" @click="check('item', index)"></view>
 						</view>
 						<view class="item-right">
-							<text class="clamp title">{{item.productName}}</text>
+							<text class="clamp title">{{item.product.Name}}</text>
 							<text class="attr">{{item.spDataStr}}</text>
-							<text class="price">¥{{item.price}}</text>
-							<uni-number-box class="step" :min="1" :max="100" :value="item.quantity" :index="index" @eventChange="numberChange"></uni-number-box>
+							<text class="price">¥{{item.skuStock.promotionPrice}}</text>
+							<uni-number-box class="step" :min="0" :max="100" :value="item.quantity" :index="index" @eventChange="numberChange"></uni-number-box>
 						</view>
 						<text class="del-btn yticon icon-fork" @click="handleDeleteCartItem(index)"></text>
 					</view>
@@ -103,18 +103,22 @@
 					let cartList = list.map(item => {
 						item.checked = true;
 						item.loaded = "loaded";
-						let spDataArr = JSON.parse(item.productAttr);
 						let spDataStr = '';
-						for (let attr of spDataArr) {
-							spDataStr += attr.key;
-							spDataStr += ":";
-							spDataStr += attr.value;
-							spDataStr += ";";
+						if (item.productAttr) {
+							let spDataArr = JSON.parse(item.productAttr);
+							for (let attr of spDataArr) {
+								spDataStr += attr.key;
+								spDataStr += ":";
+								spDataStr += attr.value;
+								spDataStr += ";";
+							}
 						}
+						
 						item.spDataStr = spDataStr;
 						return item;
 					});
 					this.cartList = cartList;
+					console.log("======cartList====", this.cartList)
 					this.calcTotal(); //计算总价
 				});
 			},
@@ -127,8 +131,8 @@
 				this[key][index].productPic = '/static/errorImage.jpg';
 			},
 			navToLogin() {
-				uni.navigateTo({
-					url: '/pages/public/login'
+				uni.reLaunch  ({
+					url: '/pages/user/user'
 				})
 			},
 			//选中状态处理
@@ -147,19 +151,22 @@
 			},
 			//数量
 			numberChange(data) {
-				let cartItem = this.cartList[data.index];
-
-				updateQuantity({id:cartItem.id,quantity:data.number}).then(response=>{
-					cartItem.quantity = data.number;
-					this.calcTotal();
-				});
+				if (data.number === 0) {
+					this.handleDeleteCartItem(data.index)
+				} else {
+					let cartItem = this.cartList[data.index];
+					updateQuantity({id:cartItem.id, quantity: data.number}).then(response=>{
+						cartItem.quantity = data.number;
+						this.calcTotal();
+					});
+				}
 			},
 			//删除
 			handleDeleteCartItem(index) {
 				let list = this.cartList;
 				let row = list[index];
 				let id = row.id;
-				deletCartItem({id:id}).then(response=>{
+				deletCartItem({id: id}).then(response=>{
 					this.cartList.splice(index, 1);
 					this.calcTotal();
 					uni.hideLoading();
@@ -189,7 +196,7 @@
 				let checked = true;
 				list.forEach(item => {
 					if (item.checked === true) {
-						total += item.price * item.quantity;
+						total += item.skuStock.promotionPrice * item.quantity;
 					} else if (checked === true) {
 						checked = false;
 					}
@@ -206,15 +213,12 @@
 						cartIds.push(item.id);
 					}
 				})
-				if(cartIds.length==0){
-					uni.showToast({
-						title:'您还未选择要下单的商品！',
-						duration:1000
-					})
+				if(cartIds.length == 0){
+					this.$api.msg("您还未选择要下单的商品！", 1000)
 					return;
 				}
 				uni.navigateTo({
-					url: `/pages/order/createOrder?cartIds=${JSON.stringify(cartIds)}`
+					url: `/subpages/order/createOrder?type=2&&cartIds=${JSON.stringify(cartIds)}`
 				})
 			}
 		}

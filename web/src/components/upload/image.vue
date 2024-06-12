@@ -58,9 +58,14 @@ const beforeImageUpload = (file) => {
 }
 
 const handleImageSuccess = (res) => {
-  const { data } = res
-  if (data.file) {
-    emit('on-success', data.file.url)
+  console.log("---[handleImageSuccess]res:", res)
+  if (res.code == 0) {
+    const { data } = res
+    if (data.file) {
+      emit('on-success', data.file.url)
+    }
+  } else {
+    ElMessage.error('有同名文件!')
   }
 }
 

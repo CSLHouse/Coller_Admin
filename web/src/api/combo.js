@@ -36,11 +36,11 @@ export const updateExaVIPCombo = (data) => {
 // @Produce application/json
 // @Param data body dbModel.ExaCustomer true "删除套餐"
 // @Success 200 {string} string "{"success":true,"data":{},"msg":"获取成功"}"
-export const deleteExaVIPCombo = (data) => {
+export const deleteExaVIPCombo = (params) => {
   return service({
     url: '/business/combo',
     method: 'delete',
-    data
+    params: params,
   })
 }
 

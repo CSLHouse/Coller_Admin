@@ -12,9 +12,10 @@ type WXUserInfo struct {
 }
 
 type WXPhoneNumber struct {
-	OpenID        string `json:"openId" binding:"required"`
-	EncryptedData string `json:"encryptedData" binding:"required"`
-	Iv            string `json:"iv" binding:"required"`
+	OpenID string `json:"openId" binding:"required"`
+	Code   string `json:"code" binding:"required"`
+	//EncryptedData string `json:"encryptedData" binding:"required"`
+	//Iv            string `json:"iv" binding:"required"`
 	//SessionKey    string `json:"sessionKey" binding:"required"`
 }
 

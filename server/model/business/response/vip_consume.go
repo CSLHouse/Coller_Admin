@@ -2,7 +2,7 @@ package response
 
 type VipConsumeResModel struct {
 	ID           int    `json:"Id"`
-	Telephone    int    `json:"telephone" form:"telephone" gorm:"comment:会员手机号"`  // 客户手机号
+	Telephone    string `json:"telephone" form:"telephone" gorm:"comment:会员手机号"`  // 客户手机号
 	MemberName   string `json:"memberName" form:"memberName" gorm:"comment:会员名"`  // 客户名
 	MemberType   string `json:"memberType" form:"memberType" gorm:"comment:会员类型"` // 管理ID
 	MemberState  int    `json:"memberState" form:"memberState" gorm:"comment:会员状态"`

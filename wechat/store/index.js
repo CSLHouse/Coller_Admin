@@ -10,8 +10,9 @@ const store = new Vuex.Store({
 	state: {
 		hasLogin: false,
 		userInfo: {},
-		hasPhone: false,
-		openId: ''
+		openId: '',
+		token: "",
+		hadNickName: false,
 	},
 	mutations: {
 		refreshLoginSession() {
@@ -20,9 +21,11 @@ const store = new Vuex.Store({
 				provider: 'weixin', //使用微信登录
 				success: function (loginRes) {
 					wxLogin({code: loginRes.code}).then(res => {
-						console.log("------login---res--------", res.data)
 						if (res.code == 0) {
-							uni.setStorageSync('OpenId', res.data.openid);
+							uni.setStorage({//缓存用户登陆状态
+							    key: 'OpenId',  
+							    data: res.data.openid
+							})
 							// wx.setStorageSync("WxCode", loginRes.code)
 							// wx.setStorageSync("WxCodeTime", (new Date()).getTime())
 							_this.state.openId = res.data.openid
@@ -33,7 +36,11 @@ const store = new Vuex.Store({
 							})
 						}
 					}).catch(errors => {
-						console.log("------login---errors--------", errors)
+						uni.showModal({
+							title:'提示',
+							content:'登录失败',
+							showCancel:false
+						})
 					});
 				}
 			});
@@ -41,24 +48,24 @@ const store = new Vuex.Store({
 		login(state, provider) {
 			state.hasLogin = true;
 			state.userInfo = provider;
+			if (provider.nickName) {
+				state.hadNickName = true
+			}
 			uni.setStorage({//缓存用户登陆状态
-			    key: 'userInfo',  
-			    data: provider  
+			    key: 'UserInfo',  
+			    data: provider
 			})
-			state.openId = provider.openid
-		},
-		setPhone(state, provider) {
-			state.hasPhone = provider;
 		},
 		logout(state) {
-			state.hasLogin = false;
-			state.hasPhone = false;
-			state.userInfo = {};
+			state.hasLogin = false
+			state.hadNickName = false
+			state.userInfo = {}
+			state.token = null
 			uni.removeStorage({  
-                key: 'userInfo'  
+                key: 'UserInfo'  
             });
 			uni.removeStorage({
-			    key: 'token'  
+			    key: 'Token'  
 			})
 		}
 	},

@@ -11,7 +11,7 @@ export function searchProductList(params) {
 export function fetchCategoryTreeList() {
 	return request({
 		method: 'GET',
-		url: '/product/categoryTreeList'
+		url: '/product/allCategory'
 	})
 }
 

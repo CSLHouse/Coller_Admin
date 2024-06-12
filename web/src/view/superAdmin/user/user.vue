@@ -18,6 +18,12 @@
         <el-table-column align="left" label="用户名" min-width="150" prop="userName" />
         <el-table-column align="left" label="昵称" min-width="150" prop="nickName" />
         <el-table-column align="left" label="手机号" min-width="120" prop="phone" />
+        <el-table-column align="left" label="是否是会员制" min-width="75">
+          <template #default="scope">{{ formatMembership(scope.row.isMembership) }}</template>
+        </el-table-column>
+        <el-table-column align="left" label="是否线上付费" min-width="75">
+          <template #default="scope">{{ formatPayOnline(scope.row.payOnline) }}</template>
+        </el-table-column>
         <el-table-column align="left" label="职位" min-width="120" prop="position" />
         <el-table-column align="left" label="公司名称" min-width="120" prop="storeName" />
         <el-table-column align="left" label="邮箱" min-width="180" prop="email" />
@@ -70,7 +76,7 @@
           :current-page="page"
           :page-size="pageSize"
           :page-sizes="[10, 30, 50, 100]"
-          :total="total"
+          :total.number="+total"
           layout="total, sizes, prev, pager, next, jumper"
           @current-change="handleCurrentChange"
           @size-change="handleSizeChange"
@@ -99,6 +105,18 @@
           <el-form-item label="手机号" prop="phone">
             <el-input v-model="userInfo.phone" />
           </el-form-item>
+          <el-form-item label="是否是会员制">
+            <el-radio-group v-model="membershipState">
+              <el-radio :label="1">是</el-radio>
+              <el-radio :label="2">不是</el-radio>
+            </el-radio-group>
+          </el-form-item>
+          <el-form-item label="是否线上付费" >
+            <el-radio-group v-model="payOnlineState">
+              <el-radio :label="1">是</el-radio>
+              <el-radio :label="2">不是</el-radio>
+            </el-radio-group>
+          </el-form-item>
           <el-form-item label="邮箱" prop="email">
             <el-input v-model="userInfo.email" />
           </el-form-item>
@@ -108,7 +126,6 @@
           <el-form-item label="公司名称">
             <el-input v-model="userInfo.storeName" />
           </el-form-item>
-
           <el-form-item label="用户角色" prop="authorityId">
             <el-cascader
               v-model="userInfo.authorityIds"
@@ -133,11 +150,8 @@
               <div v-else class="header-img-box">从媒体库选择</div>
             </div>
           </el-form-item>
-
         </el-form>
-
       </div>
-
       <template #footer>
         <div class="dialog-footer">
           <el-button @click="closeAddUserDialog">取 消</el-button>
@@ -171,7 +185,7 @@ import WarningBar from '@/components/warningBar/warningBar.vue'
 import { setUserInfo, resetPassword } from '@/api/user.js'
 import { useUserStore } from '@/pinia/modules/user'
 
-import { nextTick, ref, watch } from 'vue'
+import { nextTick, ref, watch, computed } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 const path = ref(import.meta.env.VITE_BASE_API + '/')
 // 初始化相关
@@ -211,6 +225,32 @@ const handleCurrentChange = (val) => {
   getTableData()
 }
 
+const formatMembership = computed(() => {
+  return (value) => {
+        if (value == 1) {
+            return '是';
+        } else if (value == 2) {
+          return '不是'
+        } else {
+          return '不是'
+        }
+    }
+  })
+
+const formatPayOnline = computed(() => {
+  return (value) => {
+        if (value == 1) {
+            return '是';
+        } else if (value == 2) {
+          return '不是'
+        } else {
+          return '不是'
+        }
+    }
+  })
+
+const membershipState = ref(0)
+const payOnlineState = ref(0)
 // 查询
 const getTableData = async() => {
   const table = await getUserList({ page: page.value, pageSize: pageSize.value })
@@ -327,6 +367,8 @@ const rules = ref({
 const userForm = ref(null)
 const enterAddUserDialog = async() => {
   userInfo.value.authorityId = userInfo.value.authorityIds[0]
+  userInfo.value.isMembership = membershipState.value
+  userInfo.value.payOnline = payOnlineState.value
   userForm.value.validate(async valid => {
     if (valid) {
       const req = {
@@ -358,6 +400,8 @@ const closeAddUserDialog = () => {
   userInfo.value.headerImg = ''
   userInfo.value.authorityIds = []
   addUserDialog.value = false
+  membershipState.value = 0
+  payOnlineState.value = 0
 }
 
 const dialogFlag = ref('add')
@@ -393,9 +437,13 @@ const changeAuthority = async(row, flag, removeAuth) => {
 }
 
 const openEdit = (row) => {
+  membershipState.value = 0
+  payOnlineState.value = 0
   dialogFlag.value = 'edit'
   userInfo.value = JSON.parse(JSON.stringify(row))
   addUserDialog.value = true
+  membershipState.value = row.isMembership
+  payOnlineState.value = row.payOnline
 }
 
 const switchEnable = async(row) => {

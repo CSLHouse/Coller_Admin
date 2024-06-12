@@ -1,12 +1,12 @@
 package business
 
 import (
-	"github.com/flipped-aurora/gin-vue-admin/server/global"
-	"github.com/flipped-aurora/gin-vue-admin/server/model/business"
-	businessRes "github.com/flipped-aurora/gin-vue-admin/server/model/business/response"
-	"github.com/flipped-aurora/gin-vue-admin/server/model/common/request"
-	"github.com/flipped-aurora/gin-vue-admin/server/model/common/response"
-	"github.com/flipped-aurora/gin-vue-admin/server/utils"
+	"cooller/server/global"
+	"cooller/server/model/business"
+	businessRes "cooller/server/model/business/response"
+	"cooller/server/model/common/request"
+	"cooller/server/model/common/response"
+	"cooller/server/utils"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 )
@@ -55,7 +55,7 @@ func (e *OrderApi) GetVIPOrderList(c *gin.Context) {
 		response.FailWithMessage(err.Error(), c)
 		return
 	}
-	orderList, total, err := orderService.GetVIPOrderInfoList(utils.GetUserAuthorityId(c), pageInfo)
+	orderList, total, err := orderService.GetVIPOrderInfoList(utils.GetUserID(c), pageInfo)
 	if err != nil {
 		global.GVA_LOG.Error("获取失败!", zap.Error(err))
 		response.FailWithMessage("获取失败"+err.Error(), c)
@@ -68,15 +68,15 @@ func (e *OrderApi) GetVIPOrderList(c *gin.Context) {
 		orderRes.ID = order.ID
 		orderRes.OrderID = order.OrderID
 		orderRes.Telephone = order.Telephone
-		orderRes.MemberName = order.Member.MemberName
-		orderRes.ComboId = order.Member.ComboId
-		orderRes.ComboType = order.Member.Combo.ComboName
-		orderRes.ComboPrice = order.Member.Combo.ComboPrice
+		orderRes.MemberName = order.Card.UserName
+		orderRes.ComboId = order.Card.ComboId
+		orderRes.ComboType = order.Card.Combo.ComboName
+		orderRes.ComboPrice = order.Card.Combo.ComboPrice
 		orderRes.BuyDate = order.BuyDate
 		orderRes.State = order.State
 		orderRes.IsNew = order.IsNew
 		orderRes.Type = order.Type
-		orderRes.Collection = order.Member.Collection
+		orderRes.Collection = order.Card.Collection
 		orderData = append(orderData, orderRes)
 	}
 	response.OkWithDetailed(response.PageResult{
@@ -96,7 +96,7 @@ func (e *OrderApi) GetVIPStatementList(c *gin.Context) {
 		return
 	}
 
-	orderList, err := orderService.GetVIPStatementInfoList(utils.GetUserAuthorityId(c), statisticsInfo)
+	orderList, err := orderService.GetVIPStatementInfoList(utils.GetUserID(c), statisticsInfo)
 	if err != nil {
 		global.GVA_LOG.Error("获取失败!", zap.Error(err))
 		response.FailWithMessage("获取失败"+err.Error(), c)
@@ -109,13 +109,11 @@ func (e *OrderApi) GetVIPStatementList(c *gin.Context) {
 
 // GetVIPStatisticsList 获取统计数据
 func (e *OrderApi) GetVIPStatisticsList(c *gin.Context) {
-	statistics, err := orderService.GetVIPStatisticsInfoList(utils.GetUserAuthorityId(c))
+	statistics, err := orderService.GetVIPStatisticsInfoList(utils.GetUserID(c))
 	if err != nil {
 		global.GVA_LOG.Error("获取失败!", zap.Error(err))
 		response.FailWithMessage("获取失败"+err.Error(), c)
 		return
 	}
-	response.OkWithDetailed(response.AllResult{
-		List: statistics,
-	}, "获取成功", c)
+	response.OkWithDetailed(statistics, "获取成功", c)
 }

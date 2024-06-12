@@ -49,7 +49,7 @@
     <el-pagination
       :current-page="page"
       :page-size="pageSize"
-      :total="total"
+      :total.number="+total"
       :style="{'justify-content':'center'}"
       layout="total, prev, pager, next, jumper"
       @current-change="handleCurrentChange"

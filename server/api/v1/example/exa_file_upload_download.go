@@ -1,12 +1,13 @@
 package example
 
 import (
+	"cooller/server/global"
+	"cooller/server/model/common/request"
+	"cooller/server/model/common/response"
+	"cooller/server/model/example"
+	exampleRes "cooller/server/model/example/response"
+	"cooller/server/utils"
 	"fmt"
-	"github.com/flipped-aurora/gin-vue-admin/server/global"
-	"github.com/flipped-aurora/gin-vue-admin/server/model/common/request"
-	"github.com/flipped-aurora/gin-vue-admin/server/model/common/response"
-	"github.com/flipped-aurora/gin-vue-admin/server/model/example"
-	exampleRes "github.com/flipped-aurora/gin-vue-admin/server/model/example/response"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 )
@@ -32,7 +33,13 @@ func (b *FileUploadAndDownloadApi) UploadFile(c *gin.Context) {
 		response.FailWithMessage("接收文件失败", c)
 		return
 	}
-	file, err = fileUploadAndDownloadService.UploadFile(header, noSave) // 文件上传后拿到文件路径
+	userId := utils.GetUserID(c)
+	//if fileUploadAndDownloadService.CheckFile(header.Filename, userId) {
+	//	global.GVA_LOG.Error("有同名文件!", zap.Error(err))
+	//	response.Failed("有同名文件", c)
+	//	return
+	//}
+	file, err = fileUploadAndDownloadService.UploadFile(header, noSave, userId) // 文件上传后拿到文件路径
 	if err != nil {
 		global.GVA_LOG.Error("修改数据库链接失败!", zap.Error(err))
 		response.FailWithMessage("修改数据库链接失败", c)
@@ -97,7 +104,8 @@ func (b *FileUploadAndDownloadApi) GetFileList(c *gin.Context) {
 		response.FailWithMessage(err.Error(), c)
 		return
 	}
-	list, total, err := fileUploadAndDownloadService.GetFileRecordInfoList(pageInfo)
+	userId := utils.GetUserID(c)
+	list, total, err := fileUploadAndDownloadService.GetFileRecordInfoList(pageInfo, userId)
 	if err != nil {
 		global.GVA_LOG.Error("获取失败!", zap.Error(err))
 		response.FailWithMessage("获取失败", c)

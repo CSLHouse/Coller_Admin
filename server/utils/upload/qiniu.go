@@ -7,7 +7,7 @@ import (
 	"mime/multipart"
 	"time"
 
-	"github.com/flipped-aurora/gin-vue-admin/server/global"
+	"cooller/server/global"
 	"github.com/qiniu/api.v7/v7/auth/qbox"
 	"github.com/qiniu/api.v7/v7/storage"
 	"go.uber.org/zap"
@@ -24,7 +24,7 @@ type Qiniu struct{}
 //@param: file *multipart.FileHeader
 //@return: string, string, error
 
-func (*Qiniu) UploadFile(file *multipart.FileHeader) (string, string, error) {
+func (*Qiniu) UploadFile(file *multipart.FileHeader, userId int) (string, string, error) {
 	putPolicy := storage.PutPolicy{Scope: global.GVA_CONFIG.Qiniu.Bucket}
 	mac := qbox.NewMac(global.GVA_CONFIG.Qiniu.AccessKey, global.GVA_CONFIG.Qiniu.SecretKey)
 	upToken := putPolicy.UploadToken(mac)
@@ -69,6 +69,11 @@ func (*Qiniu) DeleteFile(key string) error {
 	return nil
 }
 
+func (*Qiniu) DeleteFiles(files []string) error {
+	// TODO: 待完善
+	return nil
+}
+
 //@author: [SliverHorn](https://github.com/SliverHorn)
 //@object: *Qiniu
 //@function: qiniuConfig
@@ -93,4 +98,8 @@ func qiniuConfig() *storage.Config {
 		cfg.Zone = &storage.ZoneXinjiapo
 	}
 	return &cfg
+}
+
+func (*Qiniu) UploadFileWithLocationPath(localPath string, fileName string, userId int) (string, string, error) {
+	return "", "", fmt.Errorf("")
 }

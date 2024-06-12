@@ -23,7 +23,7 @@
           @selection-change="handleSelectionChange"
         >
           <el-table-column type="selection" width="40" />
-          <el-table-column align="left" label="编号" prop="ID" width="60"></el-table-column>
+          <el-table-column align="left" label="编号" prop="id" width="60"></el-table-column>
           <el-table-column align="left" label="商品名称" prop="name" width="120" />
           <el-table-column align="left" label="品牌首字母" prop="firstLetter" width="100" />
           <el-table-column align="left" label="排序" prop="sort" width="60" />
@@ -54,7 +54,7 @@
                 <p>确定要删除吗？</p>
                 <div style="text-align: right; margin-top: 8px;">
                   <el-button type="primary" link @click="scope.row.visible = false">取消</el-button>
-                  <el-button type="primary" @click="deleteProduct(scope.row)">确定</el-button>
+                  <el-button type="primary" @click="handleDeleteBrand(scope.row)">确定</el-button>
                 </div>
                 <template #reference>
                   <el-button type="danger" link icon="delete" @click="scope.row.visible = true">删除</el-button>
@@ -79,7 +79,7 @@
             :current-page="page"
             :page-size="pageSize"
             :page-sizes="[5, 5, 5, 5]"
-            :total="total"
+            :total.number="+total"
             layout="total, sizes, prev, pager, next, jumper"
             @current-change="handleCurrentChange"
             @size-change="handleSizeChange"
@@ -95,57 +95,39 @@
                 <el-input v-model.number="productForm.firstLetter" autocomplete="off" />
             </el-form-item>
             <el-form-item label="品牌LOGO">
-                <el-upload
-                    list-type="picture"
-                    :limit=1
-                    :action="`${path}/fileUploadAndDownload/upload`"
-                    :headers="{ 'x-token': userStore.token }"
-                    :on-preview="handlePreview"
-                    :on-remove="handleRemove"
-                    :on-error="uploadError"
-                    :on-success="uploadLogoSuccess"
-                    :before-upload="beforeAvatarUpload">
-                    <el-button type="primary">点击上传</el-button>
-                    <template #tip>
-                        <div class="el-upload__tip">
-                            只能上传jpg/png文件，且不超过10MB
-                        </div>
-                    </template>
-                </el-upload>
+              <!-- <upload-image
+                v-model:imageUrl="productForm.logo"
+                :file-size="512"
+                :max-w-h="1080"
+                class="upload-btn-media-library"
+                @on-success="uploadLogoSuccess"
+              /> -->
+              <SelectImage v-model="productForm.logo" />
             </el-form-item>
             <el-form-item label="品牌专区大图">
-                <el-upload
-                    list-type="picture"
-                    :limit=1
-                    :action="`${path}/fileUploadAndDownload/upload`"
-                    :headers="{ 'x-token': userStore.token }"
-                    :on-preview="handlePreview"
-                    :on-remove="handleRemove"
-                    :on-error="uploadError"
-                    :on-success="uploadBigPicSuccess"
-                    :before-upload="beforeAvatarUpload">
-                    <el-button type="primary">点击上传</el-button>
-                    <template #tip>
-                        <div class="el-upload__tip">
-                            只能上传jpg/png文件，且不超过10MB
-                        </div>
-                    </template>
-                </el-upload>
+              <SelectImage v-model="productForm.bigPic" />
+              <!-- <upload-image
+                v-model:imageUrl="productForm.bigPic"
+                :file-size="512"
+                :max-w-h="1080"
+                class="upload-btn-media-library"
+                @on-success="uploadBigPicSuccess"
+              /> -->
             </el-form-item>
             <el-form-item label="品牌故事">
-                <el-input v-model="productForm.brandStory" autocomplete="off" />
+                <el-input v-model="productForm.brandStory" type="textarea" autocomplete="off" />
             </el-form-item>
             <el-form-item label="排序">
                 <el-input v-model.number="productForm.sort" autocomplete="off" />
             </el-form-item>
             <el-form-item label="是否显示">
-                <el-radio-group v-model="showState" class="ml-4" @change="HandleShowRadioChanged">
+                <el-radio-group v-model="showState" class="ml-4">
                     <el-radio label="1" size="large">是</el-radio>
                     <el-radio label="0" size="large">否</el-radio>
                 </el-radio-group>
             </el-form-item>
             <el-form-item label="品牌制造商">
-                <el-radio-group v-model="brandState" class="ml-4" @change="HandleBrandRadioChanged">
+                <el-radio-group v-model="brandState" class="ml-4">
                     <el-radio label="1" size="large">是</el-radio>
                     <el-radio label="0" size="large">否</el-radio>
                 </el-radio-group>
@@ -168,16 +150,10 @@
   } from '@/api/product'
   import { ref, reactive, onBeforeMount, watch } from 'vue'
   import { ElMessage } from 'element-plus'
-  import type { UploadProps, UploadUserFile, UploadInstance  } from 'element-plus'
-  import config from '@/core/config'
-  import { trim } from '@/utils/stringFun'
-  import { number } from 'echarts'
-  import { useRouter } from "vue-router";
   import { ProductStore } from '@/pinia/modules/product'  
-  import {getAliOSSCreds} from '@/api/system'
-  import OSS from 'ali-oss'
   import { useUserStore } from '@/pinia/modules/user'
-  import { createID } from '@/utils/uuid'
+  import SelectImage from '@/components/selectImage/selectImage.vue'
+  import { deleteProductBrand } from '@/api/product'
 
   const userStore = useUserStore()
 
@@ -188,15 +164,7 @@
   
   const onSearch = async() => {
     // TODO: 根据品牌名或关键词搜索
-    getTableData()
-  }
-  
-  const onCancel = () => {
-    getTableData()
-  }
-  
-  const onExport = () => {
-  
+    getTableData(true)
   }
   
   const page = ref(1)
@@ -207,31 +175,28 @@
   // 分页
   const handleSizeChange = (val) => {
     pageSize.value = val
-    getTableData()
+    getTableData(true)
   }
   
   const handleCurrentChange = (val) => {
     page.value = val
-    getTableData()
+    getTableData(true)
   }
   
   const productStore = ProductStore()
   // 查询
-  const getTableData = async() => {
+  const getTableData = async(refresh) => {
+    await productStore.BuildBrandData(refresh)
     productData.value = productStore.RandData['list']
-    if (!productData.value) {
-      await productStore.BuildBrandData()
-      productData.value = productStore.RandData['list']
-      productData.value.forEach(element => {
-        element.content = "商品：" + element.productCount + "  评价：" + element.productCommentCount
-      });
-      total.value = productStore.RandData['total']
-      page.value = productStore.RandData['page']
-      pageSize.value = productStore.RandData['pageSize']
-    }
+    productData.value.forEach(element => {
+      element.content = "商品：" + element.productCount + "  评价：" + element.productCommentCount
+    });
+    total.value = productStore.RandData['total']
+    page.value = productStore.RandData['page']
+    pageSize.value = productStore.RandData['pageSize']
   }
 
-  getTableData()
+  getTableData(true)
   interface stateItem {
     id: number,
     label: string,
@@ -257,7 +222,7 @@
     //     item[stateOption.value.key] = stateOption.value.value
     //     updateList.push(item.id)
     // })
-    // const res = await updateProducts({ids: updateList, key: stateOption.value.dbKey, value: stateOption.value.value })
+    // const res = await updateProductKeyword({ids: updateList, key: stateOption.value.dbKey, value: stateOption.value.value })
     // if ('code' in res && res.code !== 0) {
     //     productData.value.forEach(element => {
     //         element[stateOption.value.key] = stateOption.value.value
@@ -286,12 +251,15 @@
   const openDialog = () => {
     dialogFormVisible.value = true
     type.value = 'create'
+    resetForm()
   }
 
   const enterDialog = async() => {
     let res
     switch (type.value) {
         case 'create':
+            productForm.value.showStatus = Number(showState.value)
+            productForm.value.factoryStatus = Number(brandState.value)
             res = await createProductBrand(productForm.value)
             break
         case 'update':
@@ -305,82 +273,37 @@
     if (res.code === 0) {
         closeDialog()
         await productStore.BuildBrandData(true)
-        getTableData()
+        getTableData(true)
     }
   }
   const closeDialog = () => {
     dialogFormVisible.value = false
   }
 
-  const uploadRef = ref<UploadInstance>()
-  const path = ref(import.meta.env.VITE_BASE_API)
-  // 图片上传前验证
-  const beforeAvatarUpload = (file) => {
-    const isJPG = file.type === 'image/jpeg'
-    const isPng = file.type === 'image/png'
-    const isLt2M = file.size / 1024 / 1024 < 2
-    if (!isJPG && !isPng) {
-        ElMessage.error('上传图片只能是 jpg或png 格式!')
-    }
-    if (!isLt2M) {
-        ElMessage({
-          type: 'error',
-          message: '上传头像图片大小不能超过 2MB!'
-        })
-    }
-    return (isPng || isJPG) && isLt2M
-  }
-
-  const upload = async(item) => {
-    // let res = await getAliOSSCreds()
-    // let creds = res.data.data
-    // TODO: stsToken上传更安全
-    const client = new OSS({
-        region: 'oss-cn-beijing', // 服务器集群地区
-        accessKeyId: "LTAI5tJcdwf4dTPNt1e5xQke",// creds.accessKeyId, // OSS帐号
-        accessKeySecret: "nHEtlOvJ1wqWMXBiZheJh083YFZKmr",//creds.accessKeySecret, // OSS 密码
-        // stsToken: "acs:ram::1573486857476997:role/ramosstest",//creds.securityToken, // 签名token
-        bucket: 'cooller' // 阿里云上存储的 Bucket
-    })
-    let imageID = createID()
-    let key = 'resource/' + userStore.userInfo.nickName + 'images/' + imageID + '.jpg'  // 存储路径，并且给图片改成唯一名字
-    return client.put(key, item.file) // OSS上传
-  }
-  const uploadError = () => {
-    ElMessage({
-        type: 'error',
-        message: '图片上传失败'
-    })
-  }
-  const uploadLogoSuccess = (res) => {
-    const { data } = res
-    if (data.file) {
-        productForm.value.logo = data.file.url
-        console.log("-----logo.url-----", data.file.url)
-    }
-  }
-  
-  const uploadBigPicSuccess = (res) => {
-    const { data } = res
-    if (data.file) {
-        productForm.value.bigPic = data.file.url
-        console.log("-----bigPic.url-----", data.file.url)
-    }
-  }
-  const handleRemove: UploadProps['onRemove'] = (uploadFile, uploadFiles) => {
-    console.log(uploadFile, uploadFiles)
-  }
-  const handlePreview: UploadProps['onPreview'] = (file) => {
-    console.log(file)
-  }
-
   const showState = ref("1")
   const brandState = ref("1")
-  const HandleShowRadioChanged = () => {
-    productForm.value.showStatus = Number(showState.value)
+
+  const handleDeleteBrand = async(row) => {
+    const res = await deleteProductBrand({id: row.id})
+    if ('code' in res && res.code === 0) {
+      ElMessage({
+        type: 'success',
+        message: '删除成功!',
+      })
+      getTableData(true)
+    }
   }
-  const HandleBrandRadioChanged = () => {
-    productForm.value.factoryStatus = Number(brandState.value)
+  const resetForm = () => {
+    productForm.value = {
+      name: '',
+      firstLetter: '',
+      sort: 0,
+      factoryStatus: 0,
+      showStatus: 0,
+      logo: '',
+      bigPic: '',
+      brandStory: '',
+    }
   }
   </script>
   

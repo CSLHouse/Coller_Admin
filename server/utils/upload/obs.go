@@ -1,9 +1,10 @@
 package upload
 
 import (
+	"fmt"
 	"mime/multipart"
 
-	"github.com/flipped-aurora/gin-vue-admin/server/global"
+	"cooller/server/global"
 	"github.com/huaweicloud/huaweicloud-sdk-go-obs/obs"
 	"github.com/pkg/errors"
 )
@@ -16,7 +17,7 @@ func NewHuaWeiObsClient() (client *obs.ObsClient, err error) {
 	return obs.New(global.GVA_CONFIG.HuaWeiObs.AccessKey, global.GVA_CONFIG.HuaWeiObs.SecretKey, global.GVA_CONFIG.HuaWeiObs.Endpoint)
 }
 
-func (o *Obs) UploadFile(file *multipart.FileHeader) (string, string, error) {
+func (o *Obs) UploadFile(file *multipart.FileHeader, userId int) (string, string, error) {
 	// var open multipart.File
 	open, err := file.Open()
 	if err != nil {
@@ -64,4 +65,13 @@ func (o *Obs) DeleteFile(key string) error {
 		return errors.Wrapf(err, "删除对象(%s)失败!, output: %v", key, output)
 	}
 	return nil
+}
+
+func (o *Obs) DeleteFiles(files []string) error {
+	//TODO: 待完善
+	return nil
+}
+
+func (*Obs) UploadFileWithLocationPath(localPath string, fileName string, userId int) (string, string, error) {
+	return "", "", fmt.Errorf("")
 }

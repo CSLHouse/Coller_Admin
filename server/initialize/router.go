@@ -3,10 +3,10 @@ package initialize
 import (
 	"net/http"
 
-	"github.com/flipped-aurora/gin-vue-admin/server/docs"
-	"github.com/flipped-aurora/gin-vue-admin/server/global"
-	"github.com/flipped-aurora/gin-vue-admin/server/middleware"
-	"github.com/flipped-aurora/gin-vue-admin/server/router"
+	"cooller/server/docs"
+	"cooller/server/global"
+	"cooller/server/middleware"
+	"cooller/server/router"
 	"github.com/gin-gonic/gin"
 	ginSwagger "github.com/swaggo/gin-swagger"
 	"github.com/swaggo/gin-swagger/swaggerFiles"
@@ -16,11 +16,14 @@ import (
 
 func Routers() *gin.Engine {
 	Router := gin.Default()
+	Router.LoadHTMLGlob("./resource/*.html")
 	InstallPlugin(Router) // 安装插件
 	systemRouter := router.RouterGroupApp.System
 	exampleRouter := router.RouterGroupApp.Example
 	businessRouter := router.RouterGroupApp.Business
 	wechatRouter := router.RouterGroupApp.Wechat
+	payRouter := router.RouterGroupApp.Pay
+	productRouter := router.RouterGroupApp.Product
 	// 如果想要不使用nginx代理前端网页，可以修改 web/.env.production 下的
 	// VUE_APP_BASE_API = /
 	// VUE_APP_BASE_PATH = http://localhost
@@ -31,7 +34,7 @@ func Routers() *gin.Engine {
 	// Router.StaticFile("/", "./dist/index.html") // 前端网页入口页面
 
 	Router.StaticFS(global.GVA_CONFIG.Local.StorePath, http.Dir(global.GVA_CONFIG.Local.StorePath)) // 为用户头像和文件提供静态地址
-	// Router.Use(middleware.LoadTls())  // 如果需要使用https 请打开此中间件 然后前往 core/server.go 将启动模式 更变为 Router.RunTLS("端口","你的cre/pem文件","你的key文件")
+	//Router.Use(middleware.LoadTls())                                                                // 如果需要使用https 请打开此中间件 然后前往 core/server.go 将启动模式 更变为 Router.RunTLS("端口","你的cre/pem文件","你的key文件")
 	// 跨域，如需跨域可以打开下面的注释
 	// Router.Use(middleware.Cors()) // 直接放行全部跨域请求
 	// Router.Use(middleware.CorsByRules()) // 按照配置的规则放行跨域请求
@@ -74,12 +77,15 @@ func Routers() *gin.Engine {
 		exampleRouter.InitCustomerRouter(PrivateGroup)              // 客户路由
 		exampleRouter.InitFileUploadAndDownloadRouter(PrivateGroup) // 文件上传下载功能路由
 		businessRouter.InitComboRouter(PrivateGroup)                // 业务--套餐路由
-		businessRouter.InitMemberRouter(PrivateGroup)               // VIP会员路由
+		businessRouter.InitMemberRouter(PrivateGroup, PublicGroup)  // VIP会员路由
 		businessRouter.InitConsumeRouter(PrivateGroup)              // 会员消费路由
 		businessRouter.InitOrderRouter(PrivateGroup)                // 订单路由
 		wechatRouter.InitWechatRouter(PrivateGroup, PublicGroup)    // 小程序首页路由
 		wechatRouter.InitAccountRouter(PrivateGroup)                // 小程序账号路由
 		wechatRouter.InitOrderRouter(PrivateGroup)                  // 订单路由
+		payRouter.InitPayRouter(PrivateGroup, PublicGroup)
+		productRouter.InitFlashRouter(PrivateGroup, PublicGroup)
+		businessRouter.InitQrCodeRouter(PrivateGroup, PublicGroup)
 	}
 
 	global.GVA_LOG.Info("router register success")

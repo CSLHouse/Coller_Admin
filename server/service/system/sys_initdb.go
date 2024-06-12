@@ -2,11 +2,11 @@ package system
 
 import (
 	"context"
+	"cooller/server/global"
+	"cooller/server/model/system/request"
 	"database/sql"
 	"errors"
 	"fmt"
-	"github.com/flipped-aurora/gin-vue-admin/server/global"
-	"github.com/flipped-aurora/gin-vue-admin/server/model/system/request"
 	"gorm.io/gorm"
 	"sort"
 )
@@ -160,6 +160,41 @@ func createTables(ctx context.Context, inits initSlice) error {
 	defer func(c func()) { c() }(cancel)
 	for _, init := range inits {
 		if init.TableCreated(next) {
+			continue
+		}
+		if n, err := init.MigrateTable(next); err != nil {
+			return err
+		} else {
+			next = n
+		}
+	}
+	return nil
+}
+
+func InitTables() error {
+	ctx := context.TODO()
+	if global.GVA_DB == nil {
+		global.GVA_LOG.Error("已存在数据库配置!")
+		return fmt.Errorf("已存在数据库配置!")
+	}
+	if len(initializers) == 0 {
+		return errors.New("无可用初始化过程，请检查初始化是否已执行完成")
+	}
+	sort.Sort(&initializers) // 保证有依赖的 initializer 排在后面执行
+	ctx = context.WithValue(ctx, "db", global.GVA_DB)
+
+	next, cancel := context.WithCancel(ctx)
+	defer func(c func()) { c() }(cancel)
+	for _, init := range initializers {
+		if init.TableCreated(next) {
+			if init.DataInserted(next) {
+				continue
+			}
+			if n, err := init.InitializeData(next); err != nil {
+				return err
+			} else {
+				next = n
+			}
 			continue
 		}
 		if n, err := init.MigrateTable(next); err != nil {

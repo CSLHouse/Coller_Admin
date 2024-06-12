@@ -16,7 +16,9 @@ export const useUserStore = defineStore('user', () => {
     authority: {},
     sideMode: 'dark',
     activeColor: 'var(--el-color-primary)',
-    baseColor: '#fff'
+    baseColor: '#fff',
+    isMembership: 0,
+    payOnline: 0,
   })
   const token = ref(window.localStorage.getItem('token') || '')
   const setUserInfo = (val) => {

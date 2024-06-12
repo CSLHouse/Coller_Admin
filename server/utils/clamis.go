@@ -1,8 +1,8 @@
 package utils
 
 import (
-	"github.com/flipped-aurora/gin-vue-admin/server/global"
-	systemReq "github.com/flipped-aurora/gin-vue-admin/server/model/system/request"
+	"cooller/server/global"
+	systemReq "cooller/server/model/system/request"
 	"github.com/gin-gonic/gin"
 	"github.com/gofrs/uuid/v5"
 )
@@ -84,5 +84,33 @@ func GetUserName(c *gin.Context) string {
 	} else {
 		waitUse := claims.(*systemReq.CustomClaims)
 		return waitUse.UserName
+	}
+}
+
+// GetNickName 从Gin的Context中获取从jwt解析出来的用户昵称
+func GetNickName(c *gin.Context) string {
+	if claims, exists := c.Get("claims"); !exists {
+		if cl, err := GetClaims(c); err != nil {
+			return ""
+		} else {
+			return cl.UserName
+		}
+	} else {
+		waitUse := claims.(*systemReq.CustomClaims)
+		return waitUse.NickName
+	}
+}
+
+// GetTelephone 从Gin的Context中获取从jwt解析出来的用户手机号
+func GetTelephone(c *gin.Context) string {
+	if claims, exists := c.Get("claims"); !exists {
+		if cl, err := GetClaims(c); err != nil {
+			return ""
+		} else {
+			return cl.Telephone
+		}
+	} else {
+		waitUse := claims.(*systemReq.CustomClaims)
+		return waitUse.Telephone
 	}
 }

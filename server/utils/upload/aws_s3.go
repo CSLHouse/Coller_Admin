@@ -6,7 +6,7 @@ import (
 	"mime/multipart"
 	"time"
 
-	"github.com/flipped-aurora/gin-vue-admin/server/global"
+	"cooller/server/global"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
@@ -25,7 +25,7 @@ type AwsS3 struct{}
 //@param: file *multipart.FileHeader
 //@return: string, string, error
 
-func (*AwsS3) UploadFile(file *multipart.FileHeader) (string, string, error) {
+func (*AwsS3) UploadFile(file *multipart.FileHeader, userId int) (string, string, error) {
 	session := newSession()
 	uploader := s3manager.NewUploader(session)
 
@@ -80,6 +80,11 @@ func (*AwsS3) DeleteFile(key string) error {
 	return nil
 }
 
+func (*AwsS3) DeleteFiles(files []string) error {
+	// TODO: 待完善
+	return nil
+}
+
 // newSession Create S3 session
 func newSession() *session.Session {
 	sess, _ := session.NewSession(&aws.Config{
@@ -94,4 +99,8 @@ func newSession() *session.Session {
 		),
 	})
 	return sess
+}
+
+func (*AwsS3) UploadFileWithLocationPath(localPath string, fileName string, userId int) (string, string, error) {
+	return "", "", fmt.Errorf("")
 }

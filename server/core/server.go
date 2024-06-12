@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/flipped-aurora/gin-vue-admin/server/global"
-	"github.com/flipped-aurora/gin-vue-admin/server/initialize"
-	"github.com/flipped-aurora/gin-vue-admin/server/service/system"
+	"cooller/server/global"
+	"cooller/server/initialize"
+	"cooller/server/service/system"
 	"go.uber.org/zap"
 )
 
@@ -27,7 +27,8 @@ func RunWindowsServer() {
 
 	Router := initialize.Routers()
 	//Router.Static("/form-generator", "./resource/page") // 表单设计器
-
+	//port := fmt.Sprintf("%d", global.GVA_CONFIG.System.Addr)
+	//Router.RunTLS(port, "../cert/cs.coollerbaby.cn.pem", "../cert/cs.coollerbaby.cn.key")
 	address := fmt.Sprintf(":%d", global.GVA_CONFIG.System.Addr)
 	s := initServer(address, Router)
 	// 保证文本顺序输出
@@ -36,10 +37,7 @@ func RunWindowsServer() {
 	global.GVA_LOG.Info("server run success on ", zap.String("address", address))
 
 	fmt.Printf(`
-	欢迎使用 gin-vue-admin
 	当前版本:v2.5.6
-	插件市场:https://plugin.gin-vue-admin.com
-	GVA讨论社区:https://support.qq.com/products/371961
 	默认自动化文档地址:http://127.0.0.1%s/swagger/index.html
 	默认前端文件运行地址:http://127.0.0.1:8080
 `, address)

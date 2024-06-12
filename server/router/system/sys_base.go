@@ -1,7 +1,7 @@
 package system
 
 import (
-	v1 "github.com/flipped-aurora/gin-vue-admin/server/api/v1"
+	v1 "cooller/server/api/v1"
 	"github.com/gin-gonic/gin"
 )
 
@@ -17,6 +17,9 @@ func (s *BaseRouter) InitBaseRouter(Router *gin.RouterGroup) (R gin.IRoutes) {
 		baseRouter.GET("wxUserInfo", baseApi.GetWXUserInfo)
 		baseRouter.POST("wxUserInfo", baseApi.CreateWXUserInfo)
 		baseRouter.POST("wxRefreshLogin", baseApi.WXRefreshLogin)
+		baseRouter.POST("phoneNumber", baseApi.ParsePhoneNumber)
+		baseRouter.GET("checkPhone", baseApi.CheckPhoneNumber)
+		baseRouter.POST("recordShare", baseApi.RecordShareScanAccount)
 	}
 	return baseRouter
 }

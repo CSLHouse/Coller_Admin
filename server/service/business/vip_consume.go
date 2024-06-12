@@ -1,10 +1,10 @@
 package business
 
 import (
+	"cooller/server/global"
+	"cooller/server/model/business"
+	"cooller/server/model/common/request"
 	"fmt"
-	"github.com/flipped-aurora/gin-vue-admin/server/global"
-	"github.com/flipped-aurora/gin-vue-admin/server/model/business"
-	"github.com/flipped-aurora/gin-vue-admin/server/model/common/request"
 )
 
 type VIPConsumeService struct{}
@@ -57,17 +57,6 @@ func (exa *VIPConsumeService) CreateVIPConsumeSynchronous(consumeRecord *busines
 }
 
 //@author: [piexlmax](https://github.com/piexlmax)
-//@function: DeleteFileChunk
-//@description: 删除客户
-//@param: e model.ExaConsume
-//@return: err error
-
-func (exa *VIPConsumeService) DeleteVIPConsume(e business.ConsumeRecord) (err error) {
-	err = global.GVA_DB.Delete(&e).Error
-	return err
-}
-
-//@author: [piexlmax](https://github.com/piexlmax)
 //@function: UpdateExaConsume
 //@description: 更新客户
 //@param: e *model.ExaConsume
@@ -78,22 +67,11 @@ func (exa *VIPConsumeService) UpdateVIPConsume(e *business.ConsumeRecord) (err e
 	return err
 }
 
-//@author: [piexlmax](https://github.com/piexlmax)
-//@function: GetExaConsume
-//@description: 获取客户信息
-//@param: id int
-//@return: member model.ExaConsume, err error
-
-func (exa *VIPConsumeService) GetVIPConsume(id int) (member business.ConsumeRecord, err error) {
-	err = global.GVA_DB.Where("id = ?", id).First(&member).Error
-	return
-}
-
-func (exa *VIPConsumeService) GetVIPConsumeInfoList(sysUserAuthorityID int, searchInfo request.ConsumeSearchInfo) (list interface{}, total int64, err error) {
+func (exa *VIPConsumeService) GetVIPConsumeInfoList(userId int, searchInfo request.ConsumeSearchInfo) (list interface{}, total int64, err error) {
 	limit := searchInfo.PageSize
 	offset := searchInfo.PageSize * (searchInfo.Page - 1)
 	var ConsumeList []business.ConsumeRecord
-	cmd := fmt.Sprintf("sys_user_authority_id = %d", sysUserAuthorityID)
+	cmd := fmt.Sprintf("sys_user_id = %d", userId)
 	if searchInfo.Telephone >= 1000 {
 		cmd += fmt.Sprintf(" and telephone like '%%%d%%'", searchInfo.Telephone)
 	}
@@ -108,7 +86,7 @@ func (exa *VIPConsumeService) GetVIPConsumeInfoList(sysUserAuthorityID int, sear
 	if err != nil {
 		return ConsumeList, total, err
 	} else {
-		err = db.Limit(limit).Offset(offset).Preload("Member").Preload("Member.Combo").Where(cmd).Find(&ConsumeList).Error
+		err = db.Limit(limit).Offset(offset).Preload("Card").Preload("Card.Combo").Where(cmd).Find(&ConsumeList).Error
 	}
 	return ConsumeList, total, err
 }

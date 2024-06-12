@@ -7,6 +7,16 @@ type PageInfo struct {
 	Keyword  string `json:"keyword" form:"keyword"`   //关键字
 }
 
+type StateInfo struct {
+	Page            int    `json:"page" form:"page"`                       // 页码
+	PageSize        int    `json:"pageSize" form:"pageSize"`               // 每页大小
+	State           int    `json:"state" form:"state"`                     // 状态
+	OrderSn         string `json:"orderSn" form:"orderSn"`                 // 订单编号
+	ReceiverKeyword string `json:"receiverKeyword" form:"receiverKeyword"` // 收货人
+	OrderType       int    `json:"orderType" form:"orderType"`             // 订单分类
+	CreateTime      string `json:"createTime" form:"createTime"`           // 提交时间
+}
+
 // GetById Find by id structure
 type GetById struct {
 	ID int `json:"id" form:"id"` // 主键ID
@@ -20,6 +30,11 @@ type IdsReq struct {
 	Ids []int `json:"ids" form:"ids"`
 }
 
+type IdsTagReq struct {
+	Ids []int `json:"ids" form:"ids"`
+	Tag int   `json:"tag" form:"tag"`
+}
+
 // GetAuthorityId Get role by id structure
 type GetAuthorityId struct {
 	AuthorityId int `json:"authorityId" form:"authorityId"` // 角色ID
@@ -28,12 +43,13 @@ type GetAuthorityId struct {
 type Empty struct{}
 
 type MemberSearchInfo struct {
-	Telephone  int    `json:"telephone" form:"telephone"`   // 联系电话
+	Telephone  string `json:"telephone" form:"telephone"`   // 联系电话
 	MemberName string `json:"memberName" form:"memberName"` // 姓名
 	Deadline   string `json:"deadline" form:"deadline"`     // 截止时间
 	State      int    `json:"state" form:"state"`           // 状态
-	Page       int    `json:"page" form:"page"`             // 页码
-	PageSize   int    `json:"pageSize" form:"pageSize"`     // 每页大小
+	Tmp        int    `json:"tmp" form:"tmp"`
+	Page       int    `json:"page" form:"page"`         // 页码
+	PageSize   int    `json:"pageSize" form:"pageSize"` // 每页大小
 }
 
 type CardInfo struct {
@@ -59,18 +75,6 @@ type OrderSearchInfo struct {
 type StatisticsSearchInfo struct {
 	StartDate string `json:"startDate" form:"startDate" gorm:"comment:开始日期"`
 	EndDate   string `json:"endDate" form:"endDate" gorm:"comment:结束日期"`
-}
-
-type ProductSearchInfo struct {
-	Name                string `json:"name" form:"name" gorm:"comment:商品编号"`
-	BrandId             int    `json:"brandId" form:"brandId" gorm:"comment:物品序号"`
-	ProductSN           string `json:"productSN" form:"productSN" gorm:"comment:货号"`
-	ProductCategoryName string `json:"productCategoryName" form:"productCategoryName" gorm:"comment:商品分类"`
-	BrandName           string `json:"brandName" form:"brandName" gorm:"comment:品牌"`
-	PublishStatus       int    `json:"publishStatus" form:"publishStatus" gorm:"comment:上架状态"`
-	VerifyStatus        int    `json:"verifyStatus" form:"verifyStatus" gorm:"comment:审核状态"`
-	Page                int    `json:"page" form:"page"`         // 页码
-	PageSize            int    `json:"pageSize" form:"pageSize"` // 每页大小
 }
 
 type TagSearchInfo struct {
@@ -104,4 +108,18 @@ type KeyWordInfo struct {
 type QuantityInfo struct {
 	ID       int `json:"id" form:"id"`             // 主键ID
 	Quantity int `json:"quantity" form:"quantity"` // 数量
+}
+
+type OpenIdInfo struct {
+	OpenId string `json:"openId" form:"openId"`
+}
+
+type StatusUpdateInfo struct {
+	ID     int `json:"id" form:"id"`         // 主键ID
+	Status int `json:"status" form:"status"` // 数量
+}
+
+type SortUpdateInfo struct {
+	ID   int `json:"id" form:"id"` // 主键ID
+	Sort int `json:"sort" form:"sort"`
 }

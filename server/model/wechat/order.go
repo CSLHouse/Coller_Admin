@@ -1,6 +1,9 @@
 package wechat
 
-import "github.com/flipped-aurora/gin-vue-admin/server/global"
+import (
+	"cooller/server/global"
+	"time"
+)
 
 // Order 订单表
 type Order struct {
@@ -8,7 +11,7 @@ type Order struct {
 	UserId                int          `json:"user_id" gorm:" not null;"`
 	CouponId              int          `json:"couponId" gorm:" not null;"`
 	OrderSn               string       `json:"orderSn" gorm:"null;default null;comment:订单编号;"`
-	Username              string       `json:"username" gorm:"null;default null;comment:用户帐号;"`
+	UserName              string       `json:"userName" gorm:"null;default null;comment:用户帐号;"`
 	TotalAmount           float32      `json:"totalAmount" gorm:"null;default null;comment:订单总金额;"`
 	PayAmount             float32      `json:"payAmount" gorm:"null;default null;comment:应付金额（实际支付金额）;"`
 	FreightAmount         float32      `json:"freightAmount" gorm:"null;default null;comment:运费金额;"`
@@ -25,7 +28,7 @@ type Order struct {
 	AutoConfirmDay        int          `json:"autoConfirmDay" gorm:"null;default null;comment:自动确认时间（天）;size:11;"`
 	Integration           int          `json:"integration" gorm:"null;default null;comment:可以获得的积分;size:1;"`
 	Growth                int          `json:"growth" gorm:"null;default null;comment:可以活动的成长值;size:1;"`
-	PromotionInfo         string       `json:"promotionInfo" gorm:"null;default null;comment:活动信息;"`
+	PromotionInfo         string       `json:"promotionInfo" gorm:"null;default '';comment:活动信息;"`
 	BillType              int          `json:"billType" gorm:"null;default null;size:1;comment:发票类型：0->不开发票；1->电子发票；2->纸质发票;"`
 	BillHeader            string       `json:"billHeader" gorm:"null;default null;comment:发票抬头"`
 	BillContent           string       `json:"billContent" gorm:"null;default null;comment:发票内容"`
@@ -42,12 +45,13 @@ type Order struct {
 	ConfirmStatus         int          `json:"confirmStatus" gorm:"null;default null;comment:确认收货状态：0->未确认；1->已确认;size:1;"`
 	DeleteStatus          int          `json:"deleteStatus" gorm:"null;default null;comment:删除状态：0->未删除；1->已删除;size:1;"`
 	UseIntegration        int          `json:"useIntegration" gorm:"null;default null;comment:下单时使用的积分;size:11;"`
-	PaymentTime           string       `json:"paymentTime" gorm:"null;default null;comment:支付时间"`
-	DeliveryTime          string       `json:"deliveryTime" gorm:"null;default null;comment:发货时间"`
-	ReceiveTime           string       `json:"receiveTime" gorm:"null;default null;comment:确认收货时间"`
-	CommentTime           string       `json:"commentTime" gorm:"null;default null;comment:评价时间"`
-	ModifyTime            string       `json:"modifyTime" gorm:"null;default null;comment:修改时间"`
+	PaymentTime           time.Time    `json:"paymentTime" gorm:"null;default null;comment:支付时间"`
+	DeliveryTime          time.Time    `json:"deliveryTime" gorm:"null;default null;comment:发货时间"`
+	ReceiveTime           time.Time    `json:"receiveTime" gorm:"null;default null;comment:确认收货时间"`
+	CommentTime           time.Time    `json:"commentTime" gorm:"null;default null;comment:评价时间"`
+	ModifyTime            time.Time    `json:"modifyTime" gorm:"null;default null;comment:修改时间"`
 	OrderItemList         []*OrderItem `json:"orderItemList" gorm:"foreignKey:OrderId"`
+	PrepayId              string       `json:"prepayId" gorm:"null;default null;comment:预支付交易会话标识"`
 }
 
 func (Order) TableName() string {
@@ -60,7 +64,7 @@ type OrderItem struct {
 	OrderId int `json:"orderId" gorm:"null;default null;comment:订单id;"`
 	//OrderSn           string  `json:"orderSn" gorm:"null;default null;comment:订单编号;"`
 	ProductId         int     `json:"productId" gorm:"null;default null"`
-	ProductSkuId      int     `json:"productSkuId" gorm:"null;default null;comment:商品sku编号;"`
+	ProductSkuId      string  `json:"productSkuId" gorm:"null;default null;comment:商品sku编号;"`
 	UserId            int     `json:"user_id" gorm:" not null;"`
 	Quantity          int     `json:"quantity" gorm:"null;default null;comment:购买数量;"`
 	Price             float32 `json:"price" gorm:"null;default null;comment:销售价格;"`
@@ -85,4 +89,14 @@ type OrderItem struct {
 
 func (OrderItem) TableName() string {
 	return "oms_order_item"
+}
+
+type OrderSetting struct {
+	global.GVA_MODEL
+	FlashOrderOvertime  int `json:"flashOrderOvertime" gorm:"null;default null;comment:秒杀订单超时关闭时间(分);"`
+	NormalOrderOvertime int `json:"normalOrderOvertime" gorm:"null;default null;comment:常订单超时时间(分);"`
+}
+
+func (OrderSetting) TableName() string {
+	return "oms_order_setting"
 }

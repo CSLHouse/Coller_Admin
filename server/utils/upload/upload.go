@@ -3,15 +3,17 @@ package upload
 import (
 	"mime/multipart"
 
-	"github.com/flipped-aurora/gin-vue-admin/server/global"
+	"cooller/server/global"
 )
 
 // OSS 对象存储接口
 // Author [SliverHorn](https://github.com/SliverHorn)
 // Author [ccfish86](https://github.com/ccfish86)
 type OSS interface {
-	UploadFile(file *multipart.FileHeader) (string, string, error)
+	UploadFile(file *multipart.FileHeader, userId int) (string, string, error)
 	DeleteFile(key string) error
+	DeleteFiles(files []string) error
+	UploadFileWithLocationPath(localPath string, fileName string, userId int) (string, string, error)
 }
 
 // NewOss OSS的实例化方法

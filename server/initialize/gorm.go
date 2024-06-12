@@ -3,10 +3,10 @@ package initialize
 import (
 	"os"
 
-	"github.com/flipped-aurora/gin-vue-admin/server/global"
-	"github.com/flipped-aurora/gin-vue-admin/server/model/example"
-	"github.com/flipped-aurora/gin-vue-admin/server/model/system"
-
+	"cooller/server/global"
+	"cooller/server/model/example"
+	"cooller/server/model/system"
+	service "cooller/server/service/system"
 	"go.uber.org/zap"
 	"gorm.io/gorm"
 )
@@ -57,8 +57,9 @@ func RegisterTables() {
 		example.ExaFileUploadAndDownload{},
 	)
 	if err != nil {
-		global.GVA_LOG.Error("register table failed", zap.Error(err))
+		global.GVA_LOG.Error("register system table failed", zap.Error(err))
 		os.Exit(0)
 	}
+	service.InitTables()
 	global.GVA_LOG.Info("register table success")
 }

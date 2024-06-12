@@ -1,9 +1,9 @@
 package utils
 
 import (
+	"cooller/server/global"
+	"cooller/server/model/system"
 	"fmt"
-	"github.com/flipped-aurora/gin-vue-admin/server/global"
-	"github.com/flipped-aurora/gin-vue-admin/server/model/system"
 	"strconv"
 )
 

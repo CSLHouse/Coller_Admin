@@ -2,8 +2,8 @@ package business
 
 import (
 	"context"
-	businessModel "github.com/flipped-aurora/gin-vue-admin/server/model/business"
-	"github.com/flipped-aurora/gin-vue-admin/server/service/system"
+	businessModel "cooller/server/model/business"
+	"cooller/server/service/system"
 	"github.com/pkg/errors"
 	"gorm.io/gorm"
 )
@@ -14,7 +14,7 @@ type initCombo struct{}
 
 // auto run
 func init() {
-	//system.RegisterInit(initOrderCombo, &initCombo{})
+	system.RegisterInit(initOrderCombo, &initCombo{})
 }
 
 func (i *initCombo) MigrateTable(ctx context.Context) (context.Context, error) {

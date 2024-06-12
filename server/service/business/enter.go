@@ -5,4 +5,5 @@ type ServiceGroup struct {
 	VIPMemberService
 	VIPConsumeService
 	VIPOrderService
+	QrCodeService
 }

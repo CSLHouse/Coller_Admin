@@ -2,8 +2,8 @@ package wechat
 
 import (
 	"context"
-	wechatModel "github.com/flipped-aurora/gin-vue-admin/server/model/wechat"
-	"github.com/flipped-aurora/gin-vue-admin/server/service/system"
+	wechatModel "cooller/server/model/wechat"
+	"cooller/server/service/system"
 	"github.com/pkg/errors"
 	"gorm.io/gorm"
 )
@@ -23,11 +23,12 @@ func (i *initNewProduct) MigrateTable(ctx context.Context) (context.Context, err
 		return ctx, system.ErrMissingDBContext
 	}
 	return ctx, db.AutoMigrate(
-		&wechatModel.HomeNewProduct{},
+		&wechatModel.NewProduct{},
 		&wechatModel.ProductFullReduction{},
 		&wechatModel.ProductLadder{},
-		&wechatModel.SKUStock{},
+		&wechatModel.SkuStock{},
 		&wechatModel.CartItem{},
+		&wechatModel.CartTmpItem{},
 	)
 }
 
@@ -36,11 +37,11 @@ func (i *initNewProduct) TableCreated(ctx context.Context) bool {
 	if !ok {
 		return false
 	}
-	return db.Migrator().HasTable(&wechatModel.HomeNewProduct{})
+	return db.Migrator().HasTable(&wechatModel.NewProduct{})
 }
 
 func (i initNewProduct) InitializerName() string {
-	return wechatModel.HomeNewProduct{}.TableName()
+	return wechatModel.NewProduct{}.TableName()
 }
 
 func (i *initNewProduct) InitializeData(ctx context.Context) (next context.Context, err error) {
@@ -49,7 +50,7 @@ func (i *initNewProduct) InitializeData(ctx context.Context) (next context.Conte
 		return ctx, system.ErrMissingDBContext
 	}
 
-	entities := []wechatModel.HomeNewProduct{
+	entities := []wechatModel.NewProduct{
 		{
 			ProductId:       37,
 			ProductName:     "Apple iPhone 14 (A2884) 128GB 支持移动联通电信5G 双卡双待手机",
@@ -82,7 +83,7 @@ func (i *initNewProduct) InitializeData(ctx context.Context) (next context.Conte
 		},
 	}
 	if err = db.Create(&entities).Error; err != nil {
-		return ctx, errors.Wrap(err, wechatModel.HomeNewProduct{}.TableName()+"表数据初始化失败!")
+		return ctx, errors.Wrap(err, wechatModel.NewProduct{}.TableName()+"表数据初始化失败!")
 	}
 	next = context.WithValue(ctx, i.InitializerName(), entities)
 
@@ -94,7 +95,7 @@ func (i *initNewProduct) DataInserted(ctx context.Context) bool {
 	if !ok {
 		return false
 	}
-	if errors.Is(db.Where("product_id = ?", 41).First(&wechatModel.HomeNewProduct{}).Error, gorm.ErrRecordNotFound) { // 判断是否存在数据
+	if errors.Is(db.Where("product_id = ?", 41).First(&wechatModel.NewProduct{}).Error, gorm.ErrRecordNotFound) { // 判断是否存在数据
 		return false
 	}
 	return true

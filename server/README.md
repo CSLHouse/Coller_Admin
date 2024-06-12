@@ -52,3 +52,4 @@
 | `--timer` | timer | 定时器接口封装 |
 | `--upload`      | oss                  | oss接口封装        |
 
+微信支付 go sdk https://github.com/wechatpay-apiv3/wechatpay-go

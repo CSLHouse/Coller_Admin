@@ -3,7 +3,7 @@ package internal
 import (
 	"fmt"
 
-	"github.com/flipped-aurora/gin-vue-admin/server/global"
+	"cooller/server/global"
 	"gorm.io/gorm/logger"
 )
 

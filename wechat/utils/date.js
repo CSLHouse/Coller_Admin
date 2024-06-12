@@ -1,22 +1,29 @@
 // date.js
-export function formatDate(date, fmt) {
-  if (/(y+)/.test(fmt)) {
-    fmt = fmt.replace(RegExp.$1, (date.getFullYear() + '').substr(4 - RegExp.$1.length));
-  }
-  let o = {
-    'M+': date.getMonth() + 1,
-    'd+': date.getDate(),
-    'h+': date.getHours(),
-    'm+': date.getMinutes(),
-    's+': date.getSeconds()
-  };
-  for (let k in o) {
-    if (new RegExp(`(${k})`).test(fmt)) {
-      let str = o[k] + '';
-      fmt = fmt.replace(RegExp.$1, (RegExp.$1.length === 1) ? str : padLeftZero(str));
+export function formatDate(date, format) {
+  const o = {
+      'M+': date.getMonth() + 1, // 月份
+      'd+': date.getDate(), // 日
+      'h+': date.getHours() % 12 === 0 ? 12 : date.getHours() % 12, // 小时
+      'H+': date.getHours(), // 小时
+      'm+': date.getMinutes(), // 分
+      's+': date.getSeconds(), // 秒
+    };
+    const re = /(y+)/
+    if (re.test(format)) {
+      const t = re.exec(format)[1]
+      format = format.replace(t, (date.getFullYear() + '').slice(4 - t.length));
     }
-  }
-  return fmt;
+    for (let k in o) {
+      const reg = new RegExp('(' + k + ')')
+      if (reg.test(format)) {
+        const t = reg.exec(format)[1]
+        
+        format = format.replace(
+          t, t.length === 1 ? o[k] : ('00' + o[k]).slice(('' + o[k]).length)
+        );
+      }
+    }
+    return format;
 }
 
 function padLeftZero(str) {

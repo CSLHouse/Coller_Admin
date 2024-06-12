@@ -1,14 +1,15 @@
 package system
 
 import (
+	"cooller/server/model/business"
 	"errors"
 	"fmt"
 	"time"
 
-	"github.com/flipped-aurora/gin-vue-admin/server/global"
-	"github.com/flipped-aurora/gin-vue-admin/server/model/common/request"
-	"github.com/flipped-aurora/gin-vue-admin/server/model/system"
-	"github.com/flipped-aurora/gin-vue-admin/server/utils"
+	"cooller/server/global"
+	"cooller/server/model/common/request"
+	"cooller/server/model/system"
+	"cooller/server/utils"
 	"github.com/gofrs/uuid/v5"
 	"gorm.io/gorm"
 )
@@ -165,16 +166,18 @@ func (userService *UserService) DeleteUser(id int) (err error) {
 
 func (userService *UserService) SetUserInfo(req system.SysUser) error {
 	return global.GVA_DB.Model(&system.SysUser{}).
-		Select("updated_at", "nick_name", "avatar_url", "phone", "email", "sideMode", "enable").
+		Select("updated_at", "nick_name", "avatar_url", "phone", "email", "sideMode", "enable", "is_membership", "pay_online").
 		Where("id=?", req.ID).
 		Updates(map[string]interface{}{
-			"updated_at": time.Now(),
-			"nick_name":  req.NickName,
-			"avatar_url": req.AvatarUrl,
-			"phone":      req.Phone,
-			"email":      req.Email,
-			"side_mode":  req.SideMode,
-			"enable":     req.Enable,
+			"updated_at":    time.Now(),
+			"nick_name":     req.NickName,
+			"avatar_url":    req.AvatarUrl,
+			"phone":         req.Phone,
+			"email":         req.Email,
+			"side_mode":     req.SideMode,
+			"enable":        req.Enable,
+			"is_membership": req.IsMembership,
+			"pay_online":    req.PayOnline,
 		}).Error
 }
 
@@ -245,21 +248,21 @@ func (userService *UserService) ResetPassword(ID int) (err error) {
 }
 
 func (userService *UserService) CreateWXAccount(e *system.SysUser) (err error) {
-	db := global.GVA_DB.Model(&system.SysUser{})
-	var wxUser system.SysUser
-	result := db.Where("open_id = ?", e.OpenId).First(&wxUser)
-	if result.Error != nil {
-		if result.Error == gorm.ErrRecordNotFound {
-			e.UUID = uuid.Must(uuid.NewV4())
-			err = global.GVA_DB.Debug().Create(&e).Error
-			return err
-		}
-		err = result.Error
-	} else {
-		err = db.Debug().Where("open_id = ?", e.OpenId).Updates(map[string]interface{}{"nick_name": e.NickName,
-			"gender": e.Gender, "avatar_url": e.AvatarUrl}).Error
-		return err
-	}
+	//db := global.GVA_DB.Model(&system.SysUser{})
+	//var wxUser system.SysUser
+	//result := db.Where("telephone = ?", e.Phone).First(&wxUser)
+	//if result.Error != nil {
+	//	if result.Error == gorm.ErrRecordNotFound {
+	//		e.UUID = uuid.Must(uuid.NewV4())
+	//		err = global.GVA_DB.Debug().Create(&e).Error
+	//		return err
+	//	}
+	//	err = result.Error
+	//} else {
+	//	err = db.Debug().Where("open_id = ?", e.OpenId).Updates(map[string]interface{}{"nick_name": e.NickName,
+	//		"gender": e.Gender, "avatar_url": e.AvatarUrl}).Error
+	//	return err
+	//}
 
 	return err
 }
@@ -276,3 +279,13 @@ func (userService *UserService) GetWXAccountByOpenID(openId string) (user system
 //		"gender": e.Gender, "avatar_url": e.AvatarUrl}).Error
 //	return err
 //}
+
+func (userService *UserService) ResetWXNickName(e *business.Customer) (err error) {
+	err = global.GVA_DB.Save(e).Error
+	return err
+}
+
+func (userService *UserService) RecordShareScanAccount(openId *string) (err error) {
+	err = global.GVA_DB.Debug().Where("open_id = ?", openId).UpdateColumn("share_count", gorm.Expr("share_count+?", 1)).Error
+	return err
+}

@@ -11,8 +11,6 @@ Date.prototype.Format = function(fmt) {
     'h+': this.getHours(), // 小时
     'm+': this.getMinutes(), // 分
     's+': this.getSeconds(), // 秒
-    'q+': Math.floor((this.getMonth() + 3) / 3), // 季度
-    'S': this.getMilliseconds() // 毫秒
   }
   if (/(y+)/.test(fmt)) { fmt = fmt.replace(RegExp.$1, (this.getFullYear() + '').substr(4 - RegExp.$1.length)) }
   for (var k in o) {
@@ -27,4 +25,32 @@ export function formatTimeToStr(times, pattern) {
     d = new Date(times).Format(pattern)
   }
   return d.toLocaleString()
+}
+
+// date.js
+export function formatDate(date, format) {
+  const o = {
+    'M+': date.getMonth() + 1, // 月份
+    'd+': date.getDate(), // 日
+    'h+': date.getHours() % 12 === 0 ? 12 : date.getHours() % 12, // 小时
+    'H+': date.getHours(), // 小时
+    'm+': date.getMinutes(), // 分
+    's+': date.getSeconds(), // 秒
+  };
+  const re = /(y+)/
+  if (re.test(format)) {
+    const t = re.exec(format)[1]
+    format = format.replace(t, (date.getFullYear() + '').slice(4 - t.length));
+  }
+  for (let k in o) {
+    const reg = new RegExp('(' + k + ')')
+    if (reg.test(format)) {
+      const t = reg.exec(format)[1]
+      
+      format = format.replace(
+        t, t.length === 1 ? o[k] : ('00' + o[k]).slice(('' + o[k]).length)
+      );
+    }
+  }
+  return format;
 }

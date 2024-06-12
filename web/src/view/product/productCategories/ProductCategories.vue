@@ -11,7 +11,7 @@
           tooltip-effect="dark"
           row-key="Id"
         >
-          <el-table-column align="left" label="编号" prop="ID" width="60"></el-table-column>
+          <el-table-column align="left" label="编号" prop="id" width="60"></el-table-column>
           <el-table-column align="left" label="分类名称" prop="name" width="100" />
           <el-table-column align="left" label="级别" prop="level" width="60" >
             <template #default="scope">
@@ -67,7 +67,7 @@
             :current-page="page"
             :page-size="pageSize"
             :page-sizes="[5, 5, 5, 5]"
-            :total="total"
+            :total.number="+total"
             layout="total, sizes, prev, pager, next, jumper"
             @current-change="handleCurrentChange"
             @size-change="handleSizeChange"
@@ -224,7 +224,7 @@
     navStatus: 0,
     showStatus: 0,
     sort: 0,
-    icon: 0,
+    icon: "",
     keywords: '',
     description: '',
   })
@@ -247,7 +247,7 @@
         navStatus: 0,
         showStatus: 0,
         sort: 0,
-        icon: 0,
+        icon: '',
         keywords: '',
         description: '',
     }
